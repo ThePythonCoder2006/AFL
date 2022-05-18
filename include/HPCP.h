@@ -6,7 +6,7 @@
 typedef struct HPCP
 {
   char head;
-  uint64_t *limbs[100];
+  uint64_t limbs[];
 } hpcp_t;
 
 int hpcp_init(hpcp_t rop, uint64_t prec);

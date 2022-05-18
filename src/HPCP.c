@@ -12,6 +12,6 @@ int hpcp_init(hpcp_t rop, uint64_t prec)
 {
   for (size_t i = 0; i < prec; i += 8)
   {
-    printf("created limb number %i", i / 8);
+    printf("created limb number %i\n", i / 8 + 1);
   }
 }
