@@ -1,4 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <errno.h>
+#include <string.h>
+#include <conio.h>
+#include <process.h>
+#include <io.h>
 #include <HPCP.h>
 
 hpcp_t num;
@@ -14,4 +21,33 @@ int hpcp_init(hpcp_t rop, uint64_t prec)
   {
     printf("created limb number %i\n", i / 8 + 1);
   }
+}
+
+// file stuff ------------------------------------------------------
+
+void rek_mkdir(char *path)
+{
+  char *sep = strrchr(path, '/');
+  if (sep != NULL)
+  {
+    *sep = 0;
+    rek_mkdir(path);
+    *sep = '/';
+  }
+  mkdir(path);
+  if (errno != EEXIST)
+    printf("error while trying to create '%s'\n%m\n", path);
+}
+
+FILE *fopen_mkdir(char *path, char *mode)
+{
+  char *sep = strrchr(path, '/');
+  if (sep)
+  {
+    char *path0 = strdup(path);
+    path0[sep - path] = 0;
+    rek_mkdir(path0);
+    free(path0);
+  }
+  return fopen(path, mode);
 }

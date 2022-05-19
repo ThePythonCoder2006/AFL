@@ -1,5 +1,7 @@
 {
   "files.associations": {
-    "hpcp.h": "c"
+    "hpcp.h": "c",
+    "stdlib.h": "c",
+    "process.h": "c"
   }
 }
