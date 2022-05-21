@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <process.h>
 #include <io.h>
+#include <direct.h>
 #include <HPCP.h>
 #include <dirent.h>
 #include <sys/stat.h>
