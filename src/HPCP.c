@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <process.h>
 #include <io.h>
+#include <direct.h>
 #include <HPCP.h>
 
 hpcp_t num;
@@ -34,7 +35,7 @@ void rek_mkdir(char *path)
     rek_mkdir(path);
     *sep = '/';
   }
-  mkdir(path);
+  _mkdir(path);
   if (errno != EEXIST)
     printf("error while trying to create '%s'\n%m\n", path);
 }
