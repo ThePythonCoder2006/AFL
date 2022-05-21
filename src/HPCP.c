@@ -4,12 +4,8 @@
 #include <errno.h>
 #include <string.h>
 #include <conio.h>
-#include <process.h>
-#include <io.h>
-#include <direct.h>
 #include <HPCP.h>
 #include <dirent.h>
-#include <sys/stat.h>
 
 hpcp_t num;
 int main(int argc, char **argv)
@@ -57,4 +53,20 @@ FILE *fopen_mkdir(char *path, char *mode)
 
 int remove_recursive(const char *const path)
 {
+  struct dirent *de; // Pointer for directory entry
+
+  // opendir() returns a pointer of DIR type.
+  DIR *dr = opendir(".");
+
+  if (dr == NULL) // opendir returns NULL if couldn't open directory
+  {
+    printf("Could not open current directory");
+    return 0;
+  }
+
+  while ((de = readdir(dr)) != NULL)
+    printf("%s\n", de->d_name);
+
+  closedir(dr);
+  return 0;
 }
