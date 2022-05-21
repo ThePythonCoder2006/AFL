@@ -7,6 +7,8 @@
 #include <process.h>
 #include <io.h>
 #include <HPCP.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 hpcp_t num;
 int main(int argc, char **argv)
@@ -34,9 +36,9 @@ void rek_mkdir(char *path)
     rek_mkdir(path);
     *sep = '/';
   }
-  mkdir(path);
-  if (errno != EEXIST)
-    printf("error while trying to create '%s'\n%m\n", path);
+  printf("ok\n");
+  if (mkdir(path) && errno != EEXIST)
+    printf("error while trying to create '%s'\n", path);
 }
 
 FILE *fopen_mkdir(char *path, char *mode)
@@ -50,4 +52,8 @@ FILE *fopen_mkdir(char *path, char *mode)
     free(path0);
   }
   return fopen(path, mode);
+}
+
+int remove_recursive(const char *const path)
+{
 }
