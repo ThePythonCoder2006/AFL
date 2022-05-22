@@ -2,20 +2,18 @@
 #include <stdlib.h>
 #include "HPCP.h"
 
+void pause(void);
+
 int main(int argc, char **argv)
 {
-  printf("%i\n", sizeof(hpcp_t));
+  printf("hpcp_t: %i\nhpcp_limb_t: %i\n", sizeof(hpcp_t), sizeof(hpcp_limb_t));
   hpcp_t test;
-  hpcp_init(test, 20);
-<<<<<<< HEAD
-  fopen_mkdir("tmp/tmp.bin", "w");
-  char tmp;
-  scanf("%c", &tmp);
-  fflush(stdin);
-  remove_recursive("tmp");
-=======
-  FILE *f = fopen_mkdir("tmp/tmp.bin", "w");
-  fclose(f);
->>>>>>> 03d6b43408a939942c5844ee2bf46d00bd602acb
+  hpcp_init(test, 200);
   return 0;
+}
+
+void pause(void)
+{
+  scanf("%c", (char *)0);
+  fflush(stdin);
 }

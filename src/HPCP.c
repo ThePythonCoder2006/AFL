@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <string.h>
-#include <conio.h>
 #include <HPCP.h>
-#include <dirent.h>
+#include <io.h>
 
 hpcp_t num;
 int main(int argc, char **argv)
@@ -16,10 +16,17 @@ int main(int argc, char **argv)
 
 int hpcp_init(hpcp_t rop, uint64_t prec)
 {
-  for (size_t i = 0; i < prec; i += 8)
+  FILE *list = fopen_mkdir("tmp/tmp-list.txt", "a");
+  FILE *bin = fopen("tmp/tmp.bin", "wb");
+  uint64_t buff = 0;
+  for (uint64_t i = 0; i <= prec; i += sizeof(uint64_t))
   {
-    printf("created limb number %i\n", i / 8 + 1);
+    // printf("created limb number %" PRIu64 " (i = %" PRIu64 ", prec = %" PRIu64 " buff = 0x%" PRIx64 ")\n", (i / 8) + 1, i, prec, buff);
+    fwrite(&buff, sizeof(buff), 1, bin);
   }
+  fclose(list);
+  fclose(bin);
+  return 0;
 }
 
 // file stuff ------------------------------------------------------
@@ -33,7 +40,6 @@ void rek_mkdir(char *path)
     rek_mkdir(path);
     *sep = '/';
   }
-  printf("ok\n");
   if (mkdir(path) && errno != EEXIST)
     printf("error while trying to create '%s'\n", path);
 }
@@ -49,24 +55,4 @@ FILE *fopen_mkdir(char *path, char *mode)
     free(path0);
   }
   return fopen(path, mode);
-}
-
-int remove_recursive(const char *const path)
-{
-  struct dirent *de; // Pointer for directory entry
-
-  // opendir() returns a pointer of DIR type.
-  DIR *dr = opendir(".");
-
-  if (dr == NULL) // opendir returns NULL if couldn't open directory
-  {
-    printf("Could not open current directory");
-    return 0;
-  }
-
-  while ((de = readdir(dr)) != NULL)
-    printf("%s\n", de->d_name);
-
-  closedir(dr);
-  return 0;
 }
