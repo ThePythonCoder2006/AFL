@@ -5,4 +5,3 @@ gcc -Os -s ./main.c -L ./lib -lhpcp -o ./bin/main -I ./include
 cd bin
 main
 cd ../
-pause

@@ -4,11 +4,15 @@
 
 void pause(void);
 
+#define PREC 200
+
 int main(int argc, char **argv)
 {
-  printf("hpcp_t: %i\nhpcp_limb_t: %i\n", sizeof(hpcp_t), sizeof(hpcp_limb_t));
+  printf("hpcp_t: %i\nhpcp_limb_t: %i\nuint64_t: %i\n", sizeof(hpcp_t), sizeof(hpcp_limb_t), sizeof(uint64_t));
   hpcp_t test;
-  hpcp_init(test, 200);
+  hpcp_init(&test, PREC);
+  printf("%x\n", *(*(test.start) + (sizeof(hpcp_limb_t) * 2)));
+  pause();
   return 0;
 }
 

@@ -3,10 +3,9 @@
 #ifndef HPCP
 #define HPCP
 
-typedef struct HPCP_LIMB_T
-{
-  uint64_t *limb;
-} hpcp_limb_t;
+#define HPCP_LIMB_SIZE 10
+
+typedef uint64_t hpcp_limb_t[10];
 
 typedef struct HPCP_T
 {
@@ -14,7 +13,7 @@ typedef struct HPCP_T
   hpcp_limb_t *start;
 } hpcp_t;
 
-int hpcp_init(hpcp_t rop, uint64_t prec);
+int hpcp_init(hpcp_t *rop, uint64_t prec);
 
 void rek_mkdir(char *path);
 FILE *fopen_mkdir(char *path, char *mode);

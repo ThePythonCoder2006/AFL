@@ -7,23 +7,19 @@
 #include <HPCP.h>
 #include <io.h>
 
-hpcp_t num;
-int main(int argc, char **argv)
-{
-  hpcp_init(num, 20);
-  return 0;
-}
-
-int hpcp_init(hpcp_t rop, uint64_t prec)
+int hpcp_init(hpcp_t *rop, uint64_t prec)
 {
   FILE *list = fopen_mkdir("tmp/tmp-list.txt", "a");
   FILE *bin = fopen("tmp/tmp.bin", "wb");
-  uint64_t buff = 0;
-  for (uint64_t i = 0; i <= prec; i += sizeof(uint64_t))
-  {
-    // printf("created limb number %" PRIu64 " (i = %" PRIu64 ", prec = %" PRIu64 " buff = 0x%" PRIx64 ")\n", (i / 8) + 1, i, prec, buff);
+  if (list == NULL || bin == NULL)
+    return -1;
+  unsigned char buff = 0;
+  for (uint64_t i = 0; i <= prec; ++i)
     fwrite(&buff, sizeof(buff), 1, bin);
-  }
+  // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
+  rop = malloc(sizeof(hpcp_t));
+  hpcp_limb_t *start = calloc(10, sizeof(hpcp_limb_t));
+  rop->start = start;
   fclose(list);
   fclose(bin);
   return 0;
