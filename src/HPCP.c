@@ -16,7 +16,7 @@ int hpcp_init(hpcp_t *rop, uint64_t prec)
   unsigned char buff = 0;
   for (uint64_t i = 0; i <= prec; ++i)
     fwrite(&buff, sizeof(buff), 1, bin);
-  // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
+  printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
   rop = malloc(sizeof(hpcp_t));
   hpcp_limb_t *start = calloc(10, sizeof(hpcp_limb_t));
   rop->start = start;

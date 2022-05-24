@@ -12,6 +12,7 @@ int main(int argc, char **argv)
   hpcp_t test;
   hpcp_init(&test, PREC);
   printf("%x\n", *(*(test.start) + (sizeof(hpcp_limb_t) * 2)));
+  printf("ok boomer\n");
   pause();
   return 0;
 }
