@@ -7,9 +7,8 @@ make: *** No rule to make target 'all'.  Stop.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
- 
 
-# Make data base, printed on Tue May 24 16:38:18 2022
+# Make data base, printed on Sat May 28 09:21:43 2022
 
 # Variables
 
@@ -18,36 +17,33 @@ SYSTEMDRIVE = C:
 # environment
 LC_ALL = C
 # environment
-USERPROFILE = C:\Users\El�ve
+USERPROFILE = C:\Users\paul
 # environment
-LOCALAPPDATA = C:\Users\El�ve\AppData\Local
+LOCALAPPDATA = C:\Users\paul\AppData\Local
 # environment
-VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-68a9dde5-46cd-4900-8ed5-75b68a67cd31-sock
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-9d46b4ea-41ff-42dc-bc07-68e883724420-sock
 # environment
-VSCODE_CWD = C:\Users\El�ve\AppData\Local\Programs\Microsoft VS Code
+VSCODE_CWD = C:\Users\paul\AppData\Local\Programs\Microsoft VS Code
 # environment
 CHOCOLATEYINSTALL = C:\ProgramData\chocolatey
 # environment
-SYSTEMROOT = C:\windows
-# e 
-nvironment
-PROCESSOR_LEVEL = 23
+SYSTEMROOT = C:\WINDOWS
 # environment
-PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PROCESSOR_LEVEL = 6
+# environment
+PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 # default
 MAKE_COMMAND := C:/ProgramData/chocolatey/lib/make/tools/install/bin/make.exe
 # automatic
 @D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_10784_GZENQHZVFGYBETDK
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_6892_CJSQQFHHGBINCUQR
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
 .VARIABLES := 
 # automatic
 %D = $(patsubst %/,%,$(patsubst %\,%,$(dir $%)))
-# environment
-LDRAWDIR = C:\Users\Public\Documents\LDraw
 # automatic
 ^D = $(patsubst %/,%,$(patsubst %\,%,$(dir $^)))
 # environment
@@ -55,13 +51,13 @@ VSCODE_LOG_STACK = false
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = C:\Users\El�ve\AppData\Roaming\Code\CachedData\c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
+VSCODE_CODE_CACHE_PATH = C:\Users\paul\AppData\Roaming\Code\CachedData\c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
 # environment
 LANG = C
 # default
 .LOADED := 
 # environment
-TMP = C:\Users\ELVE~1\AppData\Local\Temp
+TMP = C:\Users\paul\AppData\Local\Temp
 # default
 .INCLUDE_DIRS = .
 # environment
@@ -69,13 +65,13 @@ PROCESSOR_ARCHITEW6432 = AMD64
 # makefile
 MAKEFLAGS = pqrR
 # environment
-ONEDRIVE = C:\Users\El�ve\OneDrive
+ONEDRIVE = C:\Users\paul\OneDrive
 # makefile
-CURDIR := c:/Users/El�ve/Desktop/document/progra/HPCP
+CURDIR := c:/Users/paul/Desktop/documents/Programation/hpcp
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # automatic
 *D = $(patsubst %/,%,$(patsubst %\,%,$(dir $*)))
 # environment
@@ -88,14 +84,16 @@ MFLAGS = -pqrR
 COMMONPROGRAMW6432 = C:\Program Files\Common Files
 # automatic
 +D = $(patsubst %/,%,$(patsubst %\,%,$(dir $+)))
-# makefile
-MAKEFILE_LIST := 
+# makefile (from 'Makefile', line 4)
+ODIR = src/obj
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
 # automatic
 @F = $(notdir $@)
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_PID = 10784
+VSCODE_PID = 6892
 # automatic
 ?D = $(patsubst %/,%,$(patsubst %\,%,$(dir $?)))
 # automatic
@@ -104,31 +102,32 @@ VSCODE_PID = 10784
 <D = $(patsubst %/,%,$(patsubst %\,%,$(dir $<)))
 # environment
 VSCODE_NLS_CONFIG = {"locale":"fr","availableLanguages":{},"_languagePackSupport":true}
+# environment
+ONEDRIVECONSUMER = C:\Users\paul\OneDrive
 # default
 MAKE_HOST := Windows32
 # environment
 PROGRAMDATA = C:\ProgramData
 # default
 SHELL := sh.exe
-# 
- environment
-HOMEPATH = \Users\El�ve
+# environment
+HOMEPATH = \Users\paul
 # default
 MAKECMDGOALS := all
 # environment
 DRIVERDATA = C:\Windows\System32\Drivers\DriverData
 # environment
-COMSPEC = C:\windows\system32\cmd.exe
+COMSPEC = C:\WINDOWS\system32\cmd.exe
 # environment
-WINDIR = C:\windows
+WINDIR = C:\WINDOWS
 # environment
 MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\MinGW\bin;C:\Program Files\Git\cmd;C:\ProgramData\chocolatey\bin;C:\Users\El�ve\AppData\Local\Programs\Python\Python39\Scripts\;C:\Devsoft\msys64\mingw64\bin;C:\Devsoft\msys64\usr\bin;C:\Users\El�ve\AppData\Local\Programs\Python\Python39\;C:\Users\El�ve\AppData\Local\Microsoft\WindowsApps;C:\Users\El�ve\AppData\Local\Programs\Microsoft VS Code\bin;C:\dart-sass;
+PATH = C:\WINDOWS\system32;C:\Program Files\Common Files\Oracle\Java\javapath;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\MinGW\bin;C:\dart-sass;C:\dart-sass\src;C:\ProgramData\chocolatey\bin;C:\Users\paul\AppData\Local\Microsoft\WindowsApps;C:\Users\paul\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\paul\AppData\Local\Programs\Git\cmd
 # environment
-COMPUTERNAME = DESKTOP-ULAS64R
+COMPUTERNAME = DESKTOP-0C9JCDP
 # default
 MAKEFILES := 
 # automatic
@@ -136,13 +135,11 @@ MAKEFILES :=
 # environment
 PROMPT = $P$G
 # environment
-CHOCOLATEYLASTPATHUPDATE = 132978675391637421
-# environment
-LOGONSERVER = \\DESKTOP-ULAS64R
+LOGONSERVER = \\DESKTOP-0C9JCDP
 # environment
 VSCODE_LOG_NATIVE = false
 # environment
-USERNAME = El�ve
+USERNAME = paul
 # environment
 COMMONPROGRAMFILES = C:\Program Files (x86)\Common Files
 # automatic
@@ -156,44 +153,47 @@ PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = undefined
 # environment
-USERDOMAIN = DESKTOP-ULAS64R
+USERDOMAIN = DESKTOP-0C9JCDP
 # 'override' directive
 GNUMAKEFLAGS := 
 # environment
 OS = Windows_NT
 # makefile
-.DEFAULT_GOAL := 
+.DEFAULT_GOAL := comp
 # default
 MAKE_VERSION := 4.3
 # environment
 PROGRAMFILES(X86) = C:\Program Files (x86)
 # environment
-USERDOMAIN_ROAMINGPROFILE = DESKTOP-ULAS64R
+USERDOMAIN_ROAMINGPROFILE = DESKTOP-0C9JCDP
 # environment
-NUMBER_OF_PROCESSORS = 2
+NUMBER_OF_PROCESSORS = 4
 # environment
 PUBLIC = C:\Users\Public
 # environment
-APPDATA = C:\Users\El�ve\AppData\Roaming
+APPDATA = C:\Users\paul\AppData\Roaming
+# makefile (from 'Makefile', line 2)
+CFLAGS = -I include
 # environment
 HOMEDRIVE = C:
 # environment
 PROCESSOR_ARCHITECTURE = x86
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
-# envi 
-ronment
+# environment
 COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-TEMP = C:\Users\ELVE~1\AppData\Local\Temp
+TEMP = C:\Users\paul\AppData\Local\Temp
 # environment
-VSCODE_IPC_HOOK = \\.\pipe\857b61f7261568c99a8417fce0f449fa-1.67.2-main-sock
+VSCODE_IPC_HOOK = \\.\pipe\f4c74f624cd294edee0ab9076d8324e9-1.67.2-main-sock
 # default
 .RECIPEPREFIX := 
 # automatic
 <F = $(notdir $<)
+# makefile (from 'Makefile', line 3)
+DEPS = include/HPCP.h
 # default
 SUFFIXES := 
 # environment
@@ -201,14 +201,15 @@ ALLUSERSPROFILE = C:\ProgramData
 # environment
 SESSIONNAME = Console
 # default
-.FEATURES := target-specific order-only second-expansion else-if shortest-stem und 
-efine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync load
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync load
 # environment
-PROCESSOR_REVISION = 1801
+PROCESSOR_REVISION = 9e09
+# makefile (from 'Makefile', line 1)
+CC = gcc
 # environment
-PROCESSOR_IDENTIFIER = AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 9, GenuineIntel
 # variable set hash-table stats:
-# Load=95/1024=9%, Rehash=0, Collisions=9/119=8%
+# Load=98/1024=10%, Rehash=0, Collisions=9/129=7%
 
 # Pattern-specific Variable Values
 
@@ -216,23 +217,45 @@ PROCESSOR_IDENTIFIER = AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD
 
 # Directories
 
-# . (key c:/Users/El�ve/Desktop/document/progra/HPCP, mtime 1653402615): 12 files, no impossibilities.
+# src (key c:/Users/paul/Desktop/documents/Programation/hpcp/src, mtime 1653421873): No files, no impossibilities so far.
+# . (key c:/Users/paul/Desktop/documents/Programation/hpcp, mtime 1653649145): 12 files, no impossibilities.
 
-# 12 files, no im 
-possibilities in 1 directories.
+# 12 files, no impossibilities in 2 directories.
 
 # Implicit Rules
 
-# No implicit rules.
+src/obj/%.o: src/%.c include/HPCP.h
+#  recipe to execute (from 'Makefile', line 10):
+	$(CC) -c -o $@ $< $(CFLAGS)
 
+# 1 implicit rules, 0 (0.0%) terminal.
 # Files
+
+# Not a target:
+src/obj/main.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  File does not exist.
+#  Last modified 2022-05-25 14:22:05
 #  File has been updated.
-#  Failed to be updated.
+#  Successfully updated.
+
+clean:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 13):
+	del /f src\obj\*.o
+
+# Not a target:
+src/obj/HPCP.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 .DEFAULT:
@@ -247,41 +270,27 @@ all:
 #  File does not exist.
 #  File has not been updated.
 
-# Not a target:
-makefile:
-#  Implicit rule search has been done.
-#  File does not exist.
-#  File has been updated.
-#  Failed to be updated.
-
-# Not a target:
-makefile.mak:
-#  Implicit rule search has been done.
-#  File does not exist.
-#  File has been updated.
-#  Failed to be updated.
-
-# Not a target:
-GNUmakefile:
-#  Implicit rule search has been done.
-#  File does not exist.
-#  File has been updated.
-#  Failed to be updated.
+comp: src/obj/main.o src/obj/HPCP.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 7):
+	$(CC) -o bin/main $^
 
 # files hash-table stats:
-# Load=7/1024=1%, Rehash=0, Collisions=0/16=0%
+# Load=8/1024=1%, Rehash=0, Collisions=0/20=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 19 / storage = 137 B / avg = 7 B
-# current buf: size = 8174 B / used = 137 B / count = 19 / avg = 7 B
+# strcache buffers: 1 (0) / strings = 22 / storage = 175 B / avg = 7 B
+# current buf: size = 8174 B / used = 175 B / count = 22 / avg = 7 B
 
-# strcache performance: lookups = 22 / hit rate = 13%
+# strcache performance: lookups = 29 / hit rate = 24%
 # hash-table stats:
-# Load=19/8192=0%, Rehash=0, Collisions=0/22=0%
-# Finished Make data base on Tue May 24 16:38:18 2022
+# Load=22/8192=0%, Rehash=0, Collisions=0/29=0%
+# Finished Make data base on Sat May 28 09:21:43 2022
 
  
