@@ -15,16 +15,9 @@ int main(int argc, char **argv)
   if (hpcp_init(&test, PREC) == -1)
     fprintf(stderr, "error while initing test\n");
 
-  printf("%" PRId64 "\n", test->prec);
+  printf("%" PRId64 "\n", test->head);
 
   hpcp_set_ui(test, 8);
-
-  printf("%i\n", HPCP_PLUS);
-  printf("%i\n", HPCP_MINUS);
-  printf("%i\n", HPCP_PLUS_ZERO);
-  printf("%i\n", HPCP_MINUS_ZERO);
-  printf("%i\n", HPCP_PLUS_INF);
-  printf("%i\n", HPCP_PLUS_INF);
 
   hpcp_clear(test);
   return 0;

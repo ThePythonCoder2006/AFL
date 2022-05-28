@@ -22,9 +22,6 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
     return -1;
 
   uint8_t buff = 0x00;
-  for (uint64_t i = 0; i <= prec; ++i)
-    fwrite(&buff, sizeof(buff), 1, bin);
-  fwrite((uint64_t)0, sizeof(uint64_t), 1, bin);
 
   printf("%i\n", sizeof((*rop)->line));
 
@@ -33,6 +30,12 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
   (*rop)->start = calloc(1, sizeof(hpcp_limb_t));
   (*rop)->prec = prec;
   (*rop)->line = numb_vars;
+  (*rop)->head = HPCP_PLUS | HPCP_MINUS | HPCP_PLUS_ZERO | HPCP_MINUS_ZERO;
+
+  fwrite((*rop)->head, sizeof((*rop)->head), 1, bin);
+  fwrite((uint64_t)0, sizeof(uint64_t), 1, bin);
+  for (uint64_t i = 0; i <= prec; ++i)
+    fwrite(&buff, sizeof(buff), 1, bin);
 
   ++numb_vars;
 
