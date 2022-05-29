@@ -15,7 +15,7 @@ uint64_t numb_vars = 1;
 int hpcp_init(hpcp_t **rop, uint64_t prec)
 {
   char filename[64];
-  sprintf(filename, "./" TMPPATH "/HPCP-%" PRIu64 ".bin", numb_vars);
+  sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", numb_vars);
 
   FILE *bin = fopen_mkdir(filename, "wb");
   if (bin == NULL)
@@ -23,17 +23,15 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
 
   uint8_t buff = 0x00;
 
-  printf("%i\n", sizeof((*rop)->line));
+  // sprintf("%i\n", sizeof((*rop)->line));
 
   // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
   *rop = malloc(sizeof(hpcp_t));
   (*rop)->start = calloc(1, sizeof(hpcp_limb_t));
-  (*rop)->prec = prec;
   (*rop)->line = numb_vars;
-  (*rop)->head = HPCP_PLUS | HPCP_MINUS | HPCP_PLUS_ZERO | HPCP_MINUS_ZERO;
+  (*rop)->exp = 0;
+  (*rop)->head = HPCP_PLUS | HPCP_MINUS | HPCP_0;
 
-  fwrite((*rop)->head, sizeof((*rop)->head), 1, bin);
-  fwrite((uint64_t)0, sizeof(uint64_t), 1, bin);
   for (uint64_t i = 0; i <= prec; ++i)
     fwrite(&buff, sizeof(buff), 1, bin);
 
@@ -47,14 +45,44 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
 
 void hpcp_set_ui(hpcp_t *rop, uint64_t op)
 {
+  if (op == 0)
+  {
+    fprintf(stderr, "[TODO] handle set ui 0\n");
+    return;
+  }
+
+  uint8_t buff;
+  uint8_t val = 0x20;
+  uint8_t pval = 0x40;
+  uint8_t sign;
+
+  while (pval - val > 1 || val - pval > 1)
+  {
+    printf("%i, %i, %" PRIu64 ", %" PRIu64 "\n", val, pval, op, ((uint64_t)0x01 << val));
+    if (op < ((uint64_t)0x01 << val))
+    {
+      buff = val;
+      val -= abs(pval - val) / 2;
+      pval = buff;
+    }
+    else
+    {
+      buff = val;
+      val += abs(pval - val) / 2;
+      pval = buff;
+    }
+  }
+  // ++val;
+  printf("%i\n", val);
 }
 
 void hpcp_clear(hpcp_t *rop)
 {
+  free(*(rop->start));
   char filename[64];
-  sprintf(filename, "./" TMPPATH "/HPCP-%" PRIu64 ".bin", rop->line);
+  sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", rop->line);
   printf("%s\n", filename);
-  // remove(filename);
+  remove(filename);
   free((void *)rop);
 }
 

@@ -17,7 +17,11 @@ int main(int argc, char **argv)
 
   printf("%" PRId64 "\n", test->head);
 
-  hpcp_set_ui(test, 8);
+  for (uint8_t i = 1; i <= 64; ++i)
+  {
+    hpcp_set_ui(test, ((uint64_t)1 << i - 1) - i + 3);
+    printf("%i\n\n", i);
+  }
 
   hpcp_clear(test);
   return 0;

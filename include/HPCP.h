@@ -4,12 +4,12 @@
 #define HPCP
 
 #define HPCP_LIMB_SIZE 10
-#define HPCP_PLUS 0x01       // 0b00000001
-#define HPCP_MINUS 0x02      // 0b00000010
-#define HPCP_PLUS_ZERO 0x04  // 0b00000100
-#define HPCP_MINUS_ZERO 0x08 // 0b00001000
-#define HPCP_PLUS_INF 0x10   // 0b00010000
-#define HPCP_MINUS_INF 0x20  // 0b00100000
+#define HPCP_PLUS 0x01  // 0b00000001
+#define HPCP_MINUS 0x02 // 0b00000010
+#define HPCP_0 0x04     // 0b00000100
+#define HPCP_INF 0x08   // 0b00001000
+#define HPCP_NAN 0x10   // 0b00010000
+#define HPCP_GRT_1 0x20 // 0b00100000
 
 typedef uint64_t hpcp_limb_t[10];
 typedef uint8_t hpcp_head_t;
@@ -17,7 +17,7 @@ typedef uint8_t hpcp_head_t;
 typedef struct HPCP_T
 {
   hpcp_head_t head;
-  uint64_t prec;
+  uint64_t exp;
   uint64_t line;
   hpcp_limb_t *start;
 } hpcp_t;

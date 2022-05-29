@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat May 28 09:21:43 2022
+# Make data base, printed on Sun May 29 09:09:09 2022
 
 # Variables
 
@@ -21,7 +21,7 @@ USERPROFILE = C:\Users\paul
 # environment
 LOCALAPPDATA = C:\Users\paul\AppData\Local
 # environment
-VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-9d46b4ea-41ff-42dc-bc07-68e883724420-sock
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-fb50896c-cefa-4175-9289-cdbd7829fbf7-sock
 # environment
 VSCODE_CWD = C:\Users\paul\AppData\Local\Programs\Microsoft VS Code
 # environment
@@ -37,7 +37,7 @@ MAKE_COMMAND := C:/ProgramData/chocolatey/lib/make/tools/install/bin/make.exe
 # automatic
 @D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_6892_CJSQQFHHGBINCUQR
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_14944_FXXNGBXKVVCGSQPY
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
@@ -93,7 +93,7 @@ MAKEFILE_LIST := Makefile
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_PID = 6892
+VSCODE_PID = 14944
 # automatic
 ?D = $(patsubst %/,%,$(patsubst %\,%,$(dir $?)))
 # automatic
@@ -218,7 +218,7 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 9, GenuineIntel
 # Directories
 
 # src (key c:/Users/paul/Desktop/documents/Programation/hpcp/src, mtime 1653421873): No files, no impossibilities so far.
-# . (key c:/Users/paul/Desktop/documents/Programation/hpcp, mtime 1653649145): 12 files, no impossibilities.
+# . (key c:/Users/paul/Desktop/documents/Programation/hpcp, mtime 1653737709): 12 files, no impossibilities.
 
 # 12 files, no impossibilities in 2 directories.
 
@@ -232,7 +232,8 @@ src/obj/%.o: src/%.c include/HPCP.h
 # Files
 
 # Not a target:
-src/obj/main.o:
+src/obj/ma 
+in.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -253,7 +254,8 @@ clean:
 
 # Not a target:
 src/obj/HPCP.o:
-#  Implicit rule search has not been done.
+#  Implicit rule search  
+has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
@@ -285,12 +287,12 @@ comp: src/obj/main.o src/obj/HPCP.o
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 22 / storage = 175 B / avg = 7 B
-# current buf: size = 8174 B / used = 175 B / count = 22 / avg = 7 B
+# strcache buffers: 1 (0) / strings = 22 / storage = 182 B / avg = 8 B
+# current buf: size = 8174 B / used = 182 B / count = 22 / avg = 8 B
 
 # strcache performance: lookups = 29 / hit rate = 24%
 # hash-table stats:
 # Load=22/8192=0%, Rehash=0, Collisions=0/29=0%
-# Finished Make data base on Sat May 28 09:21:43 2022
+# Finished Make data base on Sun May 29 09:09:09 2022
 
  
