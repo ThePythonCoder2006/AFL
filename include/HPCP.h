@@ -1,15 +1,22 @@
+
+#include <stdio.h>
 #include <stdint.h>
 
 #ifndef HPCP
 #define HPCP
 
 #define HPCP_LIMB_SIZE 10
-#define HPCP_PLUS 0x01  // 0b00000001
-#define HPCP_MINUS 0x02 // 0b00000010
-#define HPCP_0 0x04     // 0b00000100
-#define HPCP_INF 0x08   // 0b00001000
-#define HPCP_NAN 0x10   // 0b00010000
-#define HPCP_GRT_1 0x20 // 0b00100000
+
+#define HPCP_MINUS 0x01     // 0b00000001
+#define HPCP_0 0x02         // 0b00000010
+#define HPCP_INF 0x04       // 0b00000100
+#define HPCP_NAN 0x08       // 0b00001000
+#define HPCP_EXP_MINUS 0x10 // 0b00010000
+
+#define SET_BIT(n, N) (n |= (0x01 << (N - 1)))
+#define UNSET_BIT(n, N) (n &= (0x01 << (N - 1)))
+#define SWAP_BIT(n, N) (n ^= (0x01 << (N - 1)))
+#define NTH_BIT(n, N) ((n >> N) & 0x01)
 
 typedef uint64_t hpcp_limb_t[10];
 typedef uint8_t hpcp_head_t;

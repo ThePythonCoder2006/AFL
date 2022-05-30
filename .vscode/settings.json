@@ -6,6 +6,7 @@
     "errno.h": "c",
     "string.h": "c",
     "time.h": "c",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "cstdlib": "c"
   }
 }

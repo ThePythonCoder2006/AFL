@@ -15,15 +15,16 @@ int main(int argc, char **argv)
   if (hpcp_init(&test, PREC) == -1)
     fprintf(stderr, "error while initing test\n");
 
-  printf("%" PRId64 "\n", test->head);
+  // printf("%" PRIu64 "\n", (uint64_t)test->head);
 
-  for (uint8_t i = 1; i <= 64; ++i)
-  {
-    hpcp_set_ui(test, ((uint64_t)1 << i - 1) - i + 3);
-    printf("%i\n\n", i);
-  }
+  hpcp_set_ui(test, 9);
+
+  // pause();
 
   hpcp_clear(test);
+
+  (void)argc;
+  (void)argv;
   return 0;
 }
 
