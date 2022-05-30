@@ -13,10 +13,10 @@
 #define HPCP_NAN 0x08       // 0b00001000
 #define HPCP_EXP_MINUS 0x10 // 0b00010000
 
-#define SET_BIT(n, N) (n |= (0x01 << (N - 1)))
-#define UNSET_BIT(n, N) (n &= (0x01 << (N - 1)))
-#define SWAP_BIT(n, N) (n ^= (0x01 << (N - 1)))
-#define NTH_BIT(n, N) ((n >> N) & 0x01)
+#define SET_BIT(n, N) ((n) |= ((uint64_t)1 << (N)))
+#define CLR_BIT(n, N) ((n) &= ~(uint64_t)(1 << (N)))
+#define TOGGLE_BIT(n, N) ((n) ^= ((uint64_t)1 << (N)))
+#define NTH_BIT(n, N) (((n) >> (N)) & (uint64_t)1)
 
 typedef uint64_t hpcp_limb_t[10];
 typedef uint8_t hpcp_head_t;
@@ -31,6 +31,7 @@ typedef struct HPCP_T
 
 int hpcp_init(hpcp_t **rop, uint64_t prec);
 void hpcp_set_ui(hpcp_t *rop, uint64_t op);
+size_t hpcp_printf(const char *format, ...);
 void hpcp_clear(hpcp_t *rop);
 
 void rek_mkdir(char *path);

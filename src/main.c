@@ -18,6 +18,7 @@ int main(int argc, char **argv)
   // printf("%" PRIu64 "\n", (uint64_t)test->head);
 
   hpcp_set_ui(test, 9);
+  printf("%" PRIu64 "\n", test->exp);
 
   // pause();
 

@@ -50,34 +50,12 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
 
 void hpcp_set_ui(hpcp_t *rop, uint64_t op)
 {
-  if (op == 0)
+  uint64_t v = op;
+  uint8_t val = 0;
+
+  while (v >>= 1) // unroll for more speed...
   {
-    fprintf(stderr, "[TODO] handle set ui 0\n");
-    return;
-  }
-
-  uint8_t buff;
-  uint8_t val = 0x20;
-  uint8_t pval = 0x40;
-  uint8_t sign;
-
-  while (abs(val - pval) > 1)
-  {
-    // printf("%i, %i, %" PRIu64 ", %" PRIu64 "\n", val, pval, op, ((uint64_t)0x01 << val));
-    uint64_t tmp = ((uint64_t)0x01 << val);
-    if (op == tmp)
-      break;
-    else
-    {
-      if (op < tmp)
-        sign = -1;
-      else
-        sign = 1;
-
-      buff = val;
-      val += sign * abs(pval - val) / 2;
-      pval = buff;
-    }
+    val++;
   }
   printf("%i\n", val);
 
@@ -85,13 +63,19 @@ void hpcp_set_ui(hpcp_t *rop, uint64_t op)
   rop->head = 0x00;
   FILE *f = fopen(TMPPATH "/HPCP-1.bin", "wb");
 
-  printf("%" PRIu64 ", %i\n", op, NTH_BIT(op, val));
-  UNSET_BIT(op, val);
-  printf("%" PRIu64 "\n", op);
+  // printf("%" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", op, NTH_BIT(op, val), NTH_BIT(op, val));
+  CLR_BIT(op, val);
+
+  op <<= (64 - val);
+  printf("%" PRIu64 ", %" PRIu64 "\n", op, UINT64_MAX);
 
   fwrite(&op, sizeof(uint64_t), 1, f);
 
   fclose(f);
+}
+
+size_t hpcp_printf(const char *format, ...)
+{
 }
 
 void hpcp_clear(hpcp_t *rop)
