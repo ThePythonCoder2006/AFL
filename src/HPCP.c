@@ -78,6 +78,8 @@ size_t hpcp_printf(const char *format, ...)
 {
 }
 
+void hpcp_get_int_part(hpcp_t rop, hpcp_t op);
+
 void hpcp_clear(hpcp_t *rop)
 {
   free(*(rop->start));
