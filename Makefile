@@ -9,7 +9,7 @@ comp: $(ODIR)/main.o $(ODIR)/HPCP.o
 $(ODIR)/%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-pre: src/hpcp.c
+pre: src/main.c
 	$(CC) -E $^ $(CFLAGS) > build.c
 
 clean:

@@ -1,7 +1,7 @@
-# 1 "src/HPCP.c"
+# 1 "src/main.c"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "src/HPCP.c"
+# 1 "src/main.c"
 # 1 "c:\\mingw\\include\\stdio.h" 1 3
 # 38 "c:\\mingw\\include\\stdio.h" 3
        
@@ -437,7 +437,7 @@ int vswscanf (const wchar_t *__restrict__, const wchar_t * __restrict__, __built
 
 
 
-# 2 "src/HPCP.c" 2
+# 2 "src/main.c" 2
 # 1 "c:\\mingw\\include\\stdlib.h" 1 3
 # 34 "c:\\mingw\\include\\stdlib.h" 3
        
@@ -745,7 +745,7 @@ __attribute__((__cdecl__)) __attribute__((__nothrow__)) int unsetenv( const char
 
 
 
-# 3 "src/HPCP.c" 2
+# 3 "src/main.c" 2
 # 1 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stdint.h" 1 3 4
 # 9 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stdint.h" 3 4
 # 1 "c:\\mingw\\include\\stdint.h" 1 3 4
@@ -791,11 +791,11 @@ typedef unsigned int uint_fast32_t;
 typedef long long int_fast64_t;
 typedef unsigned long long uint_fast64_t;
 # 106 "c:\\mingw\\include\\stdint.h" 3
- typedef int __intptr_t;
+typedef int __intptr_t;
 
 typedef __intptr_t intptr_t;
 # 118 "c:\\mingw\\include\\stdint.h" 3
- typedef unsigned int __uintptr_t;
+typedef unsigned int __uintptr_t;
 
 typedef __uintptr_t uintptr_t;
 
@@ -808,7 +808,7 @@ typedef __uintptr_t uintptr_t;
 typedef long long intmax_t;
 typedef unsigned long long uintmax_t;
 # 10 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stdint.h" 2 3 4
-# 4 "src/HPCP.c" 2
+# 4 "src/main.c" 2
 # 1 "c:\\mingw\\include\\inttypes.h" 1 3
 # 9 "c:\\mingw\\include\\inttypes.h" 3
 # 1 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stddef.h" 1 3 4
@@ -838,201 +838,19 @@ uintmax_t __attribute__((__cdecl__)) __attribute__((__nothrow__)) wcstoumax (con
         wchar_t** __restrict__ endptr, int base);
 
 
-# 5 "src/HPCP.c" 2
-# 1 "c:\\mingw\\include\\errno.h" 1 3
-# 103 "c:\\mingw\\include\\errno.h" 3
-
-# 112 "c:\\mingw\\include\\errno.h" 3
- int* __attribute__((__cdecl__)) __attribute__((__nothrow__)) _errno(void);
-
-
-
-
-# 6 "src/HPCP.c" 2
-# 1 "c:\\mingw\\include\\string.h" 1 3
-# 34 "c:\\mingw\\include\\string.h" 3
-       
-# 35 "c:\\mingw\\include\\string.h" 3
-# 53 "c:\\mingw\\include\\string.h" 3
-# 1 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stddef.h" 1 3 4
-# 54 "c:\\mingw\\include\\string.h" 2 3
-# 62 "c:\\mingw\\include\\string.h" 3
-# 1 "c:\\mingw\\include\\strings.h" 1 3
-# 33 "c:\\mingw\\include\\strings.h" 3
-       
-# 34 "c:\\mingw\\include\\strings.h" 3
-# 59 "c:\\mingw\\include\\strings.h" 3
-# 1 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stddef.h" 1 3 4
-# 60 "c:\\mingw\\include\\strings.h" 2 3
-
-
-
-int __attribute__((__cdecl__)) __attribute__((__nothrow__)) strcasecmp( const char *, const char * );
-int __attribute__((__cdecl__)) __attribute__((__nothrow__)) strncasecmp( const char *, const char *, size_t );
-# 80 "c:\\mingw\\include\\strings.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _stricmp( const char *, const char * );
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _strnicmp( const char *, const char *, size_t );
-# 100 "c:\\mingw\\include\\strings.h" 3
-
-# 63 "c:\\mingw\\include\\string.h" 2 3
-
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) void *memchr (const void *, int, size_t) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int memcmp (const void *, const void *, size_t) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) void *memcpy (void *, const void *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) void *memmove (void *, const void *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) void *memset (void *, int, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strcat (char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strchr (const char *, int) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int strcmp (const char *, const char *) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int strcoll (const char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strcpy (char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) size_t strcspn (const char *, const char *) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strerror (int);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) size_t strlen (const char *) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strncat (char *, const char *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int strncmp (const char *, const char *, size_t) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strncpy (char *, const char *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strpbrk (const char *, const char *) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strrchr (const char *, int) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) size_t strspn (const char *, const char *) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strstr (const char *, const char *) __attribute__((__pure__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strtok (char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) size_t strxfrm (char *, const char *, size_t);
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strerror (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) void *_memccpy (void *, const void *, int, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _memicmp (const void *, const void *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strdup (const char *) __attribute__((__malloc__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _strcmpi (const char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _stricoll (const char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strlwr (char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strnset (char *, int, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strrev (char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strset (char *, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strupr (char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) void _swab (const char *, char *, size_t);
-# 126 "c:\\mingw\\include\\string.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _strncoll(const char *, const char *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _strnicoll(const char *, const char *, size_t);
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) void *memccpy (void *, const void *, int, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int memicmp (const void *, const void *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strdup (const char *) __attribute__((__malloc__));
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int strcmpi (const char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int stricmp (const char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int stricoll (const char *, const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strlwr (char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int strnicmp (const char *, const char *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strnset (char *, int, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strrev (char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strset (char *, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *strupr (char *);
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) void swab (const char *, char *, size_t);
-# 170 "c:\\mingw\\include\\string.h" 3
-# 1 "c:\\mingw\\include\\wchar.h" 1 3
-# 35 "c:\\mingw\\include\\wchar.h" 3
-       
-# 36 "c:\\mingw\\include\\wchar.h" 3
-# 392 "c:\\mingw\\include\\wchar.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcscat (wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcschr (const wchar_t *, wchar_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int wcscmp (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int wcscoll (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcscpy (wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) size_t wcscspn (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) size_t wcslen (const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsncat (wchar_t *, const wchar_t *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int wcsncmp (const wchar_t *, const wchar_t *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsncpy (wchar_t *, const wchar_t *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcspbrk (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsrchr (const wchar_t *, wchar_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) size_t wcsspn (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsstr (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcstok (wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) size_t wcsxfrm (wchar_t *, const wchar_t *, size_t);
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wcsdup (const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wcsicmp (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wcsicoll (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wcslwr (wchar_t*);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wcsnicmp (const wchar_t *, const wchar_t *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wcsnset (wchar_t *, wchar_t, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wcsrev (wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wcsset (wchar_t *, wchar_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wcsupr (wchar_t *);
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wcsncoll (const wchar_t *, const wchar_t *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wcsnicoll (const wchar_t *, const wchar_t *, size_t);
-# 445 "c:\\mingw\\include\\wchar.h" 3
-int __attribute__((__cdecl__)) __attribute__((__nothrow__)) wcscmpi (const wchar_t *, const wchar_t *);
-# 457 "c:\\mingw\\include\\wchar.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsdup (const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int wcsicmp (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int wcsicoll (const wchar_t *, const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcslwr (wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int wcsnicmp (const wchar_t *, const wchar_t *, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsnset (wchar_t *, wchar_t, size_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsrev (wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsset (wchar_t *, wchar_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *wcsupr (wchar_t *);
-# 491 "c:\\mingw\\include\\wchar.h" 3
-extern size_t __mingw_wcsnlen (const wchar_t *, size_t);
-
-
-extern inline __attribute__((__gnu_inline__)) __attribute__((__always_inline__)) size_t wcsnlen (const wchar_t *__text, size_t __maxlen)
-{ return __mingw_wcsnlen (__text, __maxlen); }
-# 171 "c:\\mingw\\include\\string.h" 2 3
-# 193 "c:\\mingw\\include\\string.h" 3
-extern size_t __mingw_strnlen (const char *, size_t);
-
-
-extern inline __attribute__((__gnu_inline__)) __attribute__((__always_inline__)) size_t strnlen (const char *__text, size_t __maxlen)
-{ return __mingw_strnlen (__text, __maxlen); }
-# 212 "c:\\mingw\\include\\string.h" 3
-extern int strerror_r (int, char *, size_t);
-# 227 "c:\\mingw\\include\\string.h" 3
-extern inline __attribute__((__gnu_inline__)) __attribute__((__always_inline__)) int strerror_s (char *__buf, size_t __len, int __err)
-{ return strerror_r (__err, __buf, __len); }
-
-
-
-
-
-# 7 "src/HPCP.c" 2
+# 5 "src/main.c" 2
 # 1 "include/HPCP.h" 1
-# 21 "include/HPCP.h"
+# 47 "include/HPCP.h"
 
-# 21 "include/HPCP.h"
+# 47 "include/HPCP.h"
 typedef uint64_t hpcp_limb_t[10];
 typedef uint8_t hpcp_head_t;
 
 typedef struct HPCP_T
 {
   hpcp_head_t head;
+  uint64_t prec;
+  uint8_t real_prec_dec;
   uint64_t exp;
   uint64_t line;
   hpcp_limb_t *start;
@@ -1040,652 +858,49 @@ typedef struct HPCP_T
 
 int hpcp_init(hpcp_t **rop, uint64_t prec);
 void hpcp_set_ui(hpcp_t *rop, uint64_t op);
+size_t hpcp_printf(const char *format, ...);
 void hpcp_clear(hpcp_t *rop);
 
 void rek_mkdir(char *path);
 FILE *fopen_mkdir(char *path, char *mode);
 void rm_dir(const char *const path);
-# 8 "src/HPCP.c" 2
-# 1 "c:\\mingw\\include\\time.h" 1 3
-# 33 "c:\\mingw\\include\\time.h" 3
-       
-# 34 "c:\\mingw\\include\\time.h" 3
-# 45 "c:\\mingw\\include\\time.h" 3
-# 1 "c:\\mingw\\include\\sys\\types.h" 1 3
-# 34 "c:\\mingw\\include\\sys\\types.h" 3
-       
-# 35 "c:\\mingw\\include\\sys\\types.h" 3
-# 139 "c:\\mingw\\include\\sys\\types.h" 3
-  
-# 139 "c:\\mingw\\include\\sys\\types.h" 3
- typedef long __time32_t;
-  typedef long long __time64_t;
-# 149 "c:\\mingw\\include\\sys\\types.h" 3
-   typedef __time32_t time_t;
-# 46 "c:\\mingw\\include\\time.h" 2 3
-# 115 "c:\\mingw\\include\\time.h" 3
-struct timespec
+# 6 "src/main.c" 2
+
+void pause(void);
+
+
+
+int main(int argc, char **argv)
 {
+  printf("hpcp_t: %i\nhpcp_limb_t: %i\nuint64_t: %i\n", sizeof(hpcp_t), sizeof(hpcp_limb_t), sizeof(uint64_t));
+  hpcp_t *test;
+  if (hpcp_init(&test, 200) == -1)
+    fprintf(
+# 16 "src/main.c" 3
+           (&_iob[2])
+# 16 "src/main.c"
+                 , "error while initing test\n");
 
 
 
+  hpcp_set_ui(test, 9);
+  printf("%c%c%c%c%c%c%c%c" "\n", (((test->head)&0x80ll) ? '1' : '0'), (((test->head)&0x40ll) ? '1' : '0'), (((test->head)&0x20ll) ? '1' : '0'), (((test->head)&0x10ll) ? '1' : '0'), (((test->head)&0x08ll) ? '1' : '0'), (((test->head)&0x04ll) ? '1' : '0'), (((test->head)&0x02ll) ? '1' : '0'), (((test->head)&0x01ll) ? '1' : '0'));
 
 
 
+  hpcp_clear(test);
 
-  __time64_t tv_sec;
-  long tv_nsec;
-};
-
-
-struct __mingw32_expanded_timespec
-{
-
-
-
-
-
-  union
-  {
-
-
-
-    __time64_t __tv64_sec;
-    __time32_t __tv32_sec;
-    time_t tv_sec;
-  };
-  long tv_nsec;
-};
-# 155 "c:\\mingw\\include\\time.h" 3
-
-
-extern inline __attribute__((__gnu_inline__)) __attribute__((__always_inline__))
-
-
-
-
-
-
-
-struct __mingw32_expanded_timespec *mingw_timespec( struct timespec *__tv )
-{ return (struct __mingw32_expanded_timespec *)(__tv); }
-
-
-# 178 "c:\\mingw\\include\\time.h" 3
-# 1 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stddef.h" 1 3 4
-# 179 "c:\\mingw\\include\\time.h" 2 3
-
-
-
-
-typedef long clock_t;
-
-struct tm
-{
-
-
-
-
-  int tm_sec;
-  int tm_min;
-  int tm_hour;
-  int tm_mday;
-  int tm_mon;
-  int tm_year;
-  int tm_wday;
-  int tm_yday;
-  int tm_isdst;
-};
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) clock_t clock (void);
-# 214 "c:\\mingw\\include\\time.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) time_t time (time_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) double difftime (time_t, time_t);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) time_t mktime (struct tm *);
-# 228 "c:\\mingw\\include\\time.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *asctime (const struct tm *);
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *ctime (const time_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) struct tm *gmtime (const time_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) struct tm *localtime (const time_t *);
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-size_t strftime (char *, size_t, const char *, const struct tm *);
-
-
-extern __attribute__((__cdecl__)) __attribute__((__nothrow__)) void _tzset (void);
-
-
-extern __attribute__((__cdecl__)) __attribute__((__nothrow__)) void tzset (void);
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strdate (char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_strtime (char *);
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) __time64_t _time64( __time64_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) __time64_t _mktime64 (struct tm *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_ctime64 (const __time64_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) struct tm *_gmtime64 (const __time64_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) struct tm *_localtime64 (const __time64_t *);
-# 344 "c:\\mingw\\include\\time.h" 3
-extern __attribute__((__cdecl__)) __attribute__((__nothrow__)) int *__p__daylight (void);
-extern __attribute__((__cdecl__)) __attribute__((__nothrow__)) long *__p__timezone (void);
-extern __attribute__((__cdecl__)) __attribute__((__nothrow__)) char **__p__tzname (void);
-
-extern __attribute__((__dllimport__)) int _daylight;
-extern __attribute__((__dllimport__)) long _timezone;
-extern __attribute__((__dllimport__)) char *_tzname[2];
-# 381 "c:\\mingw\\include\\time.h" 3
-extern __attribute__((__dllimport__)) int daylight;
-extern __attribute__((__dllimport__)) long timezone;
-extern __attribute__((__dllimport__)) char *tzname[2];
-# 407 "c:\\mingw\\include\\time.h" 3
-__attribute__((__cdecl__)) __attribute__((__nothrow__))
-int nanosleep( const struct timespec *, struct timespec * );
-# 428 "c:\\mingw\\include\\time.h" 3
-
-# 440 "c:\\mingw\\include\\time.h" 3
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wasctime (const struct tm *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wstrdate (wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wstrtime (wchar_t *);
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wctime64 (const __time64_t *);
-# 466 "c:\\mingw\\include\\time.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wctime (const time_t *);
-# 495 "c:\\mingw\\include\\time.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-size_t wcsftime (wchar_t *, size_t, const wchar_t *, const struct tm *);
-
-
-# 9 "src/HPCP.c" 2
-
-
-# 1 "c:\\mingw\\include\\io.h" 1 3
-# 38 "c:\\mingw\\include\\io.h" 3
-       
-# 39 "c:\\mingw\\include\\io.h" 3
-# 56 "c:\\mingw\\include\\io.h" 3
-# 1 "c:\\mingw\\include\\sys\\types.h" 1 3
-# 34 "c:\\mingw\\include\\sys\\types.h" 3
-       
-# 35 "c:\\mingw\\include\\sys\\types.h" 3
-# 62 "c:\\mingw\\include\\sys\\types.h" 3
-  typedef long __off32_t;
-
-
-
-
-  typedef __off32_t _off_t;
-
-
-
-
-
-
-
-  typedef _off_t off_t;
-# 91 "c:\\mingw\\include\\sys\\types.h" 3
-  typedef long long __off64_t;
-
-
-
-
-
-
-  typedef __off64_t off64_t;
-# 115 "c:\\mingw\\include\\sys\\types.h" 3
-  typedef int _ssize_t;
-
-
-
-
-
-
-
-  typedef _ssize_t ssize_t;
-# 174 "c:\\mingw\\include\\sys\\types.h" 3
-# 1 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stddef.h" 1 3 4
-# 149 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stddef.h" 3 4
-typedef int ptrdiff_t;
-# 175 "c:\\mingw\\include\\sys\\types.h" 2 3
-# 184 "c:\\mingw\\include\\sys\\types.h" 3
-typedef unsigned int _dev_t;
-# 195 "c:\\mingw\\include\\sys\\types.h" 3
-typedef short _ino_t;
-typedef unsigned short _mode_t;
-typedef int _pid_t;
-typedef int _sigset_t;
-# 207 "c:\\mingw\\include\\sys\\types.h" 3
-typedef _dev_t dev_t;
-typedef _ino_t ino_t;
-typedef _mode_t mode_t;
-typedef _pid_t pid_t;
-typedef _sigset_t sigset_t;
-
-
-typedef long long fpos64_t;
-
-
-
-
-
-
-typedef unsigned long useconds_t __attribute__((__deprecated__));
-# 57 "c:\\mingw\\include\\io.h" 2 3
-# 67 "c:\\mingw\\include\\io.h" 3
-# 1 "c:\\mingw\\include\\stdint.h" 1 3
-# 68 "c:\\mingw\\include\\io.h" 2 3
-# 104 "c:\\mingw\\include\\io.h" 3
-typedef unsigned long _fsize_t;
-# 174 "c:\\mingw\\include\\io.h" 3
-
-# 184 "c:\\mingw\\include\\io.h" 3
-struct _finddata_t { unsigned attrib; time_t time_create; time_t time_access; time_t time_write; _fsize_t size; char name[(260)]; };
-struct _finddatai64_t { unsigned attrib; time_t time_create; time_t time_access; time_t time_write; long long size; char name[(260)]; };
-# 200 "c:\\mingw\\include\\io.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-intptr_t _findfirst (const char *, struct _finddata_t *);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-int _findnext (intptr_t, struct _finddata_t *);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-intptr_t _findfirsti64 (const char *, struct _finddatai64_t *);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-int _findnexti64 (intptr_t, struct _finddatai64_t *);
-# 223 "c:\\mingw\\include\\io.h" 3
-struct __finddata64_t { unsigned attrib; __time64_t time_create; __time64_t time_access; __time64_t time_write; long long size; char name[(260)]; };
-
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-intptr_t _findfirst64 (const char *, struct __finddata64_t *);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-int _findnext64 (intptr_t, struct __finddata64_t *);
-# 341 "c:\\mingw\\include\\io.h" 3
-struct _wfinddata_t { unsigned attrib; time_t time_create; time_t time_access; time_t time_write; _fsize_t size; wchar_t name[(260)]; };
-struct _wfinddatai64_t { unsigned attrib; time_t time_create; time_t time_access; time_t time_write; long long size; wchar_t name[(260)]; };
-
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-intptr_t _wfindfirst (const wchar_t *, struct _wfinddata_t *);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-int _wfindnext (intptr_t, struct _wfinddata_t *);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-intptr_t _wfindfirsti64 (const wchar_t *, struct _wfinddatai64_t *);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-int _wfindnexti64 (intptr_t, struct _wfinddatai64_t *);
-
-
-
-
-
-
-
-struct __wfinddata64_t { unsigned attrib; __time64_t time_create; __time64_t time_access; __time64_t time_write; long long size; wchar_t name[(260)]; };
-# 377 "c:\\mingw\\include\\io.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-intptr_t _wfindfirst64 (const wchar_t *, struct __wfinddata64_t *);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__))
-int _wfindnext64 (intptr_t, struct __wfinddata64_t *);
-# 484 "c:\\mingw\\include\\io.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _findclose (intptr_t);
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _chdir (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_getcwd (char *, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _mkdir (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *_mktemp (char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _rmdir (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _chmod (const char *, int);
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long long _filelengthi64 (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long long _lseeki64 (int, long long, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long long _telli64 (int);
-
-
-extern inline __attribute__((__gnu_inline__)) __off64_t lseek64 (int, __off64_t, int);
-extern inline __attribute__((__gnu_inline__))
-__off64_t lseek64 (int fd, __off64_t offset, int whence)
-{ return _lseeki64 (fd, (long long)(offset), whence); }
-
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int chdir (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *getcwd (char *, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int mkdir (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) char *mktemp (char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int rmdir (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int chmod (const char *, int);
-
-
-
-
-
-
-# 551 "c:\\mingw\\include\\io.h" 3
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _access (const char *, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _chsize (int, long);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _close (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _commit (int);
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _creat (const char *, int);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _dup (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _dup2 (int, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long _filelength (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long _get_osfhandle (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _isatty (int);
-# 579 "c:\\mingw\\include\\io.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _eof (int);
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _locking (int, int, long);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long _lseek (int, long, int);
-
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _open (const char *, int, ...);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _open_osfhandle (intptr_t, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _pipe (int *, unsigned int, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _read (int, void *, unsigned int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _setmode (int, int);
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int remove (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int rename (const char *, const char *);
-
-
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _sopen (const char *, int, int, ...);
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long _tell (int);
-
-
-
-
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _umask (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _unlink (const char *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _write (int, const void *, unsigned int);
-# 636 "c:\\mingw\\include\\io.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _waccess (const wchar_t *, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wchmod (const wchar_t *, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wcreat (const wchar_t *, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wunlink (const wchar_t *);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wopen (const wchar_t *, int, ...);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int _wsopen (const wchar_t *, int, int, ...);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) wchar_t *_wmktemp (wchar_t *);
-# 651 "c:\\mingw\\include\\io.h" 3
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int access (const char*, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int chsize (int, long );
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int close (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int creat (const char*, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int dup (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int dup2 (int, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int eof (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long filelength (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int isatty (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long lseek (int, long, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int open (const char*, int, ...);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int read (int, void*, unsigned int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int setmode (int, int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int sopen (const char*, int, int, ...);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) long tell (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int umask (int);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int unlink (const char*);
- __attribute__((__cdecl__)) __attribute__((__nothrow__)) int write (int, const void*, unsigned int);
-# 701 "c:\\mingw\\include\\io.h" 3
-
-# 12 "src/HPCP.c" 2
-
-
-
-
-
-
-
-# 18 "src/HPCP.c"
-uint64_t numb_vars = 1;
-
-int hpcp_init(hpcp_t **rop, uint64_t prec)
-{
-  char filename[64];
-  sprintf(filename, "bin/tmp" "/HPCP-%" 
-# 23 "src/HPCP.c" 3
-                                     "I64u" 
-# 23 "src/HPCP.c"
-                                            ".bin", numb_vars);
-
-  FILE *bin = fopen_mkdir(filename, "wb");
-  if (bin == 
-# 26 "src/HPCP.c" 3 4
-            ((void *)0)
-# 26 "src/HPCP.c"
-                )
-    return -1;
-
-  uint8_t buff = 0x00;
-
-
-
-
-  *rop = malloc(sizeof(hpcp_t));
-  (*rop)->start = calloc(1, sizeof(hpcp_limb_t));
-  (*rop)->line = numb_vars;
-  (*rop)->exp = 0;
-  (*rop)->head = 0x02;
-
-  for (uint64_t i = 0; i <= prec; ++i)
-    fwrite(&buff, sizeof(buff), 1, bin);
-
-  ++numb_vars;
-
-
-
-  fclose(bin);
+  (void)argc;
+  (void)argv;
   return 0;
 }
 
-void hpcp_set_ui(hpcp_t *rop, uint64_t op)
+void pause(void)
 {
-  if (op == 0)
-  {
-    fprintf(
-# 55 "src/HPCP.c" 3
-           (&_iob[2])
-# 55 "src/HPCP.c"
-                 , "[TODO] handle set ui 0\n");
-    return;
-  }
-
-  uint8_t buff;
-  uint8_t val = 0x20;
-  uint8_t pval = 0x40;
-  uint8_t sign;
-
-  while (abs(val - pval) > 1)
-  {
-
-    uint64_t tmp = ((uint64_t)0x01 << val);
-    if (op == tmp)
-      break;
-    else
-    {
-      if (op < tmp)
-        sign = -1;
-      else
-        sign = 1;
-
-      buff = val;
-      val += sign * abs(pval - val) / 2;
-      pval = buff;
-    }
-  }
-  printf("%i\n", val);
-
-  rop->exp = val;
-  rop->head = 0x00;
-  FILE *f = fopen("bin/tmp" "/HPCP-1.bin", "wb");
-
-  printf("%" 
-# 88 "src/HPCP.c" 3
-            "I64u" 
-# 88 "src/HPCP.c"
-                   ", %" 
-# 88 "src/HPCP.c" 3
-                         "I64u" 
-# 88 "src/HPCP.c"
-                                ", %" 
-# 88 "src/HPCP.c" 3
-                                      "I64u" 
-# 88 "src/HPCP.c"
-                                             "\n", op, (((op) >> (val)) & (uint64_t)1), (((op) >> (val)) & (uint64_t)1));
-  ((op) &= ((uint64_t)1 << (val)));
-  printf("%" 
-# 90 "src/HPCP.c" 3
-            "I64u" 
-# 90 "src/HPCP.c"
-                   ", %" 
-# 90 "src/HPCP.c" 3
-                         "I64u" 
-# 90 "src/HPCP.c"
-                                ", %" 
-# 90 "src/HPCP.c" 3
-                                      "I64u" 
-# 90 "src/HPCP.c"
-                                             "\n", op, (((op) >> (val)) & (uint64_t)1), (((op) >> (val)) & (uint64_t)1));
-
-  fwrite(&op, sizeof(uint64_t), 1, f);
-
-  fclose(f);
-}
-
-void hpcp_clear(hpcp_t *rop)
-{
-  free(*(rop->start));
-  char filename[64];
-  sprintf(filename, "bin/tmp" "/HPCP-%" 
-# 101 "src/HPCP.c" 3
-                                     "I64u" 
-# 101 "src/HPCP.c"
-                                            ".bin", rop->line);
-  printf("%s\n", filename);
-  remove(filename);
-  free((void *)rop);
-}
-
-
-
-void rek_mkdir(char *path)
-{
-  char *sep = strrchr(path, '/');
-  if (sep != 
-# 112 "src/HPCP.c" 3 4
-            ((void *)0)
-# 112 "src/HPCP.c"
-                )
-  {
-    *sep = 0;
-    rek_mkdir(path);
-    *sep = '/';
-  }
-  if (mkdir(path) && 
-# 118 "src/HPCP.c" 3
-                    (*_errno()) 
-# 118 "src/HPCP.c"
-                          != 
-# 118 "src/HPCP.c" 3
-                             17
-# 118 "src/HPCP.c"
-                                   )
-    printf("error while trying to create '%s'\n", path);
-}
-
-FILE *fopen_mkdir(char *path, char *mode)
-{
-  char *sep = strrchr(path, '/');
-  if (sep)
-  {
-    char *path0 = strdup(path);
-    path0[sep - path] = 0;
-    rek_mkdir(path0);
-    free(path0);
-  }
-  return fopen(path, mode);
-}
-
-
-
-inline int64_t abs2(int64_t op)
-{
-  int const mask = op >> ((sizeof(int) * 8) - 1);
-
-  return (op + mask) ^ mask;
+  scanf("%c", (char *)0);
+  fflush(
+# 35 "src/main.c" 3
+        (&_iob[0])
+# 35 "src/main.c"
+             );
 }
