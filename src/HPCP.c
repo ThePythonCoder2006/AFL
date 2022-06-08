@@ -74,11 +74,10 @@ void hpcp_set_ui(hpcp_t *rop, uint64_t op)
   fclose(f);
 }
 
-size_t hpcp_printf(const char *format, ...)
+void hpcp_add(hpcp_t rop, hpcp_t op1, hpcp_t op2)
 {
+  return;
 }
-
-void hpcp_get_int_part(hpcp_t rop, hpcp_t op);
 
 void hpcp_clear(hpcp_t *rop)
 {
