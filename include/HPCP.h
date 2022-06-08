@@ -38,13 +38,14 @@
 #define HPCP_INF 0x04       // 0b00000100
 #define HPCP_NAN 0x08       // 0b00001000
 #define HPCP_EXP_MINUS 0x10 // 0b00010000
+#define HPCP_INT 0x20       // 0b00100000
 
 #define SET_BIT(n, N) ((n) |= ((uint64_t)1 << (N)))
 #define CLR_BIT(n, N) ((n) &= ~((uint64_t)(1 << (N))))
 #define TOGGLE_BIT(n, N) ((n) ^= ((uint64_t)1 << (N)))
 #define NTH_BIT(n, N) (((n) >> (N)) & (uint64_t)1)
 
-typedef uint64_t hpcp_limb_t[10];
+typedef uint64_t hpcp_limb_t[HPCP_LIMB_SIZE];
 typedef uint8_t hpcp_head_t;
 
 typedef struct HPCP_T

@@ -17,13 +17,13 @@ int main(int argc, char **argv)
 
   // printf("%" PRIu64 "\n", (uint64_t)test->head);
 
-  hpcp_set_ui(test, ((uint64_t)UINT16_MAX));
-  printf("%" PRIu8 "\n", test->head);
-  printf(PRINTF_BINARY_PATTERN_INT8 "\n", PRINTF_BYTE_TO_BINARY_INT8(test->head));
+  // hpcp_set_ui(test, ((uint64_t)UINT16_MAX));
 
+  printf("printf_bin(test) : ");
+  // test->head |= HPCP_EXP_MINUS;
   hpcp_printf_bin(test);
 
-  // pause();
+  pause();
 
   hpcp_clear(test);
 
@@ -34,6 +34,7 @@ int main(int argc, char **argv)
 
 void pause(void)
 {
-  scanf("%c", (char *)0);
+  char tmp;
+  scanf("%c", &tmp);
   fflush(stdin);
 }

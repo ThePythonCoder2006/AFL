@@ -22,29 +22,39 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
   char filename[64];
   sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", numb_vars);
 
-  FILE *bin = fopen_mkdir(filename, "wb");
-  if (bin == NULL)
-    return -1;
-
-  uint8_t buff = 0x00;
-
   // sprintf("%i\n", sizeof((*rop)->line));
 
   // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
   *rop = malloc(sizeof(hpcp_t));
-  (*rop)->start = calloc(1, sizeof(hpcp_limb_t));
+  if (*rop == NULL)
+    return -1;
+  (*rop)->start = calloc(HPCP_LIMB_SIZE, sizeof(uint64_t));
+  if ((*rop)->start == NULL)
+    return -1;
   (*rop)->line = numb_vars;
   (*rop)->exp = 0;
   (*rop)->prec = prec;
-  (*rop)->head = HPCP_0;
-  printf("head : %" PRIu8 "\n", (*rop)->head);
-
-  for (uint64_t i = 0; i <= prec; ++i)
-    fwrite(&buff, sizeof(buff), 1, bin);
+  (*rop)->head = HPCP_0 | HPCP_INT;
 
   ++numb_vars;
 
-  // printf("%" PRIu64 "\n", rop->prec);
+  uint64_t binmax;
+
+  if (prec < sizeof(hpcp_limb_t))
+    return 0;
+
+  binmax = prec - sizeof(hpcp_limb_t);
+
+  printf("%" PRIu64 "\n", binmax);
+
+  const uint8_t buff = 0x00;
+
+  FILE *bin = fopen_mkdir(filename, "wb");
+  if (bin == NULL)
+    return -1;
+
+  for (uint64_t i = 0; i < binmax; ++i)
+    fwrite(&buff, sizeof(buff), 1, bin);
 
   fclose(bin);
   return 0;
@@ -62,19 +72,19 @@ void hpcp_set_ui(hpcp_t *rop, uint64_t op)
   printf("%i\n", val);
 
   rop->exp = val;
-  rop->head = 0x00;
+  rop->head = HPCP_INT;
   FILE *f = fopen(TMPPATH "/HPCP-1.bin", "wb");
 
   // for (size_t i = 0; i < (rop->prec + rop->real_prec_dec); ++i)
   // {
   // }
 
-  printf("%" PRIu64 ", %" PRIu64 ", " PRINTF_BINARY_PATTERN_INT64 "\n", op, NTH_BIT(op, val), PRINTF_BYTE_TO_BINARY_INT64(op));
+  // printf("%" PRIu64 ", %" PRIu64 ", " PRINTF_BINARY_PATTERN_INT64 "\n", op, NTH_BIT(op, val), PRINTF_BYTE_TO_BINARY_INT64(op));
   CLR_BIT(op, val);
 
   op <<= (64 - val);
-  printf("%" PRIu64 ", %" PRIu64 "\n", (uint64_t)(64 - val), val);
-  printf("2^%" PRIu64 " x 1." PRINTF_BINARY_PATTERN_INT64 "\n", rop->exp, PRINTF_BYTE_TO_BINARY_INT64(op));
+  // printf("%" PRIu64 ", %" PRIu64 "\n", (uint64_t)(64 - val), (uint64_t)val);
+  // printf("2^%" PRIu64 " x 1." PRINTF_BINARY_PATTERN_INT64 "\n", rop->exp, PRINTF_BYTE_TO_BINARY_INT64(op));s
 
   fwrite(&op, sizeof(uint64_t), 1, f);
 
@@ -84,9 +94,12 @@ void hpcp_set_ui(hpcp_t *rop, uint64_t op)
 
 int hpcp_printf_bin(hpcp_t *op)
 {
-  printf("2^%" PRIu8 "%" PRIu64 "", (op->head & HPCP_0) == op->head ? 0 : '-', op->exp);
+  printf("2^%c%" PRIu64 " x ", NTH_BIT(op->head, 4) == 0 ? 0 : '-', op->exp);
+  for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64(((*(op->start))[i])));
   for (size_t i = 0; i < op->prec + op->real_prec_dec; ++i)
-    return 0;
+    ;
+  return 0;
 }
 
 void hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
