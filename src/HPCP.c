@@ -82,13 +82,6 @@ void hpcp_set_ui(hpcp_t *rop, uint64_t op)
   return;
 }
 
-<<<<<<< HEAD
-void hpcp_add(hpcp_t rop, hpcp_t op1, hpcp_t op2)
-{
-  return;
-}
-
-=======
 int hpcp_printf_bin(hpcp_t *op)
 {
   printf("2^%" PRIu8 "%" PRIu64 "", (op->head & HPCP_0) == op->head ? 0 : '-', op->exp);
@@ -104,7 +97,6 @@ void hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
   return;
 }
 
->>>>>>> 8b0d6d52e9a5acf511c3b7994829d53696025c96
 void hpcp_clear(hpcp_t *rop)
 {
   free(*(rop->start));
