@@ -35,7 +35,9 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
   (*rop)->start = calloc(1, sizeof(hpcp_limb_t));
   (*rop)->line = numb_vars;
   (*rop)->exp = 0;
+  (*rop)->prec = prec;
   (*rop)->head = HPCP_0;
+  printf("head : %" PRIu8 "\n", (*rop)->head);
 
   for (uint64_t i = 0; i <= prec; ++i)
     fwrite(&buff, sizeof(buff), 1, bin);
@@ -63,22 +65,46 @@ void hpcp_set_ui(hpcp_t *rop, uint64_t op)
   rop->head = 0x00;
   FILE *f = fopen(TMPPATH "/HPCP-1.bin", "wb");
 
-  // printf("%" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", op, NTH_BIT(op, val), NTH_BIT(op, val));
+  // for (size_t i = 0; i < (rop->prec + rop->real_prec_dec); ++i)
+  // {
+  // }
+
+  printf("%" PRIu64 ", %" PRIu64 ", " PRINTF_BINARY_PATTERN_INT64 "\n", op, NTH_BIT(op, val), PRINTF_BYTE_TO_BINARY_INT64(op));
   CLR_BIT(op, val);
 
   op <<= (64 - val);
-  printf("%" PRIu64 ", %" PRIu64 "\n", op, UINT64_MAX);
+  printf("%" PRIu64 ", %" PRIu64 "\n", (uint64_t)(64 - val), val);
+  printf("2^%" PRIu64 " x 1." PRINTF_BINARY_PATTERN_INT64 "\n", rop->exp, PRINTF_BYTE_TO_BINARY_INT64(op));
 
   fwrite(&op, sizeof(uint64_t), 1, f);
 
   fclose(f);
+  return;
 }
 
+<<<<<<< HEAD
 void hpcp_add(hpcp_t rop, hpcp_t op1, hpcp_t op2)
 {
   return;
 }
 
+=======
+int hpcp_printf_bin(hpcp_t *op)
+{
+  printf("2^%" PRIu8 "%" PRIu64 "", (op->head & HPCP_0) == op->head ? 0 : '-', op->exp);
+  for (size_t i = 0; i < op->prec + op->real_prec_dec; ++i)
+    return 0;
+}
+
+void hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
+{
+  if (rop == NULL || op1 == NULL || op2 == NULL)
+    return;
+
+  return;
+}
+
+>>>>>>> 8b0d6d52e9a5acf511c3b7994829d53696025c96
 void hpcp_clear(hpcp_t *rop)
 {
   free(*(rop->start));
@@ -87,6 +113,7 @@ void hpcp_clear(hpcp_t *rop)
   printf("%s\n", filename);
   remove(filename);
   free((void *)rop);
+  return;
 }
 
 // file stuff ------------------------------------------------------
