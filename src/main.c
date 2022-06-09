@@ -6,7 +6,7 @@
 
 void pause(void);
 
-#define PREC 81
+#define PREC 83
 
 int main(int argc, char **argv)
 {
@@ -17,10 +17,15 @@ int main(int argc, char **argv)
 
   printf("%" PRIu64 "\n", (uint64_t)test->real_prec_dec);
 
-  hpcp_set_ui(test, ((uint64_t)UINT16_MAX));
+  hpcp_set_ui(test, UINT8_MAX);
 
   printf("printf_bin(test) : ");
-  // test->head |= HPCP_EXP_MINUS;
+  hpcp_printf_bin(test);
+
+  hpcp_set_ui(test, 0);
+  test->head |= HPCP_ZERO | HPCP_MINUS;
+
+  printf("\nprintf_bin(test) : ");
   hpcp_printf_bin(test);
 
   pause();

@@ -34,14 +34,18 @@
 #define HPCP_LIMB_SIZE 10
 
 #define HPCP_MINUS 0x01     // 0b00000001
-#define HPCP_0 0x02         // 0b00000010
+#define HPCP_ZERO 0x02      // 0b00000010
 #define HPCP_INF 0x04       // 0b00000100
 #define HPCP_NAN 0x08       // 0b00001000
 #define HPCP_EXP_MINUS 0x10 // 0b00010000
 #define HPCP_INT 0x20       // 0b00100000
 
+#define HPCP_IS_ZERO (op->head | HPCP_ZERO) == op->head
+#define HPCP_IS_NAN (op->head | HPCP_NAN) == op->head
+#define HPCP_IS_INF (op->head | HPCP_INF) == op->head
+
 #define SET_BIT(n, N) ((n) |= ((uint64_t)1 << (N)))
-#define CLR_BIT(n, N) ((n) &= ~((uint64_t)(1 << (N))))
+#define CLR_BIT(n, N) ((n) &= ~((uint64_t)(1ll << (N))))
 #define TOGGLE_BIT(n, N) ((n) ^= ((uint64_t)1 << (N)))
 #define NTH_BIT(n, N) (((n) >> (N)) & (uint64_t)1)
 
@@ -59,7 +63,7 @@ typedef struct HPCP_T
 } hpcp_t;
 
 int hpcp_init(hpcp_t **rop, uint64_t prec);
-void hpcp_set_ui(hpcp_t *rop, uint64_t op);
+int hpcp_set_ui(hpcp_t *rop, uint64_t op);
 size_t hpcp_printf(const char *format, ...);
 int hpcp_printf_bin(hpcp_t *op);
 void hpcp_clear(hpcp_t *rop);
