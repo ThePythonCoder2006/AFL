@@ -52,7 +52,7 @@ typedef struct HPCP_T
 {
   hpcp_head_t head;
   uint64_t prec;
-  uint8_t real_prec_dec;
+  uint64_t real_prec_dec;
   uint64_t exp;
   uint64_t line;
   hpcp_limb_t *start;

@@ -35,6 +35,9 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
   (*rop)->exp = 0;
   (*rop)->prec = prec;
   (*rop)->head = HPCP_0 | HPCP_INT;
+  (*rop)->real_prec_dec = (sizeof(hpcp_limb_t)) - ((uint64_t)((prec) % sizeof(hpcp_limb_t)));
+  if (prec <= sizeof(hpcp_limb_t))
+    (*rop)->real_prec_dec = 0;
 
   ++numb_vars;
 
@@ -43,7 +46,7 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
   if (prec < sizeof(hpcp_limb_t))
     return 0;
 
-  binmax = prec - sizeof(hpcp_limb_t);
+  binmax = (prec - sizeof(hpcp_limb_t)) + (*rop)->real_prec_dec;
 
   printf("%" PRIu64 "\n", binmax);
 
@@ -69,11 +72,9 @@ void hpcp_set_ui(hpcp_t *rop, uint64_t op)
   {
     val++;
   }
-  printf("%i\n", val);
 
   rop->exp = val;
   rop->head = HPCP_INT;
-  FILE *f = fopen(TMPPATH "/HPCP-1.bin", "wb");
 
   // for (size_t i = 0; i < (rop->prec + rop->real_prec_dec); ++i)
   // {
@@ -84,30 +85,39 @@ void hpcp_set_ui(hpcp_t *rop, uint64_t op)
 
   op <<= (64 - val);
   // printf("%" PRIu64 ", %" PRIu64 "\n", (uint64_t)(64 - val), (uint64_t)val);
-  // printf("2^%" PRIu64 " x 1." PRINTF_BINARY_PATTERN_INT64 "\n", rop->exp, PRINTF_BYTE_TO_BINARY_INT64(op));s
-
-  fwrite(&op, sizeof(uint64_t), 1, f);
-
-  fclose(f);
+  // printf("2^%" PRIu64 " x 1." PRINTF_BINARY_PATTERN_INT64 "\n", rop->exp, PRINTF_BYTE_TO_BINARY_INT64(op));
+  (*(rop->start))[0] = op;
   return;
 }
 
 int hpcp_printf_bin(hpcp_t *op)
 {
-  printf("2^%c%" PRIu64 " x ", NTH_BIT(op->head, 4) == 0 ? 0 : '-', op->exp);
+  printf("2^%c%" PRIu64 " x 1.", NTH_BIT(op->head, 4) == 0 ? 0 : '-', op->exp);
   for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
     printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64(((*(op->start))[i])));
-  for (size_t i = 0; i < op->prec + op->real_prec_dec; ++i)
-    ;
+
+  if (op->prec <= sizeof(hpcp_limb_t))
+    return 0;
+
+  char filename[64];
+  sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
+  FILE *bin = fopen(filename, "rb");
+  uint64_t data;
+  for (size_t i = 0; i < ((op->prec - sizeof(hpcp_limb_t)) + op->real_prec_dec); ++i)
+  {
+    fread(&data, sizeof(data), 1, bin);
+    printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64(data));
+  }
+  fclose(bin);
   return 0;
 }
 
-void hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
+int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
 {
   if (rop == NULL || op1 == NULL || op2 == NULL)
-    return;
+    return -1;
 
-  return;
+  return 0;
 }
 
 void hpcp_clear(hpcp_t *rop)

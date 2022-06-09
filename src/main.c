@@ -6,7 +6,7 @@
 
 void pause(void);
 
-#define PREC 200
+#define PREC 81
 
 int main(int argc, char **argv)
 {
@@ -15,9 +15,9 @@ int main(int argc, char **argv)
   if (hpcp_init(&test, PREC) == -1)
     fprintf(stderr, "error while initing test\n");
 
-  // printf("%" PRIu64 "\n", (uint64_t)test->head);
+  printf("%" PRIu64 "\n", (uint64_t)test->real_prec_dec);
 
-  // hpcp_set_ui(test, ((uint64_t)UINT16_MAX));
+  hpcp_set_ui(test, ((uint64_t)UINT16_MAX));
 
   printf("printf_bin(test) : ");
   // test->head |= HPCP_EXP_MINUS;
