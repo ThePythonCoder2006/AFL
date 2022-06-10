@@ -19,16 +19,12 @@ uint64_t numb_vars = 1;
 
 int hpcp_set_file_mantissa_zero(hpcp_t *op)
 {
-  uint64_t binmax;
-
   if (op->prec < sizeof(hpcp_limb_t))
     return 0;
 
-  binmax = (op->prec - sizeof(hpcp_limb_t)) + op->real_prec_dec;
+  const uint64_t binmax = (op->prec - sizeof(hpcp_limb_t)) + op->real_prec_dec;
 
   printf("binmax : %" PRIu64 "\n", binmax);
-
-  const uint8_t buff = 0x00;
 
   char filename[64];
   sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
@@ -37,7 +33,9 @@ int hpcp_set_file_mantissa_zero(hpcp_t *op)
   if (bin == NULL)
     return -1;
 
-  for (uint64_t i = 0; i < binmax; ++i)
+  const hpcp_limb_t buff = 0x00;
+
+  for (uint64_t i = 0; i < binmax / sizeof(hpcp_limb_t); ++i)
     fwrite(&buff, sizeof(buff), 1, bin);
 
   fclose(bin);
@@ -102,10 +100,66 @@ int hpcp_set_ui(hpcp_t *rop, uint64_t op)
   return hpcp_set_file_mantissa_zero(rop);
 }
 
+int hpcp_set_plus_zero(hpcp_t *rop)
+{
+  rop->head = HPCP_ZERO | HPCP_INT;
+  rop->exp = 0;
+
+  for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    (*(rop->start))[i] = 0;
+
+  return hpcp_set_file_mantissa_zero(rop);
+}
+
+int hpcp_set_minus_zero(hpcp_t *rop)
+{
+  rop->head = HPCP_ZERO | HPCP_INT | HPCP_MINUS;
+  rop->exp = 0;
+
+  for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    (*(rop->start))[i] = 0;
+
+  return hpcp_set_file_mantissa_zero(rop);
+}
+
+int hpcp_set_NaN(hpcp_t *rop)
+{
+  rop->head = HPCP_NAN;
+  rop->exp = 0;
+
+  for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    (*(rop->start))[i] = 0;
+
+  return hpcp_set_file_mantissa_zero(rop);
+}
+
+int hpcp_set_plus_inf(hpcp_t *rop)
+{
+  rop->head = HPCP_INF;
+  rop->exp = UINT64_MAX;
+
+  for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    (*(rop->start))[i] = 0;
+
+  return hpcp_set_file_mantissa_zero(rop);
+}
+
+int hpcp_set_minus_inf(hpcp_t *rop)
+{
+  rop->head = HPCP_INF | HPCP_MINUS;
+  rop->exp = UINT64_MAX;
+
+  for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    (*(rop->start))[i] = 0;
+
+  return hpcp_set_file_mantissa_zero(rop);
+}
+
 /* - end setting functions -----------------------------------------------------------------------------*/
 /* - print functions -----------------------------------------------------------------------------*/
 
 int hpcp_printf_bin(hpcp_t *op)
+
 {
   if (HPCP_IS_NAN)
   {
@@ -137,11 +191,11 @@ int hpcp_printf_bin(hpcp_t *op)
   char filename[64];
   sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
   FILE *bin = fopen(filename, "rb");
-  uint8_t data;
-  for (size_t i = 0; i < ((op->prec - sizeof(hpcp_limb_t)) + op->real_prec_dec); ++i)
+  uint64_t data;
+  for (size_t i = 0; i < (((op->prec - sizeof(hpcp_limb_t)) + op->real_prec_dec) / sizeof(uint64_t)); ++i)
   {
     fread(&data, sizeof(data), 1, bin);
-    printf(PRINTF_BINARY_PATTERN_INT8, PRINTF_BYTE_TO_BINARY_INT8(data));
+    printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64(data));
   }
   fclose(bin);
   return 0;
@@ -158,17 +212,57 @@ int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
   return 0;
 }
 
+int hpcp_negate(hpcp_t *rop, hpcp_t *op)
+{
+  return 0;
+}
+
 /* - end arthrimetrics functions -----------------------------------------------------------------------------*/
 
 void hpcp_clear(hpcp_t *rop)
 {
   free(*(rop->start));
   char filename[64];
-  sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", rop->line);
+  hpcp_get_filename(filename, rop);
   printf("%s\n", filename);
   remove(filename);
   free((void *)rop);
   return;
+}
+
+int hpcp_copy(hpcp_t *dst, hpcp_t *src)
+{
+  dst->exp = src->exp;
+  dst->prec = src->prec;
+  dst->head = src->head;
+  dst->start = src->start;
+  dst->real_prec_dec = src->real_prec_dec;
+
+  char filename[64];
+  hpcp_get_filename(filename, src);
+  FILE *srcbin = fopen(filename, "rb");
+  hpcp_get_filename(filename, dst);
+  FILE *dstbin = fopen(filename, "wb");
+
+  if (srcbin == NULL || dstbin == NULL)
+    return -1;
+
+  const hpcp_limb_t tmp;
+
+  for (size_t i = 0; i < ((src->prec - sizeof(hpcp_limb_t)) + src->real_prec_dec) / sizeof(hpcp_limb_t); ++i)
+  {
+    fread(&tmp, sizeof(tmp), 1, srcbin);
+    fwrite(&tmp, sizeof(tmp), 1, dstbin);
+  }
+
+  fclose(srcbin);
+  fclose(dstbin);
+  return 0;
+}
+
+size_t hpcp_get_filename(char filename[64], hpcp_t *op)
+{
+  return sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
 }
 
 // file stuff ------------------------------------------------------

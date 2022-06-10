@@ -56,7 +56,7 @@ typedef struct HPCP_T
 {
   hpcp_head_t head;
   uint64_t prec;
-  uint64_t real_prec_dec;
+  uint8_t real_prec_dec;
   uint64_t exp;
   uint64_t line;
   hpcp_limb_t *start;
@@ -67,6 +67,8 @@ int hpcp_set_ui(hpcp_t *rop, uint64_t op);
 size_t hpcp_printf(const char *format, ...);
 int hpcp_printf_bin(hpcp_t *op);
 void hpcp_clear(hpcp_t *rop);
+int hpcp_copy(hpcp_t *dst, hpcp_t *src);
+size_t hpcp_get_filename(char filename[64], hpcp_t *op);
 
 void rek_mkdir(char *path);
 FILE *fopen_mkdir(char *path, char *mode);
