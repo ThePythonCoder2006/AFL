@@ -33,7 +33,7 @@ int hpcp_set_file_mantissa_zero(hpcp_t *op)
   if (bin == NULL)
     return -1;
 
-  const hpcp_limb_t buff = 0x00;
+  const hpcp_limb_t buff = {0x00};
 
   for (uint64_t i = 0; i < binmax / sizeof(hpcp_limb_t); ++i)
     fwrite(&buff, sizeof(buff), 1, bin);
@@ -204,16 +204,23 @@ int hpcp_printf_bin(hpcp_t *op)
 /* - end print functions -----------------------------------------------------------------------------*/
 /* - arthrimetrics functions -----------------------------------------------------------------------------*/
 
+inline uint8_t hpcp_add_uint64(uint64_t *rop, uint64_t *op1, uint64_t *op2)
+{
+  *rop = (*op1 & ~(1ll << 63)) + (*op2 & ~(1ll << 63));
+
+  return (uint8_t)((*op1 & *op2) >> 63);
+}
+
 int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
 {
-  if (rop == NULL || op1 == NULL || op2 == NULL)
-    return -1;
 
   return 0;
 }
 
-int hpcp_negate(hpcp_t *rop, hpcp_t *op)
+inline int hpcp_negate(hpcp_t *rop, hpcp_t *op)
 {
+  rop->head = op->head ^ HPCP_MINUS;
+
   return 0;
 }
 
@@ -247,7 +254,7 @@ int hpcp_copy(hpcp_t *dst, hpcp_t *src)
   if (srcbin == NULL || dstbin == NULL)
     return -1;
 
-  const hpcp_limb_t tmp;
+  hpcp_limb_t tmp;
 
   for (size_t i = 0; i < ((src->prec - sizeof(hpcp_limb_t)) + src->real_prec_dec) / sizeof(hpcp_limb_t); ++i)
   {

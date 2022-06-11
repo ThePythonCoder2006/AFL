@@ -11,11 +11,9 @@ void pause(void);
 int main(int argc, char **argv)
 {
   printf("hpcp_t: %i\nhpcp_limb_t: %i\nuint64_t: %i\n", sizeof(hpcp_t), sizeof(hpcp_limb_t), sizeof(uint64_t));
-  hpcp_t *test, *test2;
+  hpcp_t *test;
   if (hpcp_init(&test, PREC) == -1)
     fprintf(stderr, "error while initing test\n");
-  if (hpcp_init(&test2, PREC) == -1)
-    fprintf(stderr, "error while initing test2\n");
 
   printf("%" PRIu64 "\n", (uint64_t)test->real_prec_dec);
 
@@ -24,16 +22,12 @@ int main(int argc, char **argv)
   printf("printf_bin(test) : ");
   hpcp_printf_bin(test);
 
-  hpcp_copy(test2, test);
-  test->head |= HPCP_ZERO | HPCP_MINUS;
-
-  printf("\nprintf_bin(test2) : ");
-  hpcp_printf_bin(test2);
+  printf("\nprintf_bin(test) : ");
+  hpcp_printf_bin(test);
 
   pause();
 
   hpcp_clear(test);
-  hpcp_clear(test2);
 
   (void)argc;
   (void)argv;
