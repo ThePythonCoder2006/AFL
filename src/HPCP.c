@@ -204,16 +204,43 @@ int hpcp_printf_bin(hpcp_t *op)
 /* - end print functions -----------------------------------------------------------------------------*/
 /* - arthrimetrics functions -----------------------------------------------------------------------------*/
 
-inline uint8_t hpcp_add_uint64(uint64_t *rop, uint64_t *op1, uint64_t *op2)
+uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2)
 {
-  *rop = (*op1 & ~(1ll << 63)) + (*op2 & ~(1ll << 63));
+  *rop = (op1 & ~(1ll << 63)) + (op2 & ~(1ll << 63));
 
-  return (uint8_t)((*op1 & *op2) >> 63);
+  return ((uint8_t)((op1 & op2) >> 63));
+}
+
+void *hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2)
+{
+#define HPCP_ADD_LIMB_GET_REM_BIT(N) (rem[(size_t)(((N) + 1) / 8)] >> ((((N) + 1) % 8) - 1)) & 1
+#define HPCP_ADD_LIMB_SET_REM_BIT(N) rem[(size_t)(((N) + 1) / 8)] |= 1 << ((((N) + 1) % 8) - 1)
+
+  uint8_t *rem = calloc(1, ((HPCP_LIMB_SIZE / 8)) + 1);
+  if (rem == NULL)
+    return (void *)-1;
+
+  for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+  {
+    if (hpcp_add_uint64(&(*rop)[i], op1[i], op2[i]))
+    {
+      HPCP_ADD_LIMB_SET_REM_BIT(i);
+    }
+  }
+
+  for (int64_t i = 1; i >= 0; --i)
+    printf(PRINTF_BINARY_PATTERN_INT8, PRINTF_BYTE_TO_BINARY_INT8(rem[i]));
+  printf("\n");
+  return rem;
+
+#undef HPCP_ADD_LIMB_GET_REM_BIT
 }
 
 int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
 {
-
+  (void)rop;
+  (void)op1;
+  (void)op2;
   return 0;
 }
 

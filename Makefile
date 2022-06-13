@@ -3,6 +3,11 @@ CFLAGS=-I include -Wall -Wextra
 DEPS=include/HPCP.h
 ODIR=src/obj
 
+comp&run: comp run
+
+run:
+	./bin/main
+
 comp: $(ODIR)/main.o $(ODIR)/HPCP.o
 	$(CC) -o bin/main $^ $(CFLAGS)
 
