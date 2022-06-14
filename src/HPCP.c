@@ -226,7 +226,7 @@ uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t
 
   // using an array to store all of the remainders of the sums : each bit represents a remainder
   // in binary a remainder can only be 0 or 1
-  uint8_t arrem1[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1], arrem2[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1];
+  uint8_t *arrem1 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1), *arrem2 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1);
 
   // summing each pair of uint64_t individually
   for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
@@ -394,7 +394,7 @@ inline int64_t abs2(int64_t op)
   return (op + mask) ^ mask;
 }
 
-void swap_ptr_uint8(uint8_t *a[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1], uint8_t *b[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1])
+void swap_ptr_uint8(uint8_t **a, uint8_t **b)
 {
   uint8_t *c = *a;
   *a = *b;

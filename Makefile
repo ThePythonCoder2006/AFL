@@ -3,13 +3,16 @@ CFLAGS=-I include -Wall -Wextra
 DEPS=include/HPCP.h
 ODIR=src/obj
 
-comp&run: comp run
+all: comphead comp run
 
 run:
 	./bin/main
 
 comp: $(ODIR)/main.o $(ODIR)/HPCP.o
 	$(CC) -o bin/main $^ $(CFLAGS)
+
+comphead: $(ODIR)/header_before_comp.o
+	./bin/comphead
 
 $(ODIR)/%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
