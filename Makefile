@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I include -Wall -Wextra
+CFLAGS=-I include -Wall -Wextra -O3
 DEPS=include/HPCP.h
 ODIR=src/obj
 
@@ -18,7 +18,7 @@ $(ODIR)/%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 pre: src/main.c
-	$(CC) -E $^ $(CFLAGS) > build.c
+	$(CC) -E $^ $(CFLAGS) > preprocessor_build.c
 
 clean:
 	del /f src\obj\*.o
