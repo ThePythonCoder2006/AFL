@@ -9,10 +9,14 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 To use HPCP you will need the ```make``` command. If your on linux you should already have it but on windows your will have to install it. I recommand installing it througt "chocolatey"
+To install chocolatey copy and paste the first command into a windows powershell with admin powers (jsut search powershell in the windows shearch bar). Then paste the second command to install make.
 
 ```
-Give examples
+> Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+> choco install make
 ```
+
+You can check if the installation was successful by typing ```make``` into a cmd. It should output ```make: *** No targets specified and no makefile found.  Stop.```.
 
 ### Installing
 
