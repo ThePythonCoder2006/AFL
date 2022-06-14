@@ -8,12 +8,12 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-To use HPCP you will need the ```make``` command. If your on linux you should already have it but on windows your will have to install it. I recommand installing it througt "chocolatey"
+To build HPCP it is better to use the ```make``` command. If your on linux you should already have it but on windows your will have to install it. I recommand installing it througt "chocolatey"
 To install chocolatey copy and paste the first command into a windows powershell with admin powers (jsut search powershell in the windows shearch bar). Then paste the second command to install make.
 
 ```
-> Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-> choco install make
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+choco install make
 ```
 
 You can check if the installation was successful by typing ```make``` into a cmd. It should output ```make: *** No targets specified and no makefile found.  Stop.```.
@@ -38,7 +38,7 @@ End with an example of getting some data out of the system or using it for a lit
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
+To check if the build was successfully done you can type ```make check``` (/!\ not implemented yet !)
 
 ### Break down into end to end tests
 
@@ -62,9 +62,7 @@ Add additional notes about how to deploy this on a live system
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+*plain old C with gcc
 
 ## Contributing
 
@@ -86,7 +84,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+*I had problems with GNU MPFR and GNU MP so I am makin my own calculation software. 
 
