@@ -69,10 +69,12 @@ int hpcp_printf_bin(hpcp_t *op);
 int hpcp_copy(hpcp_t *dst, hpcp_t *src);
 size_t hpcp_get_filename(char filename[64], hpcp_t *op);
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2);
-void *hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2);
+uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2);
 
 int hpcp_negate(hpcp_t *rop, hpcp_t *op);
 void hpcp_clear(hpcp_t *rop);
+
+void swap_ptr_uint8(uint8_t *a[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1], uint8_t *b[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1]);
 
 void rek_mkdir(char *path);
 FILE *fopen_mkdir(char *path, char *mode);

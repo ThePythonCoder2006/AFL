@@ -47,11 +47,18 @@ int main(int argc, char **argv)
 
   pause();
 
-  hpcp_limb_t rop = {0}, op1 = {UINT64_MAX, UINT64_MAX}, op2 = {UINT64_MAX, UINT64_MAX};
+  hpcp_limb_t rop, op1, op2 = {1};
 
-  uint8_t *rem = hpcp_add_limb(&rop, op1, op2);
+  for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    op1[i] = UINT64_MAX;
 
-  free(rem);
+  hpcp_add_limb(&rop, op1, op2);
+
+  // uint64_t rop, op1 = UINT64_MAX, op2 = UINT64_MAX;
+
+  // uint8_t rem = hpcp_add_uint64(&rop, op1, op2);
+
+  // printf("%i, %" PRIu64 ", 0000000%i " PRINTF_BINARY_PATTERN_INT64 "\n", rem, rop, rem, PRINTF_BYTE_TO_BINARY_INT64(rop));
 
   hpcp_clear(test);
 

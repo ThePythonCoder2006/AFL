@@ -1,7 +1,0 @@
-make.exe --dry-run --always-make --keep-going --print-directory
-make: Entering directory 'c:/Users/paul/Desktop/documents/Programation/hpcp'
-gcc -c -o src/obj/main.o src/main.c -I include -Wall -Wextra
-gcc -c -o src/obj/HPCP.o src/HPCP.c -I include -Wall -Wextra
-gcc -o bin/main src/obj/main.o src/obj/HPCP.o -I include -Wall -Wextra
-make: Leaving directory 'c:/Users/paul/Desktop/documents/Programation/hpcp'
- 

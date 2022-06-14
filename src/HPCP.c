@@ -7,7 +7,7 @@
 #include <HPCP.h>
 #include <time.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #define F_OK 0
 #define access _access
@@ -206,31 +206,89 @@ int hpcp_printf_bin(hpcp_t *op)
 
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2)
 {
-  *rop = (op1 & ~(1ll << 63)) + (op2 & ~(1ll << 63));
+  // add the two operands and dont care if there is an overflow (it it detected id the if statement and taken care of)
+  *rop = op1 + op2;
+  if (UINT64_MAX - op1 < op2)
+    return 1;
 
-  return ((uint8_t)((op1 & op2) >> 63));
+  return 0;
 }
 
-void *hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2)
+uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2)
 {
-#define HPCP_ADD_LIMB_GET_REM_BIT(N) (rem[(size_t)(((N) + 1) / 8)] >> ((((N) + 1) % 8) - 1)) & 1
-#define HPCP_ADD_LIMB_SET_REM_BIT(N) rem[(size_t)(((N) + 1) / 8)] |= 1 << ((((N) + 1) % 8) - 1)
+#define HPCP_ADD_LIMB_GET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)] >> (((N) % 8) - 1)) & 1)
+#define HPCP_ADD_LIMB_SET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) |= (1 << (((N) % 8) - 1)))
+#define HPCP_ADD_LIMB_CLR_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) &= ~(1 << (((N) % 8) - 1)))
 
-  uint8_t *rem = calloc(1, ((HPCP_LIMB_SIZE / 8)) + 1);
-  if (rem == NULL)
-    return (void *)-1;
+  // this will be one if an only if the result of the sum is bigger than 2^(64*10) - 1
+  // if the result doesn't fit in the 64*10 bits availible in hpcp_limb_t
+  uint8_t rem = 0;
 
+  // using an array to store all of the remainders of the sums : each bit represents a remainder
+  // in binary a remainder can only be 0 or 1
+  uint8_t arrem1[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1], arrem2[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1];
+
+  // summing each pair of uint64_t individually
   for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
   {
     if (hpcp_add_uint64(&(*rop)[i], op1[i], op2[i]))
-    {
-      HPCP_ADD_LIMB_SET_REM_BIT(i);
-    }
+      HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 2);
   }
 
-  for (int64_t i = 1; i >= 0; --i)
-    printf(PRINTF_BINARY_PATTERN_INT8, PRINTF_BYTE_TO_BINARY_INT8(rem[i]));
-  printf("\n");
+  // if the biggest uint64_t of the limb is at max and there is a remainder, the overflow goes into the rem return value to hpcp_add
+  // and the largest uint64_t is set to 0
+  if (((*rop)[HPCP_LIMB_SIZE - 1] > UINT64_MAX) && HPCP_ADD_LIMB_GET_REM_BIT(arrem1, HPCP_LIMB_SIZE))
+    rem = 1, (*rop)[HPCP_LIMB_SIZE - 1] = 0;
+
+  uint8_t run = 1;
+  while (run)
+  {
+    // the (i + 1) are because the i's start from 0 and not from 1
+    for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    {
+      printf("%" PRIu64 ", %i, %i, %i\n", (*rop)[i], HPCP_ADD_LIMB_GET_REM_BIT(arrem1, i + 1), HPCP_ADD_LIMB_GET_REM_BIT(arrem2, i + 1), i);
+
+      if (HPCP_ADD_LIMB_GET_REM_BIT(arrem1, i + 1))
+      {
+        // if there will not be an owerflow then apply the remainder
+        if ((*rop)[i] < UINT64_MAX)
+          HPCP_ADD_LIMB_CLR_REM_BIT(arrem1, i + 1), ((*rop)[i])++;
+        else // else set the remainder for the next value and reset the uint64_t to 0
+          HPCP_ADD_LIMB_SET_REM_BIT(arrem2, i + 2), ((*rop)[i]) = 0;
+      }
+      printf("%" PRIu64 ", %i, %i, %i\n\n", (*rop)[i], HPCP_ADD_LIMB_GET_REM_BIT(arrem1, i + 1), HPCP_ADD_LIMB_GET_REM_BIT(arrem2, i + 1), i);
+    }
+
+    run = 0;
+
+    for (int8_t i = 0; i < ((HPCP_LIMB_SIZE / 8)) + 1; ++i)
+    {
+      arrem1[i] = 0;
+      printf("%i\n", arrem2[i]);
+      if (arrem2[i])
+      {
+        run = 1;
+        continue;
+      }
+    }
+
+    // printf("%i " PRINTF_BINARY_PATTERN_INT8
+    //        ", " PRINTF_BINARY_PATTERN_INT8
+    //        ", " PRINTF_BINARY_PATTERN_INT8
+    //        ", " PRINTF_BINARY_PATTERN_INT8 "\n",
+    //        rem,
+    //        PRINTF_BYTE_TO_BINARY_INT8(arrem1[1]),
+    //        PRINTF_BYTE_TO_BINARY_INT8(arrem1[0]),
+    //        PRINTF_BYTE_TO_BINARY_INT8(arrem2[1]),
+    //        PRINTF_BYTE_TO_BINARY_INT8(arrem2[0]));
+    swap_ptr_uint8(&arrem1, &arrem2);
+    for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+    {
+      printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64((*rop)[i]));
+    }
+    printf("%i\n\n", rem);
+  }
+
   return rem;
 
 #undef HPCP_ADD_LIMB_GET_REM_BIT
@@ -334,4 +392,12 @@ inline int64_t abs2(int64_t op)
   int const mask = op >> ((sizeof(int) * 8) - 1);
 
   return (op + mask) ^ mask;
+}
+
+void swap_ptr_uint8(uint8_t *a[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1], uint8_t *b[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1])
+{
+  uint8_t *c = *a;
+  *a = *b;
+  *b = c;
+  return;
 }
