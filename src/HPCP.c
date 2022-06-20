@@ -294,6 +294,10 @@ int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
   if (hpcp_add_limb(ropstart, *op1start, *op2start) == 1)
     HPCP_ADD_LIMB_SET_REM_BIT(arrem1, 1);
 
+  hpcp_limb_t **pt_arr = malloc((((rop->prec - sizeof(hpcp_limb_t)) + rop->real_prec_dec) / sizeof(hpcp_limb_t)) * sizeof(hpcp_limb_t *));
+  printf("%i\n", (((rop->prec - sizeof(hpcp_limb_t)) + rop->real_prec_dec) / sizeof(hpcp_limb_t)) * sizeof(hpcp_limb_t *));
+  exit(1);
+
   // open all of the file containing the mantissas of the operands
   char filename[64];
   hpcp_get_filename(filename, rop);
