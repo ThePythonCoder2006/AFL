@@ -45,8 +45,6 @@ int main(int argc, char **argv)
   // printf("\nprintf_bin(test) : ");
   // hpcp_printf_bin(test);
 
-  pause();
-
   // hpcp_limb_t rop, op1, op2 = {1};
 
   // for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
@@ -61,6 +59,11 @@ int main(int argc, char **argv)
   // printf("%i, %" PRIu64 ", 0000000%i " PRINTF_BINARY_PATTERN_INT64 "\n", rem, rop, rem, PRINTF_BYTE_TO_BINARY_INT64(rop));
 
   hpcp_add(test, test, test);
+<<<<<<< HEAD
+=======
+
+  pause();
+>>>>>>> 0276b6e24de96bf8a5fb2cf13dbda0ee143ab17b
 
   hpcp_clear(test);
 
@@ -74,14 +77,4 @@ void pause(void)
   char tmp;
   scanf("%c", &tmp);
   fflush(stdin);
-}
-
-void yellow(void)
-{
-  printf("\033[0;33m");
-}
-
-void reset(void)
-{
-  printf("\033[0m");
 }

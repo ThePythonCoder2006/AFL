@@ -12,6 +12,7 @@ comp: $(ODIR)/main.o $(ODIR)/HPCP.o
 	$(CC) -o bin/main $^ $(CFLAGS)
 
 comphead: $(ODIR)/header_before_comp.o
+	$(CC) -o bin/comphead $^ $(CFLAGS)
 	./bin/comphead
 
 $(ODIR)/%.o: src/%.c $(DEPS)
