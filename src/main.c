@@ -21,7 +21,7 @@ void pause(void);
 void yellow(void);
 void reset(void);
 
-#define PREC 20
+#define PREC 200
 
 int main(int argc, char **argv)
 {
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
   // printf("%i, %" PRIu64 ", 0000000%i " PRINTF_BINARY_PATTERN_INT64 "\n", rem, rop, rem, PRINTF_BYTE_TO_BINARY_INT64(rop));
 
-  hpcp_add(&test, &test, &test);
+  hpcp_add(test, test, test);
 
   hpcp_clear(test);
 
