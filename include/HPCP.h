@@ -29,7 +29,7 @@
   PRINTF_BINARY_PATTERN_INT32 PRINTF_BINARY_PATTERN_INT32
 #define PRINTF_BYTE_TO_BINARY_INT64(i) \
   PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), PRINTF_BYTE_TO_BINARY_INT32(i)
-/* --- end macros --- */
+/* --- end printf binary macros --- */
 
 #define PRINTF_BLACK "\033[0;30m"
 #define PRINTF_RED "\033[0;31m"
