@@ -40,9 +40,12 @@
 #define HPCP_EXP_MINUS 0x10 // 0b00010000
 #define HPCP_INT 0x20       // 0b00100000
 
-#define HPCP_IS_ZERO (op->head | HPCP_ZERO) == op->head
-#define HPCP_IS_NAN (op->head | HPCP_NAN) == op->head
-#define HPCP_IS_INF (op->head | HPCP_INF) == op->head
+#define HPCP_ERR_RET_READ_FILE -1
+#define HPCP_ERR_RET_ALLOC -2
+
+#define HPCP_IS_ZERO(op) ((op)->head | HPCP_ZERO) == (op)->head
+#define HPCP_IS_NAN(op) ((op)->head | HPCP_NAN) == (op)->head
+#define HPCP_IS_INF(op) ((op)->head | HPCP_INF) == (op)->head
 
 #define SET_BIT(n, N) ((n) |= ((uint64_t)1 << (N)))
 #define CLR_BIT(n, N) ((n) &= ~((uint64_t)(1ll << (N))))
@@ -69,7 +72,8 @@ int hpcp_printf_bin(hpcp_t *op);
 int hpcp_copy(hpcp_t *dst, hpcp_t *src);
 size_t hpcp_get_filename(char filename[64], hpcp_t *op);
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2);
-uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2);
+int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2);
+int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2);
 
 int hpcp_negate(hpcp_t *rop, hpcp_t *op);
 void hpcp_clear(hpcp_t *rop);
@@ -79,5 +83,8 @@ void swap_ptr_uint8(uint8_t **a, uint8_t **b);
 void rek_mkdir(char *path);
 FILE *fopen_mkdir(char *path, char *mode);
 void rm_dir(const char *const path);
+
+#define HPCP_LIMB_MAX {[0 ...(HPCP_LIMB_SIZE - 1)] UINT64_MAX};
+#define HPCP_LIMB_IS_MAX(op) ((op) == HPCP_LIMB_MAX)
 
 #endif // HPCP

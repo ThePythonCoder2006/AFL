@@ -31,7 +31,7 @@ int hpcp_set_file_mantissa_zero(hpcp_t *op)
 
   FILE *bin = fopen_mkdir(filename, "wb");
   if (bin == NULL)
-    return -1;
+    return HPCP_ERR_RET_READ_FILE;
 
   const hpcp_limb_t buff = {0x00};
 
@@ -51,10 +51,10 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
   // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
   *rop = malloc(sizeof(hpcp_t));
   if (*rop == NULL)
-    return -1;
+    return HPCP_ERR_RET_ALLOC;
   (*rop)->start = calloc(HPCP_LIMB_SIZE, sizeof(uint64_t));
   if ((*rop)->start == NULL)
-    return -1;
+    return HPCP_ERR_RET_ALLOC;
   (*rop)->line = numb_vars;
   (*rop)->exp = 0;
   (*rop)->prec = prec;
@@ -68,7 +68,7 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
   return hpcp_set_file_mantissa_zero(*rop);
 }
 
-/* - end init functions -----------------------------------------------------------------------------*/
+/* - end init functions ----------------------------------------------------------------------------*/
 
 /* - setting functions -----------------------------------------------------------------------------*/
 
@@ -156,12 +156,12 @@ int hpcp_set_minus_inf(hpcp_t *rop)
 }
 
 /* - end setting functions -----------------------------------------------------------------------------*/
-/* - print functions -----------------------------------------------------------------------------*/
+/* - print functions -----------------------------------------------------------------------------------*/
 
 int hpcp_printf_bin(hpcp_t *op)
 
 {
-  if (HPCP_IS_NAN)
+  if (HPCP_IS_NAN(op))
   {
     printf("NaN");
     return 0;
@@ -169,13 +169,13 @@ int hpcp_printf_bin(hpcp_t *op)
 
   printf("%c", (op->head | HPCP_MINUS) == op->head ? '-' : 0);
 
-  if (HPCP_IS_INF)
+  if (HPCP_IS_INF(op))
   {
     printf("Infinity");
     return 0;
   }
 
-  if (HPCP_IS_ZERO)
+  if (HPCP_IS_ZERO(op))
   {
     printf("0");
     return 0;
@@ -204,18 +204,18 @@ int hpcp_printf_bin(hpcp_t *op)
 /* - end print functions -----------------------------------------------------------------------------*/
 /* - arthrimetrics functions -----------------------------------------------------------------------------*/
 
+/*a function that add two uint64_t (op1 and op2), sets the result into an another uint64_t passed as pointer (rop) and return the remaider of the addition*/
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2)
 {
   // add the two operands and dont care if there is an overflow (it it detected id the if statement and taken care of)
   *rop = op1 + op2;
-  if (UINT64_MAX - op1 < op2)
-    return 1;
-
-  return 0;
+  return UINT64_MAX - op1 < op2;
 }
 
-uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2)
+/*a function that add two hpcp_limb_t passed as pointers (op1 and op2), sets the result into an another hpcp_limb_t passed as pointer (rop) and return the remaider of the addition*/
+int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2)
 {
+  // helper macros for the hpcp_add function for keeping the remaiders
 #define HPCP_ADD_LIMB_GET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
 #define HPCP_ADD_LIMB_SET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) |= (1 << (((N)-1) % 8)))
 #define HPCP_ADD_LIMB_CLR_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) &= ~(1 << (((N)-1) % 8)))
@@ -227,12 +227,14 @@ uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t
   // using an array to store all of the remainders of the sums : each bit represents a remainder
   // in binary a remainder can only be 0 or 1
   uint8_t *arrem1 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1), *arrem2 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1); // It is needed to calloc these to have them as pointers
+  if (arrem1 == NULL || arrem2 == NULL)
+    return HPCP_ERR_RET_ALLOC;
 
   // summing each pair of uint64_t individually
   for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
   {
     if (hpcp_add_uint64(&(*rop)[i], op1[i], op2[i]))
-      HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 2);
+      HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 1);
   }
 
   uint8_t run = 1;
@@ -241,8 +243,6 @@ uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t
     // the (i + 1) are because the i's start from 0 and not from 1
     for (size_t i = 0; i < (HPCP_LIMB_SIZE - 1); ++i)
     {
-      printf("%" PRIu64 ", %i, %i, %i\n", (*rop)[i], HPCP_ADD_LIMB_GET_REM_BIT(arrem1, i + 1), HPCP_ADD_LIMB_GET_REM_BIT(arrem2, i + 1), i);
-
       if (HPCP_ADD_LIMB_GET_REM_BIT(arrem1, i + 1))
       {
         // if there will not be an owerflow then apply the remainder
@@ -251,7 +251,6 @@ uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t
         else // else set the remainder for the next value and reset the uint64_t to 0
           HPCP_ADD_LIMB_SET_REM_BIT(arrem2, i + 2), ((*rop)[i]) = 0;
       }
-      printf("%" PRIu64 ", %i, %i, %i\n\n", (*rop)[i], HPCP_ADD_LIMB_GET_REM_BIT(arrem1, i + 1), HPCP_ADD_LIMB_GET_REM_BIT(arrem2, i + 1), i);
     }
 
     // if the biggest uint64_t of the limb is at max and there is a remainder, the overflow goes into the rem return value to hpcp_add
@@ -278,18 +277,62 @@ uint8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t
   }
 
   return rem;
+}
+
+/*function that add two const hpcp_t passed as pointers (op1 and op2) and sets the result into an another hpcp_t pointer (rop)*/
+int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
+{
+  // using an array to store all of the remainders of the sums : each bit represents a remainder
+  // in binary a remainder can only be 0 or 1
+  uint8_t *arrem1 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1), *arrem2 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1); // It is needed to calloc these to have them as pointers
+  if (arrem1 == NULL || arrem2 == NULL)
+    return HPCP_ERR_RET_ALLOC;
+
+  hpcp_limb_t *ropstart = rop->start, *op1start = op1->start, *op2start = op2->start;
+
+  // add the limbs in pairs for the start of both op's
+  if (hpcp_add_limb(ropstart, *op1start, *op2start) == 1)
+    HPCP_ADD_LIMB_SET_REM_BIT(arrem1, 1);
+
+  // open all of the file containing the mantissas of the operands
+  char filename[64];
+  hpcp_get_filename(filename, rop);
+  FILE *ropbin = fopen(filename, "wb");
+  hpcp_get_filename(filename, op1);
+  FILE *op1bin = fopen(filename, "rb");
+  hpcp_get_filename(filename, op2);
+  FILE *op2bin = fopen(filename, "wb");
+
+  if (ropbin == NULL || op1bin == NULL || op2bin == NULL)
+    return HPCP_ERR_RET_READ_FILE;
+
+  hpcp_limb_t tmprop, tmpop1, tmpop2;
+  for (size_t i = 1; i < ((rop->prec - sizeof(hpcp_limb_t)) + rop->real_prec_dec) / sizeof(hpcp_limb_t); ++i)
+  {
+    fread(&tmpop1, sizeof(tmpop1), 1, op1bin);
+    fread(&tmpop2, sizeof(tmpop2), 1, op2bin);
+    if (hpcp_add_limb(&tmprop, tmpop1, tmpop2))
+      HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 1);
+    // check if rop is at max if not then do add the remaider
+    for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+      if (tmprop[i] < UINT64_MAX)
+        goto after_rem_1;
+
+    printf("%i\n", i);
+
+  after_rem_1:;
+    fwrite(&tmprop, sizeof(tmprop), 1, ropbin);
+  }
+
+  fclose(ropbin);
+  fclose(op1bin);
+  fclose(op2bin);
+
+  return 0;
 
 #undef HPCP_ADD_LIMB_GET_REM_BIT
 #undef HPCP_ADD_LIMB_SET_REM_BIT
 #undef HPCP_ADD_LIMB_CLR_REM_BIT
-}
-
-int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
-{
-  (void)rop;
-  (void)op1;
-  (void)op2;
-  return 0;
 }
 
 inline int hpcp_negate(hpcp_t *rop, hpcp_t *op)
@@ -327,7 +370,7 @@ int hpcp_copy(hpcp_t *dst, hpcp_t *src)
   FILE *dstbin = fopen(filename, "wb");
 
   if (srcbin == NULL || dstbin == NULL)
-    return -1;
+    return HPCP_ERR_RET_READ_FILE;
 
   hpcp_limb_t tmp;
 
