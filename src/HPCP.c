@@ -295,17 +295,11 @@ int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
   if (hpcp_add_limb(ropstart, *op1start, *op2start) == 1)
     HPCP_ADD_LIMB_SET_REM_BIT(arrem1, 1);
 
-<<<<<<< HEAD
-  hpcp_limb_t **pt_arr = malloc((((rop->prec - sizeof(hpcp_limb_t)) + rop->real_prec_dec) / sizeof(hpcp_limb_t)) * sizeof(hpcp_limb_t *));
-  printf("%i\n", (((rop->prec - sizeof(hpcp_limb_t)) + rop->real_prec_dec) / sizeof(hpcp_limb_t)) * sizeof(hpcp_limb_t *));
-  exit(1);
-=======
   // the number of limbs used by the return operand (rop)
   const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(hpcp_limb_t)) / sizeof(hpcp_limb_t);
 
   hpcp_limb_t **pt_arr = malloc(max_limb_numb * sizeof(hpcp_limb_t *));
   printf("%i\n", max_limb_numb * sizeof(hpcp_limb_t *));
->>>>>>> 0276b6e24de96bf8a5fb2cf13dbda0ee143ab17b
 
   // open all of the file containing the mantissas of the operands
   char filename[64];

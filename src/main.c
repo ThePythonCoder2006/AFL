@@ -59,11 +59,8 @@ int main(int argc, char **argv)
   // printf("%i, %" PRIu64 ", 0000000%i " PRINTF_BINARY_PATTERN_INT64 "\n", rem, rop, rem, PRINTF_BYTE_TO_BINARY_INT64(rop));
 
   hpcp_add(test, test, test);
-<<<<<<< HEAD
-=======
 
   pause();
->>>>>>> 0276b6e24de96bf8a5fb2cf13dbda0ee143ab17b
 
   hpcp_clear(test);
 
