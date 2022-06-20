@@ -17,18 +17,14 @@ White  \033[0;37m
 reset  \033[0m
 */
 
-void pause(void);
-void yellow(void);
-void reset(void);
-
 #define PREC 200
+
+void pause(void);
 
 int main(int argc, char **argv)
 {
   // header so I can see the start of my program
-  yellow();
-  printf("|-----------------------------------------------------------------|\n|                     START OF MAIN.C                             |\n|-----------------------------------------------------------------|\n\n");
-  reset();
+  printf(PRINTF_YELLOW "|-----------------------------------------------------------------|\n|                     START OF MAIN.C                             |\n|-----------------------------------------------------------------|\n\n" PRINTF_RESET);
 
   printf("hpcp_t: %i\nhpcp_limb_t: %i\nuint64_t: %i\n", sizeof(hpcp_t), sizeof(hpcp_limb_t), sizeof(uint64_t));
   hpcp_t *test;
@@ -37,13 +33,10 @@ int main(int argc, char **argv)
 
   printf("%" PRIu64 "\n", (uint64_t)test->real_prec_dec);
 
-  hpcp_set_ui(test, UINT8_MAX);
+  hpcp_set_ui(test, UINT64_MAX);
 
-  // printf("printf_bin(test) : ");
-  // hpcp_printf_bin(test);
-
-  // printf("\nprintf_bin(test) : ");
-  // hpcp_printf_bin(test);
+  printf("printf_bin(test) : ");
+  hpcp_printf_bin(test);
 
   // hpcp_limb_t rop, op1, op2 = {1};
 
@@ -59,6 +52,9 @@ int main(int argc, char **argv)
   // printf("%i, %" PRIu64 ", 0000000%i " PRINTF_BINARY_PATTERN_INT64 "\n", rem, rop, rem, PRINTF_BYTE_TO_BINARY_INT64(rop));
 
   hpcp_add(test, test, test);
+
+  printf("\nprintf_bin(test) : ");
+  hpcp_printf_bin(test);
 
   pause();
 

@@ -186,6 +186,8 @@ int hpcp_printf_bin(hpcp_t *op)
   for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
     printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64(((*(op->start))[i])));
 
+  printf(PRINTF_BLUE "| " PRINTF_RESET);
+
   if (op->prec <= sizeof(hpcp_limb_t))
     return 0;
 
@@ -193,10 +195,13 @@ int hpcp_printf_bin(hpcp_t *op)
   sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
   FILE *bin = fopen(filename, "rb");
   uint64_t data;
+
   for (size_t i = 0; i < (((op->prec - sizeof(hpcp_limb_t)) + op->real_prec_dec) / sizeof(uint64_t)); ++i)
   {
     fread(&data, sizeof(data), 1, bin);
     printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64(data));
+    if ((i + 1) % HPCP_LIMB_SIZE == 0)
+      printf(PRINTF_BLUE "| " PRINTF_RESET);
   }
   fclose(bin);
   return 0;
@@ -298,27 +303,42 @@ int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
   // the number of limbs used by the return operand (rop)
   const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(hpcp_limb_t)) / sizeof(hpcp_limb_t);
 
-  hpcp_limb_t **pt_arr = malloc(max_limb_numb * sizeof(hpcp_limb_t *));
-  printf("%i\n", max_limb_numb * sizeof(hpcp_limb_t *));
+  hpcp_limb_t **pt_arr = calloc(max_limb_numb, sizeof(hpcp_limb_t *));
 
   // open all of the file containing the mantissas of the operands
   char filename[64];
   hpcp_get_filename(filename, rop);
-  FILE *ropbin = open_file_or_panic(filename, "wb");
+  FILE *ropbin;
+  OPEN_FILE_OR_PANIC(filename, "wb", ropbin);
+
   hpcp_get_filename(filename, op1);
-  FILE *op1bin = open_file_or_panic(filename, "rb");
+  FILE *op1bin;
+  OPEN_FILE_OR_PANIC(filename, "rb", op1bin);
+
   hpcp_get_filename(filename, op2);
-  FILE *op2bin = open_file_or_panic(filename, "wb");
+  FILE *op2bin;
+  OPEN_FILE_OR_PANIC(filename, "rb", op2bin);
 
   hpcp_limb_t tmpop1, tmpop2;
   for (size_t i = 0; i < ((rop->prec - sizeof(hpcp_limb_t)) + rop->real_prec_dec) / sizeof(hpcp_limb_t); ++i)
   {
+    (pt_arr[i]) = malloc(sizeof(hpcp_limb_t));
+
     fread(&tmpop1, sizeof(tmpop1), 1, op1bin);
     fread(&tmpop2, sizeof(tmpop2), 1, op2bin);
     if (hpcp_add_limb((pt_arr[i]), tmpop1, tmpop2) == 1)
-      ; // HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 1);
+      HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 1);
 
+    int limb_i_is_max = 0;
+    for (size_t j = 0; j < HPCP_LIMB_SIZE; ++j)
+      if (((*(pt_arr[i]))[j]) == UINT64_MAX)
+      {
+        limb_i_is_max = 1;
+        break;
+      }
     // check if rop is at max if not then do add the remaider
+    if (!limb_i_is_max)
+      printf("It is not a limb_max\n");
 
     printf("%i\n", i);
   }
@@ -327,7 +347,10 @@ int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
   fclose(op1bin);
   fclose(op2bin);
 
-  exit(1);
+  for (size_t i = 0; i < max_limb_numb; ++i)
+    free((pt_arr[i]));
+
+  free(pt_arr);
 
   return 0;
 
@@ -421,19 +444,6 @@ FILE *fopen_mkdir(char *path, char *mode)
 
 // general purpuse stuff -------------------------------------------------
 
-FILE *open_file_or_panic(const char *const path, const char *const mode)
-{
-  FILE *fd = fopen(path, mode);
-  if (fd == NULL)
-  {
-    red();
-    printf("[ERROR] could not open file %s, terminating program", path);
-    reset();
-    exit(HPCP_ERR_RET_READ_FILE);
-  }
-  return fd;
-}
-
 inline int64_t abs2(int64_t op)
 {
   int const mask = op >> ((sizeof(int) * 8) - 1);
@@ -447,19 +457,4 @@ void swap_ptr_uint8(uint8_t **a, uint8_t **b)
   *a = *b;
   *b = c;
   return;
-}
-
-void yellow(void)
-{
-  printf("\033[0;33m");
-}
-
-void red(void)
-{
-  printf("\033[0;31m");
-}
-
-void reset(void)
-{
-  printf("\033[0m");
 }

@@ -31,6 +31,23 @@
   PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), PRINTF_BYTE_TO_BINARY_INT32(i)
 /* --- end macros --- */
 
+#define PRINTF_BLACK "\033[0;30m"
+#define PRINTF_RED "\033[0;31m"
+#define PRINTF_GREEN "\033[0;32m"
+#define PRINTF_YELLOW "\033[0;33m"
+#define PRINTF_BLUE "\033[0;34m"
+#define PRINTF_PURPLE "\033[0;35m"
+#define PRINTF_CYAN "\033[0;36m"
+#define PRINTF_WHITE "\033[0;37m"
+#define PRINTF_RESET "\033[0m"
+
+#define OPEN_FILE_OR_PANIC(path, mode, var)                                   \
+  if (((var) = fopen((path), (mode))) == NULL)                                \
+  {                                                                           \
+    printf(PRINTF_RED "[ERROR] could not open file %s" PRINTF_RESET, (path)); \
+    return HPCP_ERR_RET_READ_FILE;                                            \
+  }
+
 #define HPCP_LIMB_SIZE 10
 
 #define HPCP_MINUS 0x01     // 0b00000001
@@ -83,13 +100,5 @@ void swap_ptr_uint8(uint8_t **a, uint8_t **b);
 void rek_mkdir(char *path);
 FILE *fopen_mkdir(char *path, char *mode);
 void rm_dir(const char *const path);
-FILE *open_file_or_panic(const char *const path, const char *const mode);
-
-void yellow(void);
-void red(void);
-void reset(void);
-
-#define HPCP_LIMB_MAX {[0 ...(HPCP_LIMB_SIZE - 1)] UINT64_MAX};
-#define HPCP_LIMB_IS_MAX(op) ((op) == HPCP_LIMB_MAX)
 
 #endif // __HPCP
