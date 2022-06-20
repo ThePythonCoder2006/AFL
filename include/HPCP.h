@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#ifndef HPCP
-#define HPCP
+#ifndef __HPCP
+#define __HPCP
 
 /* --- PRINTF_BYTE_TO_BINARY macro's --- */
 #define PRINTF_BINARY_PATTERN_INT8 "%c%c%c%c%c%c%c%c "
@@ -83,8 +83,13 @@ void swap_ptr_uint8(uint8_t **a, uint8_t **b);
 void rek_mkdir(char *path);
 FILE *fopen_mkdir(char *path, char *mode);
 void rm_dir(const char *const path);
+FILE *open_file_or_panic(const char *const path, const char *const mode);
+
+void yellow(void);
+void red(void);
+void reset(void);
 
 #define HPCP_LIMB_MAX {[0 ...(HPCP_LIMB_SIZE - 1)] UINT64_MAX};
 #define HPCP_LIMB_IS_MAX(op) ((op) == HPCP_LIMB_MAX)
 
-#endif // HPCP
+#endif // __HPCP
