@@ -45,7 +45,7 @@ int hpcp_set_file_mantissa_zero(hpcp_t *op)
 
 /* - init functions -----------------------------------------------------------------------------*/
 
-int hpcp_init(hpcp_t **rop, uint64_t prec)
+int hpcp_init(hpcp_t **rop, const uint64_t prec)
 {
   // sprintf("%i\n", sizeof((*rop)->line));
 
@@ -73,14 +73,28 @@ int hpcp_init(hpcp_t **rop, uint64_t prec)
 
 /* - setting functions -----------------------------------------------------------------------------*/
 
-int hpcp_set_ui(hpcp_t *rop, uint64_t op)
+int hpcp_limb_set_ui(hpcp_limb_t rop, const uint64_t op)
 {
-  if (op == 0)
+  for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+  {
+    rop[i] = 0;
+  }
+
+  rop[HPCP_LIMB_SIZE - 1] = op;
+
+  return 0;
+}
+
+int hpcp_set_ui(hpcp_t *rop, const uint64_t op)
+{
+  uint64_t fn_op = op;
+
+  if (fn_op == 0)
     rop->head = HPCP_ZERO | HPCP_INT;
   else
     rop->head = HPCP_INT;
 
-  uint64_t v = op;
+  uint64_t v = fn_op;
   uint8_t val = 0;
 
   while (v >>= 1) // unroll for more speed...
@@ -90,13 +104,13 @@ int hpcp_set_ui(hpcp_t *rop, uint64_t op)
 
   rop->exp = val;
 
-  // printf("%" PRIu64 ", %" PRIu64 ", " PRINTF_BINARY_PATTERN_INT64 "\n", op, NTH_BIT(op, val), PRINTF_BYTE_TO_BINARY_INT64(op));
-  CLR_BIT(op, val);
+  // printf("%" PRIu64 ", %" PRIu64 ", " PRINTF_BINARY_PATTERN_INT64 "\n", fn_op, NTH_BIT(fn_op, val), PRINTF_BYTE_TO_BINARY_INT64(fn_op));
+  CLR_BIT(fn_op, val);
 
-  op <<= (64 - val);
+  fn_op <<= (64 - val);
   // printf("%" PRIu64 ", %" PRIu64 "\n", (uint64_t)(64 - val), (uint64_t)val);
-  // printf(PRINTF_BINARY_PATTERN_INT64 "\n", PRINTF_BYTE_TO_BINARY_INT64(op));
-  (*(rop->start))[0] = op;
+  // printf(PRINTF_BINARY_PATTERN_INT64 "\n", PRINTF_BYTE_TO_BINARY_INT64(fn_op));
+  (*(rop->start))[0] = fn_op;
 
   return hpcp_set_file_mantissa_zero(rop);
 }
@@ -159,7 +173,7 @@ int hpcp_set_minus_inf(hpcp_t *rop)
 /* - end setting functions -----------------------------------------------------------------------------*/
 /* - print functions -----------------------------------------------------------------------------------*/
 
-int hpcp_printf_bin(hpcp_t *op)
+int hpcp_printf_bin(const hpcp_t *const op)
 
 {
   if (HPCP_IS_NAN(op))
@@ -286,7 +300,7 @@ int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t 
 }
 
 /*function that add two const hpcp_t passed as pointers (op1 and op2) and sets the result into an another hpcp_t pointer (rop)*/
-int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
+int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
 {
   // using an array to store all of the remainders of the sums : each bit represents a remainder
   // in binary a remainder can only be 0 or 1
@@ -303,13 +317,10 @@ int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
   // the number of limbs used by the return operand (rop)
   const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(hpcp_limb_t)) / sizeof(hpcp_limb_t);
 
-  hpcp_limb_t **pt_arr = calloc(max_limb_numb, sizeof(hpcp_limb_t *));
+  rop->tmp_store = calloc(max_limb_numb, sizeof(hpcp_limb_t *));
 
   // open all of the file containing the mantissas of the operands
   char filename[64];
-  hpcp_get_filename(filename, rop);
-  FILE *ropbin;
-  OPEN_FILE_OR_PANIC(filename, "wb", ropbin);
 
   hpcp_get_filename(filename, op1);
   FILE *op1bin;
@@ -322,35 +333,43 @@ int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
   hpcp_limb_t tmpop1, tmpop2;
   for (size_t i = 0; i < ((rop->prec - sizeof(hpcp_limb_t)) + rop->real_prec_dec) / sizeof(hpcp_limb_t); ++i)
   {
-    (pt_arr[i]) = malloc(sizeof(hpcp_limb_t));
+    rop->tmp_store[i] = malloc(sizeof(hpcp_limb_t));
 
     fread(&tmpop1, sizeof(tmpop1), 1, op1bin);
     fread(&tmpop2, sizeof(tmpop2), 1, op2bin);
-    if (hpcp_add_limb((pt_arr[i]), tmpop1, tmpop2) == 1)
+    if (hpcp_add_limb((rop->tmp_store[i]), tmpop1, tmpop2) == 1)
       HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 1);
 
     int limb_i_is_max = 0;
     for (size_t j = 0; j < HPCP_LIMB_SIZE; ++j)
-      if (((*(pt_arr[i]))[j]) == UINT64_MAX)
+      if (((*(rop->tmp_store[i]))[j]) == UINT64_MAX)
       {
         limb_i_is_max = 1;
         break;
       }
+
+    hpcp_limb_t limb_tmp;
+    hpcp_limb_set_ui(limb_tmp, 1);
+
     // check if rop is at max if not then do add the remaider
-    if (!limb_i_is_max)
-      printf("It is not a limb_max\n");
+    if (limb_i_is_max == 0)
+      hpcp_add_limb((rop->tmp_store[i]), *(rop->tmp_store[i]), limb_tmp);
 
     printf("%i\n", i);
   }
+  // open rop's mantissa only when needing to save
+  hpcp_get_filename(filename, rop);
+  FILE *ropbin;
+  OPEN_FILE_OR_PANIC(filename, "wb", ropbin);
 
   fclose(ropbin);
   fclose(op1bin);
   fclose(op2bin);
 
   for (size_t i = 0; i < max_limb_numb; ++i)
-    free((pt_arr[i]));
+    free((rop->tmp_store[i]));
 
-  free(pt_arr);
+  free(rop->tmp_store);
 
   return 0;
 
@@ -359,7 +378,7 @@ int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2)
 #undef HPCP_ADD_LIMB_CLR_REM_BIT
 }
 
-inline int hpcp_negate(hpcp_t *rop, hpcp_t *op)
+inline int hpcp_negate(hpcp_t *rop, const hpcp_t *const op)
 {
   rop->head = op->head ^ HPCP_MINUS;
 
@@ -379,7 +398,7 @@ void hpcp_clear(hpcp_t *rop)
   return;
 }
 
-int hpcp_copy(hpcp_t *dst, hpcp_t *src)
+int hpcp_copy(hpcp_t *dst, const hpcp_t *const src)
 {
   dst->exp = src->exp;
   dst->prec = src->prec;
@@ -409,14 +428,14 @@ int hpcp_copy(hpcp_t *dst, hpcp_t *src)
   return 0;
 }
 
-size_t hpcp_get_filename(char filename[64], hpcp_t *op)
+size_t hpcp_get_filename(char filename[64], const hpcp_t *const op)
 {
   return sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
 }
 
 // file stuff ------------------------------------------------------
 
-void rek_mkdir(char *path)
+void rek_mkdir(const char *const path)
 {
   char *sep = strrchr(path, '/');
   if (sep != NULL)
@@ -429,7 +448,7 @@ void rek_mkdir(char *path)
     printf("error while trying to create '%s'\n", path);
 }
 
-FILE *fopen_mkdir(char *path, char *mode)
+FILE *fopen_mkdir(const char *const path, const char *const mode)
 {
   char *sep = strrchr(path, '/');
   if (sep)
@@ -444,14 +463,14 @@ FILE *fopen_mkdir(char *path, char *mode)
 
 // general purpuse stuff -------------------------------------------------
 
-inline int64_t abs2(int64_t op)
+inline int64_t abs2(const int64_t op)
 {
   int const mask = op >> ((sizeof(int) * 8) - 1);
 
   return (op + mask) ^ mask;
 }
 
-void swap_ptr_uint8(uint8_t **a, uint8_t **b)
+void swap_ptr_uint8(uint8_t **const a, uint8_t **const b)
 {
   uint8_t *c = *a;
   *a = *b;

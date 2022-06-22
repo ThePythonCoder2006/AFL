@@ -69,6 +69,13 @@
 #define TOGGLE_BIT(n, N) ((n) ^= ((uint64_t)1 << (N)))
 #define NTH_BIT(n, N) (((n) >> (N)) & (uint64_t)1)
 
+#define PRINT_LIMB                                                                 \
+  for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)                                      \
+  {                                                                                \
+    printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64(limb_tmp[i])); \
+  }                                                                                \
+  printf(PRINTF_BLUE "| \n" PRINTF_RESET);
+
 typedef uint64_t hpcp_limb_t[HPCP_LIMB_SIZE];
 typedef uint8_t hpcp_head_t;
 
@@ -80,25 +87,27 @@ typedef struct HPCP_T
   uint64_t exp;
   uint64_t line;
   hpcp_limb_t *start;
+  hpcp_limb_t **tmp_store;
 } hpcp_t;
 
-int hpcp_init(hpcp_t **rop, uint64_t prec);
-int hpcp_set_ui(hpcp_t *rop, uint64_t op);
-size_t hpcp_printf(const char *format, ...);
-int hpcp_printf_bin(hpcp_t *op);
-int hpcp_copy(hpcp_t *dst, hpcp_t *src);
-size_t hpcp_get_filename(char filename[64], hpcp_t *op);
+int hpcp_init(hpcp_t **rop, const uint64_t prec);
+int hpcp_limb_set_ui(hpcp_limb_t rop, const uint64_t op);
+int hpcp_set_ui(hpcp_t *rop, const uint64_t op);
+size_t hpcp_printf(const char *const format, ...);
+int hpcp_printf_bin(const hpcp_t *const op);
+int hpcp_copy(hpcp_t *dst, const hpcp_t *const src);
+size_t hpcp_get_filename(char filename[64], const hpcp_t *const op);
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2);
 int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2);
-int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2);
+int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2);
 
-int hpcp_negate(hpcp_t *rop, hpcp_t *op);
+int hpcp_negate(hpcp_t *rop, const hpcp_t *const op);
 void hpcp_clear(hpcp_t *rop);
 
-void swap_ptr_uint8(uint8_t **a, uint8_t **b);
+void swap_ptr_uint8(uint8_t **const a, uint8_t **const b);
 
-void rek_mkdir(char *path);
-FILE *fopen_mkdir(char *path, char *mode);
+void rek_mkdir(const char *const path);
+FILE *fopen_mkdir(const char *const path, const char *const mode);
 void rm_dir(const char *const path);
 
 #endif // __HPCP
