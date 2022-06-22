@@ -236,9 +236,9 @@ uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2)
 int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2)
 {
   // helper macros for the hpcp_add function for keeping the remaiders
-#define HPCP_ADD_LIMB_GET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
-#define HPCP_ADD_LIMB_SET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) |= (1 << (((N)-1) % 8)))
-#define HPCP_ADD_LIMB_CLR_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) &= ~(1 << (((N)-1) % 8)))
+#define HPCP_ADD_GET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
+#define HPCP_ADD_SET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) |= (1 << (((N)-1) % 8)))
+#define HPCP_ADD_CLR_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) &= ~(1 << (((N)-1) % 8)))
 
   // this will be one if an only if the result of the sum is bigger than 2^(64*10) - 1
   // if the result doesn't fit in the 64*10 bits availible in hpcp_limb_t
@@ -254,7 +254,7 @@ int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t 
   for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
   {
     if (hpcp_add_uint64(&(*rop)[i], op1[i], op2[i]))
-      HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 1);
+      HPCP_ADD_SET_REM_BIT(arrem1, i + 1);
   }
 
   uint8_t run = 1;
@@ -263,19 +263,19 @@ int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t 
     // the (i + 1) are because the i's start from 0 and not from 1
     for (size_t i = 0; i < (HPCP_LIMB_SIZE - 1); ++i)
     {
-      if (HPCP_ADD_LIMB_GET_REM_BIT(arrem1, i + 1))
+      if (HPCP_ADD_GET_REM_BIT(arrem1, i + 1))
       {
         // if there will not be an owerflow then apply the remainder
         if ((*rop)[i] < UINT64_MAX)
-          HPCP_ADD_LIMB_CLR_REM_BIT(arrem1, i + 1), ((*rop)[i])++;
+          HPCP_ADD_CLR_REM_BIT(arrem1, i + 1), ((*rop)[i])++;
         else // else set the remainder for the next value and reset the uint64_t to 0
-          HPCP_ADD_LIMB_SET_REM_BIT(arrem2, i + 2), ((*rop)[i]) = 0;
+          HPCP_ADD_SET_REM_BIT(arrem2, i + 2), ((*rop)[i]) = 0;
       }
     }
 
     // if the biggest uint64_t of the limb is at max and there is a remainder, the overflow goes into the rem return value to hpcp_add
     // and the largest uint64_t is set to 0
-    if (((*rop)[HPCP_LIMB_SIZE - 1] >= UINT64_MAX) && HPCP_ADD_LIMB_GET_REM_BIT(arrem1, HPCP_LIMB_SIZE))
+    if (((*rop)[HPCP_LIMB_SIZE - 1] >= UINT64_MAX) && HPCP_ADD_GET_REM_BIT(arrem1, HPCP_LIMB_SIZE))
       rem = 1, (*rop)[HPCP_LIMB_SIZE - 1] = 0;
 
     // suppose that there is no more remainder
@@ -310,10 +310,6 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
 
   hpcp_limb_t *ropstart = rop->start, *op1start = op1->start, *op2start = op2->start;
 
-  // add the limbs in pairs for the start of both op's
-  if (hpcp_add_limb(ropstart, *op1start, *op2start) == 1)
-    HPCP_ADD_LIMB_SET_REM_BIT(arrem1, 1);
-
   // the number of limbs used by the return operand (rop)
   const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(hpcp_limb_t)) / sizeof(hpcp_limb_t);
 
@@ -331,14 +327,18 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
   OPEN_FILE_OR_PANIC(filename, "rb", op2bin);
 
   hpcp_limb_t tmpop1, tmpop2;
-  for (size_t i = 0; i < ((rop->prec - sizeof(hpcp_limb_t)) + rop->real_prec_dec) / sizeof(hpcp_limb_t); ++i)
+  for (size_t i = 0; i < max_limb_numb; ++i)
   {
+    // add the limbs in pairs for the start of both op's
+    if (hpcp_add_limb(ropstart, *op1start, *op2start) == 1)
+      HPCP_ADD_SET_REM_BIT(arrem1, 1);
+
     rop->tmp_store[i] = malloc(sizeof(hpcp_limb_t));
 
     fread(&tmpop1, sizeof(tmpop1), 1, op1bin);
     fread(&tmpop2, sizeof(tmpop2), 1, op2bin);
     if (hpcp_add_limb((rop->tmp_store[i]), tmpop1, tmpop2) == 1)
-      HPCP_ADD_LIMB_SET_REM_BIT(arrem1, i + 1);
+      HPCP_ADD_SET_REM_BIT(arrem1, i + 1);
 
     int limb_i_is_max = 0;
     for (size_t j = 0; j < HPCP_LIMB_SIZE; ++j)
@@ -353,7 +353,10 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
 
     // check if rop is at max if not then do add the remaider
     if (limb_i_is_max == 0)
+    {
       hpcp_add_limb((rop->tmp_store[i]), *(rop->tmp_store[i]), limb_tmp);
+      HPCP_ADD_CLR_REM_BIT(arrem1, i + 1);
+    }
 
     printf("%i\n", i);
   }
@@ -361,6 +364,11 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
   hpcp_get_filename(filename, rop);
   FILE *ropbin;
   OPEN_FILE_OR_PANIC(filename, "wb", ropbin);
+
+  for (size_t i = 0; i < max_limb_numb; ++i)
+  {
+    fwrite(rop->tmp_store[i], sizeof(hpcp_limb_t), 1, ropbin);
+  }
 
   fclose(ropbin);
   fclose(op1bin);
@@ -373,9 +381,9 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
 
   return 0;
 
-#undef HPCP_ADD_LIMB_GET_REM_BIT
-#undef HPCP_ADD_LIMB_SET_REM_BIT
-#undef HPCP_ADD_LIMB_CLR_REM_BIT
+#undef HPCP_ADD_GET_REM_BIT
+#undef HPCP_ADD_SET_REM_BIT
+#undef HPCP_ADD_CLR_REM_BIT
 }
 
 inline int hpcp_negate(hpcp_t *rop, const hpcp_t *const op)
