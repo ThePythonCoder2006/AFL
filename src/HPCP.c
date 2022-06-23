@@ -18,7 +18,13 @@
 
 uint64_t numb_vars = 0;
 
-// dynamicaly allocated array of pointers to dynamically allocated array of pointers to hpcp_limb_t
+/*
+dynamicaly allocated array of pointers to dynamically allocated array of pointers to hpcp_limb_t
+loaded_limb_arr[x] is a pointer to an array of pointers to hpcp_limb_t (aka uint64_t[HCPP_LIMB_SIZE])
+(*)(loaded_limb_arr[x]) is an array of pointers to hpcp_limb_t (aka uint64_t[HCPP_LIMB_SIZE])
+(**)(loaded_limb_arr[x]) is a pointers to hpcp_limb_t (aka uint64_t[HCPP_LIMB_SIZE])
+(***)(loaded_limb_arr[x]) is an hpcp_limb_t (aka uint64_t[HCPP_LIMB_SIZE])
+*/
 hpcp_limb_t ****loaded_limbs_arr = NULL;
 
 int hpcp_set_file_mantissa_zero(hpcp_t *op)
@@ -320,7 +326,9 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
   // the number of limbs used by the return operand (rop)
   const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(hpcp_limb_t)) / sizeof(hpcp_limb_t);
 
-  rop->tmp_store = calloc(max_limb_numb, sizeof(hpcp_limb_t *));
+  exit(1);
+
+  *(loaded_limbs_arr[rop->line]) = calloc(max_limb_numb, sizeof(hpcp_limb_t *));
 
   // open all of the file containing the mantissas of the operands
   char filename[64];
@@ -340,16 +348,16 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
     if (hpcp_add_limb(ropstart, *op1start, *op2start) == 1)
       HPCP_ADD_SET_REM_BIT(arrem1, 1);
 
-    rop->tmp_store[i] = malloc(sizeof(hpcp_limb_t));
+    *((loaded_limbs_arr[rop->line])[i]) = malloc(sizeof(hpcp_limb_t));
 
     fread(&tmpop1, sizeof(tmpop1), 1, op1bin);
     fread(&tmpop2, sizeof(tmpop2), 1, op2bin);
-    if (hpcp_add_limb((rop->tmp_store[i]), tmpop1, tmpop2) == 1)
+    if (hpcp_add_limb(**(loaded_limbs_arr[rop->line]), tmpop1, tmpop2) == 1)
       HPCP_ADD_SET_REM_BIT(arrem1, i + 1);
 
     int limb_i_is_max = 0;
     for (size_t j = 0; j < HPCP_LIMB_SIZE; ++j)
-      if (((*(rop->tmp_store[i]))[j]) == UINT64_MAX)
+      if (((***(loaded_limbs_arr[rop->line]))[j]) == UINT64_MAX)
       {
         limb_i_is_max = 1;
         break;
@@ -361,7 +369,7 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
     // check if rop is at max if not then do add the remaider
     if (limb_i_is_max == 0)
     {
-      hpcp_add_limb((rop->tmp_store[i]), *(rop->tmp_store[i]), limb_tmp);
+      hpcp_add_limb(**(loaded_limbs_arr[rop->line]), ***(loaded_limbs_arr[rop->line]), limb_tmp);
       HPCP_ADD_CLR_REM_BIT(arrem1, i + 1);
     }
 
@@ -374,7 +382,7 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
 
   for (size_t i = 0; i < max_limb_numb; ++i)
   {
-    fwrite(rop->tmp_store[i], sizeof(hpcp_limb_t), 1, ropbin);
+    fwrite(**(loaded_limbs_arr[rop->line]), sizeof(hpcp_limb_t), 1, ropbin);
   }
 
   fclose(ropbin);
@@ -382,9 +390,9 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
   fclose(op2bin);
 
   for (size_t i = 0; i < max_limb_numb; ++i)
-    free((rop->tmp_store[i]));
+    free(**(loaded_limbs_arr[rop->line]));
 
-  free(rop->tmp_store);
+  free(*(loaded_limbs_arr[rop->line]));
 
   return 0;
 

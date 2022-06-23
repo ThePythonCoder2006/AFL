@@ -87,7 +87,6 @@ typedef struct HPCP_T
   uint64_t exp;
   uint64_t line;
   hpcp_limb_t *start;
-  hpcp_limb_t **tmp_store;
 } hpcp_t;
 
 int hpcp_init(hpcp_t **rop, const uint64_t prec);
