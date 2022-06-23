@@ -16,7 +16,10 @@
 
 #define TMPPATH "bin/tmp"
 
-uint64_t numb_vars = 1;
+uint64_t numb_vars = 0;
+
+// dynamicaly allocated array of pointers to dynamically allocated array of pointers to hpcp_limb_t
+hpcp_limb_t ****loaded_limbs_arr = NULL;
 
 int hpcp_set_file_mantissa_zero(hpcp_t *op)
 {
@@ -47,6 +50,10 @@ int hpcp_set_file_mantissa_zero(hpcp_t *op)
 
 int hpcp_init(hpcp_t **rop, const uint64_t prec)
 {
+  if (loaded_limbs_arr == NULL)
+  {
+    loaded_limbs_arr = calloc(sizeof(hpcp_limb_t ***), 15);
+  }
   // sprintf("%i\n", sizeof((*rop)->line));
 
   // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
