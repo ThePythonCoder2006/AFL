@@ -36,7 +36,7 @@ int main(int argc, char **argv)
   hpcp_set_ui(test, UINT64_MAX);
 
   printf("printf_bin(test) : ");
-  hpcp_printf_bin(test);
+  hpcp_printf_bin_sci(test);
 
   // hpcp_limb_t rop, op1, op2 = {1};
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   hpcp_add(test, test, test);
 
   printf("\nprintf_bin(test) : ");
-  hpcp_printf_bin(test);
+  hpcp_printf_bin_sci(test);
 
   pause();
 

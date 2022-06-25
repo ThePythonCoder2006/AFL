@@ -78,6 +78,7 @@
 
 typedef uint64_t hpcp_limb_t[HPCP_LIMB_SIZE];
 typedef uint8_t hpcp_head_t;
+typedef int64_t hpcp_ref;
 
 typedef struct HPCP_T
 {
@@ -85,15 +86,16 @@ typedef struct HPCP_T
   uint64_t prec;
   uint8_t real_prec_dec;
   uint64_t exp;
-  uint64_t line;
+  hpcp_ref line;
   hpcp_limb_t *start;
+  hpcp_limb_t **loaded_mantissa;
 } hpcp_t;
 
-int hpcp_init(hpcp_t **rop, const uint64_t prec);
+hpcp_ref hpcp_init(const uint64_t prec);
 int hpcp_limb_set_ui(hpcp_limb_t rop, const uint64_t op);
 int hpcp_set_ui(hpcp_t *rop, const uint64_t op);
 size_t hpcp_printf(const char *const format, ...);
-int hpcp_printf_bin(const hpcp_t *const op);
+int hpcp_printf_bin_sci(const hpcp_t *const op);
 int hpcp_copy(hpcp_t *dst, const hpcp_t *const src);
 size_t hpcp_get_filename(char filename[64], const hpcp_t *const op);
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2);
