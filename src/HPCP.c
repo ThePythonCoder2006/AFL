@@ -20,11 +20,25 @@
 
 uint64_t nb_hpcp_numb = 0;
 
+#define ALLOC_ALL_HPCP_LIMBS                                            \
+  if (all_hpcp_numbs == NULL)                                           \
+  {                                                                     \
+    all_hpcp_numbs = calloc(sizeof(hpcp_t *), HPCP_ALL_NUMBS_ORG_SIZE); \
+    if (all_hpcp_numbs == NULL)                                         \
+      return HPCP_ERR_RET_ALLOC;                                        \
+  }
+
 /*
 dynamicaly allocated array of pointers to hpcp_t
 */
 hpcp_t **all_hpcp_numbs = NULL;
 uint64_t nb_dbl_all_hpcp_numbs_size = 0;
+
+int alloc_all_hpcp_limbs()
+{
+
+  return 0;
+}
 
 int hpcp_set_file_mantissa_zero(hpcp_t *op)
 {
@@ -55,34 +69,30 @@ int hpcp_set_file_mantissa_zero(hpcp_t *op)
 
 hpcp_ref hpcp_init(const uint64_t prec)
 {
-  if (all_hpcp_numbs == NULL)
-  {
-    all_hpcp_numbs = calloc(sizeof(hpcp_t *), HPCP_ALL_NUMBS_ORG_SIZE);
-    if (all_hpcp_numbs == NULL)
-      return HPCP_ERR_RET_ALLOC;
-  }
-
+  ALLOC_ALL_HPCP_LIMBS;
   // sprintf("%i\n", sizeof((*rop)->line));
 
   // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
-  all_hpcp_numbs[nb_hpcp_numb] = malloc(sizeof(hpcp_t));
-  if (all_hpcp_numbs[nb_hpcp_numb] == NULL)
+  hpcp_t *rop = all_hpcp_numbs[nb_hpcp_numb] = malloc(sizeof(hpcp_t));
+  if (rop == NULL)
     return HPCP_ERR_RET_ALLOC;
-  all_hpcp_numbs[nb_hpcp_numb]->start = calloc(HPCP_LIMB_SIZE, sizeof(uint64_t));
-  if (all_hpcp_numbs[nb_hpcp_numb]->start == NULL)
+
+  rop->start = calloc(HPCP_LIMB_SIZE, sizeof(uint64_t));
+  if (rop->start == NULL)
     return HPCP_ERR_RET_ALLOC;
-  all_hpcp_numbs[nb_hpcp_numb]->line = nb_hpcp_numb;
-  all_hpcp_numbs[nb_hpcp_numb]->exp = 0;
-  all_hpcp_numbs[nb_hpcp_numb]->prec = prec;
-  all_hpcp_numbs[nb_hpcp_numb]->head = HPCP_ZERO | HPCP_INT;
-  all_hpcp_numbs[nb_hpcp_numb]->real_prec_dec = (sizeof(hpcp_limb_t)) - ((uint64_t)((prec) % sizeof(hpcp_limb_t)));
+
+  rop->line = nb_hpcp_numb;
+  rop->exp = 0;
+  rop->prec = prec;
+  rop->head = HPCP_ZERO | HPCP_INT;
+  rop->real_prec_dec = (sizeof(hpcp_limb_t)) - ((uint64_t)((prec) % sizeof(hpcp_limb_t)));
   if (prec <= sizeof(hpcp_limb_t))
-    all_hpcp_numbs[nb_hpcp_numb]->real_prec_dec = 0;
+    rop->real_prec_dec = 0;
 
   ++nb_hpcp_numb;
 
-  hpcp_set_file_mantissa_zero(all_hpcp_numbs[nb_hpcp_numb]);
-  return all_hpcp_numbs[]
+  hpcp_set_file_mantissa_zero(rop);
+  return rop->line;
 }
 
 /* - end init functions ----------------------------------------------------------------------------*/
