@@ -1,4 +1,4 @@
-<img align="right" src="./logo_hpcp_small.png">
+<img align="right" src="./logo_HPCP_small.png">
 
 #HPCP
 
