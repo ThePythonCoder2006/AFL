@@ -1,5 +1,4 @@
-<html><img align="right" src="./logo_HPCP_small.png"></html>
-##HPCP
+<html><img align="right" src="./logo_HPCP_small.png"><h1>HPCP</h1></html>
 
 HPCP (High Precision Computation Program) is a library that I'm currently trying to devellop that will be able to accuratly do calculations with minimal amounts of RAM (whilst using temp files on the hardrive).
 
