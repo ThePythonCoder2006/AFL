@@ -1,6 +1,6 @@
 <img align="right" src="./logo_HPCP_small.png">
 
-#HPCP
+<p>#HPCP</p>
 
 <br clear="right"/>
 
