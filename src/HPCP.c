@@ -18,30 +18,32 @@
 
 #define HPCP_ALL_NUMBS_ORG_SIZE 15
 
-uint64_t nb_hpcp_numb = 0;
-
-#define ALLOC_ALL_HPCP_LIMBS                                            \
-  if (all_hpcp_numbs == NULL)                                           \
-  {                                                                     \
-    all_hpcp_numbs = calloc(sizeof(hpcp_t *), HPCP_ALL_NUMBS_ORG_SIZE); \
-    if (all_hpcp_numbs == NULL)                                         \
-      return HPCP_ERR_RET_ALLOC;                                        \
+#define ALLOC_ALL_HPCP_LIMBS                                                 \
+  if (ALL_HPCP_FLOAT_NAME == NULL)                                           \
+  {                                                                          \
+    ALL_HPCP_FLOAT_NAME = calloc(sizeof(hpcp_t *), HPCP_ALL_NUMBS_ORG_SIZE); \
+    if (ALL_HPCP_FLOAT_NAME == NULL)                                         \
+      return (hpcp_ref_t)HPCP_ERR_RET_ALLOC;                                 \
   }
+
+#define HPCP_CHECK_FLOAT(ref)              \
+  if (ref > UINT64_MAX - HPCP_REF_MAX_DEC) \
+  return HPCP_ERR_RET_INVALID_FLOAT
+
+#define ALL_HPCP_FLOAT_NAME all_hpcp_floats
 
 /*
 dynamicaly allocated array of pointers to hpcp_t
 */
-hpcp_t **all_hpcp_numbs = NULL;
-uint64_t nb_dbl_all_hpcp_numbs_size = 0;
+hpcp_t **ALL_HPCP_FLOAT_NAME = NULL;
+uint64_t nb_hpcp_floats = 0;
 
-int alloc_all_hpcp_limbs()
+#define HPCP_GET_PTR(op) hpcp_t *op = ALL_HPCP_FLOAT_NAME[op##_ref]
+
+int hpcp_set_file_mantissa_zero(hpcp_ref_t op_ref)
 {
+  HPCP_GET_PTR(op);
 
-  return 0;
-}
-
-int hpcp_set_file_mantissa_zero(hpcp_t *op)
-{
   if (op->prec < sizeof(hpcp_limb_t))
     return 0;
 
@@ -50,7 +52,7 @@ int hpcp_set_file_mantissa_zero(hpcp_t *op)
   printf("binmax : %" PRIu64 "\n", binmax);
 
   char filename[64];
-  sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
+  sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op_ref);
 
   FILE *bin = fopen_mkdir(filename, "wb");
   if (bin == NULL)
@@ -67,21 +69,21 @@ int hpcp_set_file_mantissa_zero(hpcp_t *op)
 
 /* - init functions -----------------------------------------------------------------------------*/
 
-hpcp_ref hpcp_init(const uint64_t prec)
+hpcp_ret_ref_t hpcp_init(const uint64_t prec)
 {
   ALLOC_ALL_HPCP_LIMBS;
   // sprintf("%i\n", sizeof((*rop)->line));
 
   // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
-  hpcp_t *rop = all_hpcp_numbs[nb_hpcp_numb] = malloc(sizeof(hpcp_t));
+
+  hpcp_t *rop = ALL_HPCP_FLOAT_NAME[nb_hpcp_floats] = malloc(sizeof(hpcp_t));
   if (rop == NULL)
-    return HPCP_ERR_RET_ALLOC;
+    return (hpcp_ref_t)HPCP_ERR_RET_ALLOC;
 
   rop->start = calloc(HPCP_LIMB_SIZE, sizeof(uint64_t));
   if (rop->start == NULL)
-    return HPCP_ERR_RET_ALLOC;
+    return (hpcp_ret_ref_t)HPCP_ERR_RET_ALLOC;
 
-  rop->line = nb_hpcp_numb;
   rop->exp = 0;
   rop->prec = prec;
   rop->head = HPCP_ZERO | HPCP_INT;
@@ -89,10 +91,8 @@ hpcp_ref hpcp_init(const uint64_t prec)
   if (prec <= sizeof(hpcp_limb_t))
     rop->real_prec_dec = 0;
 
-  ++nb_hpcp_numb;
-
-  hpcp_set_file_mantissa_zero(rop);
-  return rop->line;
+  hpcp_set_file_mantissa_zero(nb_hpcp_floats);
+  return nb_hpcp_floats++;
 }
 
 /* - end init functions ----------------------------------------------------------------------------*/
@@ -111,8 +111,10 @@ int hpcp_limb_set_ui(hpcp_limb_t rop, const uint64_t op)
   return 0;
 }
 
-int hpcp_set_ui(hpcp_t *rop, const uint64_t op)
+int hpcp_set_ui(hpcp_ref_t rop_ref, const uint64_t op)
 {
+  HPCP_GET_PTR(rop);
+
   uint64_t fn_op = op;
 
   if (fn_op == 0)
@@ -141,8 +143,10 @@ int hpcp_set_ui(hpcp_t *rop, const uint64_t op)
   return hpcp_set_file_mantissa_zero(rop);
 }
 
-int hpcp_set_plus_zero(hpcp_t *rop)
+int hpcp_set_plus_zero(hpcp_ref_t rop_ref)
 {
+  HPCP_GET_PTR(rop);
+
   rop->head = HPCP_ZERO | HPCP_INT;
   rop->exp = 0;
 
@@ -152,8 +156,10 @@ int hpcp_set_plus_zero(hpcp_t *rop)
   return hpcp_set_file_mantissa_zero(rop);
 }
 
-int hpcp_set_minus_zero(hpcp_t *rop)
+int hpcp_set_minus_zero(hpcp_ref_t rop_ref)
 {
+  HPCP_GET_PTR(rop);
+
   rop->head = HPCP_ZERO | HPCP_INT | HPCP_MINUS;
   rop->exp = 0;
 
@@ -163,8 +169,10 @@ int hpcp_set_minus_zero(hpcp_t *rop)
   return hpcp_set_file_mantissa_zero(rop);
 }
 
-int hpcp_set_NaN(hpcp_t *rop)
+int hpcp_set_NaN(hpcp_ref_t rop_ref)
 {
+  HPCP_GET_PTR(rop);
+
   rop->head = HPCP_NAN;
   rop->exp = 0;
 
@@ -174,8 +182,10 @@ int hpcp_set_NaN(hpcp_t *rop)
   return hpcp_set_file_mantissa_zero(rop);
 }
 
-int hpcp_set_plus_inf(hpcp_t *rop)
+int hpcp_set_plus_inf(hpcp_ref_t rop_ref)
 {
+  HPCP_GET_PTR(rop);
+
   rop->head = HPCP_INF;
   rop->exp = UINT64_MAX;
 
@@ -185,8 +195,10 @@ int hpcp_set_plus_inf(hpcp_t *rop)
   return hpcp_set_file_mantissa_zero(rop);
 }
 
-int hpcp_set_minus_inf(hpcp_t *rop)
+int hpcp_set_minus_inf(hpcp_ref_t rop_ref)
 {
+  HPCP_GET_PTR(rop);
+
   rop->head = HPCP_INF | HPCP_MINUS;
   rop->exp = UINT64_MAX;
 
@@ -199,9 +211,10 @@ int hpcp_set_minus_inf(hpcp_t *rop)
 /* - end setting functions -----------------------------------------------------------------------------*/
 /* - print functions -----------------------------------------------------------------------------------*/
 
-int hpcp_printf_bin_sci(const hpcp_t *const op)
-
+int hpcp_printf_bin_sci(hpcp_ref_t op_ref)
 {
+  HPCP_GET_PTR(op);
+
   if (HPCP_IS_NAN(op))
   {
     printf("NaN");
@@ -232,7 +245,7 @@ int hpcp_printf_bin_sci(const hpcp_t *const op)
     return 0;
 
   char filename[64];
-  sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
+  hpcp_get_filename(filename, op_ref);
   FILE *bin = fopen(filename, "rb");
   uint64_t data;
 
@@ -412,8 +425,10 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
 #undef HPCP_ADD_CLR_REM_BIT
 }
 
-inline int hpcp_negate(hpcp_t *rop, const hpcp_t *const op)
+inline int hpcp_negate(hpcp_ref_t rop_ref, hpcp_ref_t op_ref)
 {
+  hpcp_t *rop = ALL_HPCP_FLOAT_NAME[rop_ref], *op = ALL_HPCP_FLOAT_NAME[op_ref];
+
   rop->head = op->head ^ HPCP_MINUS;
 
   return 0;
@@ -421,19 +436,25 @@ inline int hpcp_negate(hpcp_t *rop, const hpcp_t *const op)
 
 /* - end arthrimetrics functions -----------------------------------------------------------------------------*/
 
-void hpcp_clear(hpcp_t *rop)
+void hpcp_clear(hpcp_ref_t rop_ref)
 {
+  HPCP_GET_PTR(rop);
   free(*(rop->start));
   char filename[64];
   hpcp_get_filename(filename, rop);
   printf("%s\n", filename);
   remove(filename);
   free((void *)rop);
+  ALL_HPCP_FLOAT_NAME[rop_ref] = NULL;
   return;
 }
 
-int hpcp_copy(hpcp_t *dst, const hpcp_t *const src)
+int hpcp_copy(hpcp_ref_t dst_ref, hpcp_ref_t src_ref)
 {
+  // hpcp_t *dst = ALL_HPCP_FLOAT_NAME[dst_ref], *src = ALL_HPCP_FLOAT_NAME[src_ref];
+  HPCP_GET_PTR(dst);
+  HPCP_GET_PTR(src);
+
   dst->exp = src->exp;
   dst->prec = src->prec;
   dst->head = src->head;
@@ -462,9 +483,9 @@ int hpcp_copy(hpcp_t *dst, const hpcp_t *const src)
   return 0;
 }
 
-size_t hpcp_get_filename(char filename[64], const hpcp_t *const op)
+size_t hpcp_get_filename(char filename[64], hpcp_ref_t op_ref)
 {
-  return sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op->line);
+  return sprintf(filename, TMPPATH "/HPCP-%" PRIu64 ".bin", op_ref);
 }
 
 // file stuff ------------------------------------------------------

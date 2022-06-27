@@ -27,11 +27,9 @@ int main(int argc, char **argv)
   printf(PRINTF_YELLOW "|-----------------------------------------------------------------|\n|                     START OF MAIN.C                             |\n|-----------------------------------------------------------------|\n\n" PRINTF_RESET);
 
   printf("hpcp_t: %i\nhpcp_limb_t: %i\nuint64_t: %i\n", sizeof(hpcp_t), sizeof(hpcp_limb_t), sizeof(uint64_t));
-  hpcp_t *test;
-  if (hpcp_init(&test, PREC) == -1)
-    fprintf(stderr, "error while initing test\n");
+  hpcp_ref_t test = hpcp_init(PREC);
 
-  printf("%" PRIu64 "\n", (uint64_t)test->real_prec_dec);
+  printf("%" PRIu64 "\n", test);
 
   hpcp_set_ui(test, UINT64_MAX);
 

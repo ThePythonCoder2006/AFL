@@ -910,11 +910,13 @@ uintmax_t __attribute__((__cdecl__)) __attribute__((__nothrow__)) wcstoumax (con
 
 # 5 "src/main.c" 2
 # 1 "include/HPCP.h" 1
-# 55 "include/HPCP.h"
+# 88 "include/HPCP.h"
 
-# 55 "include/HPCP.h"
+# 88 "include/HPCP.h"
 typedef uint64_t hpcp_limb_t[10];
 typedef uint8_t hpcp_head_t;
+typedef uint64_t hpcp_ret_ref_t;
+typedef const hpcp_ret_ref_t hpcp_ref_t;
 
 typedef struct HPCP_T
 {
@@ -922,73 +924,62 @@ typedef struct HPCP_T
   uint64_t prec;
   uint8_t real_prec_dec;
   uint64_t exp;
-  uint64_t line;
   hpcp_limb_t *start;
+  hpcp_limb_t **loaded_mantissa;
 } hpcp_t;
 
-int hpcp_init(hpcp_t **rop, uint64_t prec);
-int hpcp_set_ui(hpcp_t *rop, uint64_t op);
-size_t hpcp_printf(const char *format, ...);
-int hpcp_printf_bin(hpcp_t *op);
-int hpcp_copy(hpcp_t *dst, hpcp_t *src);
-size_t hpcp_get_filename(char filename[64], hpcp_t *op);
+hpcp_ret_ref_t hpcp_init(const uint64_t prec);
+int hpcp_limb_set_ui(hpcp_limb_t rop, const uint64_t op);
+int hpcp_set_ui(hpcp_ref_t rop_ref, const uint64_t op);
+size_t hpcp_printf(const char *const format, ...);
+int hpcp_printf_bin_sci(hpcp_ref_t op_ref);
+int hpcp_copy(hpcp_ref_t dst_ref, hpcp_ref_t src_ref);
+size_t hpcp_get_filename(char filename[64], hpcp_ref_t op_ref);
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2);
 int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2);
-int hpcp_add(hpcp_t *rop, hpcp_t *op1, hpcp_t *op2);
+int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2);
 
-int hpcp_negate(hpcp_t *rop, hpcp_t *op);
-void hpcp_clear(hpcp_t *rop);
+int hpcp_negate(hpcp_ref_t rop_ref, hpcp_ref_t op_ref);
+void hpcp_clear(hpcp_ref_t rop_ref);
 
-void swap_ptr_uint8(uint8_t **a, uint8_t **b);
+void swap_ptr_uint8(uint8_t **const a, uint8_t **const b);
 
-void rek_mkdir(char *path);
-FILE *fopen_mkdir(char *path, char *mode);
+void rek_mkdir(const char *const path);
+FILE *fopen_mkdir(const char *const path, const char *const mode);
 void rm_dir(const char *const path);
 # 6 "src/main.c" 2
-# 20 "src/main.c"
+# 22 "src/main.c"
 void pause(void);
-void yellow(void);
-void reset(void);
-
-
 
 int main(int argc, char **argv)
 {
 
-  yellow();
-  printf("|-----------------------------------------------------------------|\n|                     START OF MAIN.C                             |\n|-----------------------------------------------------------------|\n\n");
-  reset();
+  printf("\033[0;33m" "|-----------------------------------------------------------------|\n|                     START OF MAIN.C                             |\n|-----------------------------------------------------------------|\n\n" "\033[0m");
 
   printf("hpcp_t: %i\nhpcp_limb_t: %i\nuint64_t: %i\n", sizeof(hpcp_t), sizeof(hpcp_limb_t), sizeof(uint64_t));
-  hpcp_t *test;
-  if (hpcp_init(&test, 20) == -1)
-    fprintf(
-# 36 "src/main.c" 3
-           (&_iob[2])
-# 36 "src/main.c"
-                 , "error while initing test\n");
+  hpcp_ref_t test = hpcp_init(200);
 
   printf("%" 
-# 38 "src/main.c" 3
+# 32 "src/main.c" 3
             "I64u" 
-# 38 "src/main.c"
-                   "\n", (uint64_t)test->real_prec_dec);
+# 32 "src/main.c"
+                   "\n", test);
 
   hpcp_set_ui(test, 
-# 40 "src/main.c" 3
-                   0xffU
-# 40 "src/main.c"
-                            );
+# 34 "src/main.c" 3
+                   0xffffffffffffffffULL
+# 34 "src/main.c"
+                             );
 
+  printf("printf_bin(test) : ");
+  hpcp_printf_bin_sci(test);
+# 52 "src/main.c"
+  hpcp_add(test, test, test);
 
-
-
-
-
+  printf("\nprintf_bin(test) : ");
+  hpcp_printf_bin_sci(test);
 
   pause();
-# 63 "src/main.c"
-  hpcp_add(&test, &test, &test);
 
   hpcp_clear(test);
 
@@ -1002,18 +993,8 @@ void pause(void)
   char tmp;
   scanf("%c", &tmp);
   fflush(
-# 76 "src/main.c" 3
+# 70 "src/main.c" 3
         (&_iob[0])
-# 76 "src/main.c"
+# 70 "src/main.c"
              );
-}
-
-void yellow(void)
-{
-  printf("\033[0;33m");
-}
-
-void reset(void)
-{
-  printf("\033[0m");
 }

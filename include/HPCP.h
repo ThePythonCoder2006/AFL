@@ -59,6 +59,7 @@
 
 #define HPCP_ERR_RET_READ_FILE -1
 #define HPCP_ERR_RET_ALLOC -2
+#define HPCP_ERR_RET_INVALID_FLOAT -3
 
 #define HPCP_IS_ZERO(op) ((op)->head | HPCP_ZERO) == (op)->head
 #define HPCP_IS_NAN(op) ((op)->head | HPCP_NAN) == (op)->head
@@ -69,16 +70,25 @@
 #define TOGGLE_BIT(n, N) ((n) ^= ((uint64_t)1 << (N)))
 #define NTH_BIT(n, N) (((n) >> (N)) & (uint64_t)1)
 
-#define PRINT_LIMB                                                                 \
-  for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)                                      \
-  {                                                                                \
-    printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64(limb_tmp[i])); \
-  }                                                                                \
+#define PRINT_LIMB(limb)                                                         \
+  for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)                                    \
+  {                                                                              \
+    printf(PRINTF_BINARY_PATTERN_INT64, PRINTF_BYTE_TO_BINARY_INT64((limb)[i])); \
+  }                                                                              \
   printf(PRINTF_BLUE "| \n" PRINTF_RESET);
+
+// the number of values reserved for error codes int hpcp_ref_t
+#define HPCP_REF_MAX_DEC 32
+#define HPCP_REF_MAX (UINT64_MAX) - (HPCP_REF_MAX_DEC)
+
+#define HPCP_REF_RET_ERR_INVALID_FLOAT ((UINT64_MAX) - (HPCP_ERR_RET_INVALID_FLOAT))
+#define HPCP_REF_RET_ERR_ALLOC ((UINT64_MAX) - (HPCP_ERR_RET_ALLOC))
+#define HPCP_REF_RET_ERR_READ_FILE ((UINT64_MAX) - (HPCP_ERR_RET_READ_FILE))
 
 typedef uint64_t hpcp_limb_t[HPCP_LIMB_SIZE];
 typedef uint8_t hpcp_head_t;
-typedef int64_t hpcp_ref;
+typedef uint64_t hpcp_ret_ref_t;
+typedef const hpcp_ret_ref_t hpcp_ref_t;
 
 typedef struct HPCP_T
 {
@@ -86,24 +96,23 @@ typedef struct HPCP_T
   uint64_t prec;
   uint8_t real_prec_dec;
   uint64_t exp;
-  hpcp_ref line;
   hpcp_limb_t *start;
   hpcp_limb_t **loaded_mantissa;
 } hpcp_t;
 
-hpcp_ref hpcp_init(const uint64_t prec);
+hpcp_ret_ref_t hpcp_init(const uint64_t prec);
 int hpcp_limb_set_ui(hpcp_limb_t rop, const uint64_t op);
-int hpcp_set_ui(hpcp_t *rop, const uint64_t op);
+int hpcp_set_ui(hpcp_ref_t rop_ref, const uint64_t op);
 size_t hpcp_printf(const char *const format, ...);
-int hpcp_printf_bin_sci(const hpcp_t *const op);
-int hpcp_copy(hpcp_t *dst, const hpcp_t *const src);
-size_t hpcp_get_filename(char filename[64], const hpcp_t *const op);
+int hpcp_printf_bin_sci(hpcp_ref_t op_ref);
+int hpcp_copy(hpcp_ref_t dst_ref, hpcp_ref_t src_ref);
+size_t hpcp_get_filename(char filename[64], hpcp_ref_t op_ref);
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2);
 int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2);
 int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2);
 
-int hpcp_negate(hpcp_t *rop, const hpcp_t *const op);
-void hpcp_clear(hpcp_t *rop);
+int hpcp_negate(hpcp_ref_t rop_ref, hpcp_ref_t op_ref);
+void hpcp_clear(hpcp_ref_t rop_ref);
 
 void swap_ptr_uint8(uint8_t **const a, uint8_t **const b);
 
