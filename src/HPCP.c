@@ -319,16 +319,15 @@ int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1_top, const hpcp_lim
     return HPCP_ERR_RET_ALLOC;
 
   // the number of uint64_t that wont need to be split before
-  // uint8_t safe_parts = (dec - (dec % sizeof(uint64_t))) / sizeof(uint64_t);
+  const uint8_t uint64_dec = (dec - (dec % sizeof(uint64_t))) / sizeof(uint64_t);
 
-  uint8_t uint64_dec = dec % sizeof(uint64_t);
-  uint64_t mask = ((1ull << uint64_dec) - 1);
+  const uint8_t bit_dec = dec % sizeof(uint64_t);
+  const uint64_t mask = ((1ull << bit_dec) - 1);
 
   // summing each pair of uint64_t individually
   for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
   {
-
-    uint64_t nval = (op1_top[i] & mask) | (op1_top[i] & ~mask);
+    uint64_t nval = (op1_top[i + uint64_dec] & mask) | (op1_top[i + uint64_dec] & ~mask);
     if (hpcp_add_uint64(&(*rop)[i], nval, op2[i]))
       HPCP_ADD_SET_REM_BIT(arrem1, i + 1);
   }
@@ -378,15 +377,22 @@ int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1_top, const hpcp_lim
 /*function that add two const hpcp_t passed as pointers (op1 and op2) and sets the result into an another hpcp_t pointer (rop)*/
 int hpcp_add(hpcp_ref_t rop_ref, hpcp_ref_t op1_ref, hpcp_ref_t op2_ref)
 {
+  ALLOC_ALL_HPCP_LIMBS;
+
+  HPCP_CHECK_FLOAT(op1_ref);
+  HPCP_CHECK_FLOAT(op2_ref);
+
   HPCP_GET_PTR(rop);
   HPCP_GET_PTR(op1);
   HPCP_GET_PTR(op2);
 
   // using an array to store all of the remainders of the sums : each bit represents a remainder
   // in binary a remainder can only be 0 or 1
-  uint8_t *arrem1 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1), *arrem2 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1); // It is needed to calloc these to have them as pointers
-  if (arrem1 == NULL || arrem2 == NULL)
-    return HPCP_ERR_RET_ALLOC;
+  uint8_t arrem1_arr[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1],
+      arrem2_arr[((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1]; // It is needed to calloc these to have them as pointers
+
+  uint8_t *arrem1 = arrem1_arr;
+  uint8_t *arrem2 = arrem2_arr;
 
   hpcp_limb_t *ropstart = rop->start, *op1start = op1->start, *op2start = op2->start;
 
@@ -406,13 +412,15 @@ int hpcp_add(hpcp_ref_t rop_ref, hpcp_ref_t op1_ref, hpcp_ref_t op2_ref)
   FILE *op2bin;
   OPEN_FILE_OR_PANIC(filename, "rb", op2bin);
 
+  const uint32_t limb_dec = (dec - (dec % sizeof(hpcp_limb_t)));
+
+  // add the limbs in pair for the start of both op's
+  if (hpcp_add_limb(ropstart, *op1start, *op2start, limb_dec) == 1)
+    HPCP_ADD_SET_REM_BIT(arrem1, 1);
+
   hpcp_limb_t tmpop1, tmpop2;
   for (size_t i = 0; i < max_limb_numb; ++i)
   {
-    // add the limbs in pairs for the start of both op's
-    if (hpcp_add_limb(ropstart, *op1start, *op2start) == 1)
-      HPCP_ADD_SET_REM_BIT(arrem1, 1);
-
     (rop->loaded_mantissa)[i] = malloc(sizeof(hpcp_limb_t));
 
     fread(&tmpop1, sizeof(tmpop1), 1, op1bin);
