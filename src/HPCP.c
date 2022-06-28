@@ -18,27 +18,26 @@
 
 #define HPCP_ALL_NUMBS_ORG_SIZE 15
 
-#define ALLOC_ALL_HPCP_LIMBS                                                 \
-  if (ALL_HPCP_FLOAT_NAME == NULL)                                           \
-  {                                                                          \
-    ALL_HPCP_FLOAT_NAME = calloc(sizeof(hpcp_t *), HPCP_ALL_NUMBS_ORG_SIZE); \
-    if (ALL_HPCP_FLOAT_NAME == NULL)                                         \
-      return (hpcp_ref_t)HPCP_ERR_RET_ALLOC;                                 \
+#define ALLOC_ALL_HPCP_LIMBS                                                                 \
+  if (all_hpcp_floats == NULL)                                                               \
+  {                                                                                          \
+    fprintf(stderr, PRINTF_YELLOW "[ERROR] you should use hpcp_global_init()" PRINTF_RESET); \
+    all_hpcp_floats = calloc(sizeof(hpcp_t *), HPCP_ALL_NUMBS_ORG_SIZE);                     \
+    if (all_hpcp_floats == NULL)                                                             \
+      return HPCP_ERR_RET_ALLOC;                                                             \
   }
 
 #define HPCP_CHECK_FLOAT(ref)              \
   if (ref > UINT64_MAX - HPCP_REF_MAX_DEC) \
   return HPCP_ERR_RET_INVALID_FLOAT
 
-#define ALL_HPCP_FLOAT_NAME all_hpcp_floats
-
 /*
 dynamicaly allocated array of pointers to hpcp_t
 */
-hpcp_t **ALL_HPCP_FLOAT_NAME = NULL;
+hpcp_t **all_hpcp_floats = NULL;
 uint64_t nb_hpcp_floats = 0;
 
-#define HPCP_GET_PTR(op) hpcp_t *op = ALL_HPCP_FLOAT_NAME[op##_ref]
+#define HPCP_GET_PTR(op) hpcp_t *op = all_hpcp_floats[op##_ref]
 
 int hpcp_set_file_mantissa_zero(hpcp_ref_t op_ref)
 {
@@ -76,7 +75,7 @@ hpcp_ret_ref_t hpcp_init(const uint64_t prec)
 
   // printf("prec = %" PRIu64 " buff = 0x%" PRIx64 "\n", prec, buff);
 
-  hpcp_t *rop = ALL_HPCP_FLOAT_NAME[nb_hpcp_floats] = malloc(sizeof(hpcp_t));
+  hpcp_t *rop = all_hpcp_floats[nb_hpcp_floats] = malloc(sizeof(hpcp_t));
   if (rop == NULL)
     return (hpcp_ref_t)HPCP_ERR_RET_ALLOC;
 
@@ -140,7 +139,7 @@ int hpcp_set_ui(hpcp_ref_t rop_ref, const uint64_t op)
   // printf(PRINTF_BINARY_PATTERN_INT64 "\n", PRINTF_BYTE_TO_BINARY_INT64(fn_op));
   (*(rop->start))[0] = fn_op;
 
-  return hpcp_set_file_mantissa_zero(rop);
+  return hpcp_set_file_mantissa_zero(rop_ref);
 }
 
 int hpcp_set_plus_zero(hpcp_ref_t rop_ref)
@@ -153,7 +152,7 @@ int hpcp_set_plus_zero(hpcp_ref_t rop_ref)
   for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
     (*(rop->start))[i] = 0;
 
-  return hpcp_set_file_mantissa_zero(rop);
+  return hpcp_set_file_mantissa_zero(rop_ref);
 }
 
 int hpcp_set_minus_zero(hpcp_ref_t rop_ref)
@@ -166,7 +165,7 @@ int hpcp_set_minus_zero(hpcp_ref_t rop_ref)
   for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
     (*(rop->start))[i] = 0;
 
-  return hpcp_set_file_mantissa_zero(rop);
+  return hpcp_set_file_mantissa_zero(rop_ref);
 }
 
 int hpcp_set_NaN(hpcp_ref_t rop_ref)
@@ -179,7 +178,7 @@ int hpcp_set_NaN(hpcp_ref_t rop_ref)
   for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
     (*(rop->start))[i] = 0;
 
-  return hpcp_set_file_mantissa_zero(rop);
+  return hpcp_set_file_mantissa_zero(rop_ref);
 }
 
 int hpcp_set_plus_inf(hpcp_ref_t rop_ref)
@@ -192,7 +191,7 @@ int hpcp_set_plus_inf(hpcp_ref_t rop_ref)
   for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
     (*(rop->start))[i] = 0;
 
-  return hpcp_set_file_mantissa_zero(rop);
+  return hpcp_set_file_mantissa_zero(rop_ref);
 }
 
 int hpcp_set_minus_inf(hpcp_ref_t rop_ref)
@@ -205,7 +204,7 @@ int hpcp_set_minus_inf(hpcp_ref_t rop_ref)
   for (uint8_t i = 0; i < HPCP_LIMB_SIZE; ++i)
     (*(rop->start))[i] = 0;
 
-  return hpcp_set_file_mantissa_zero(rop);
+  return hpcp_set_file_mantissa_zero(rop_ref);
 }
 
 /* - end setting functions -----------------------------------------------------------------------------*/
@@ -263,6 +262,35 @@ int hpcp_printf_bin_sci(hpcp_ref_t op_ref)
 /* - end print functions -----------------------------------------------------------------------------*/
 /* - arthrimetrics functions -----------------------------------------------------------------------------*/
 
+int hpcp_div_2_ui(hpcp_ref_t rop_ref, hpcp_ref_t op_ref, const uint64_t dec)
+{
+  ALLOC_ALL_HPCP_LIMBS;
+  HPCP_CHECK_FLOAT(op_ref);
+
+  HPCP_GET_PTR(rop);
+  HPCP_GET_PTR(op);
+
+  uint64_t dec2 = dec;
+
+  hpcp_copy(rop_ref, op_ref);
+
+  rop->head &= ~(HPCP_INT);
+
+  if (op->exp < dec2)
+  {
+    rop->exp = dec2 - op->exp;
+    rop->head |= HPCP_EXP_MINUS;
+    return 0;
+  }
+  if (op->head | HPCP_EXP_MINUS == op->head)
+    dec2 = -dec;
+
+  rop->exp = op->exp - dec2;
+  rop->head &= ~(HPCP_EXP_MINUS);
+
+  return 0;
+}
+
 /*a function that add two uint64_t (op1 and op2), sets the result into an another uint64_t passed as pointer (rop) and return the remaider of the addition*/
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2)
 {
@@ -271,8 +299,8 @@ uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2)
   return UINT64_MAX - op1 < op2;
 }
 
-/*a function that add two hpcp_limb_t passed as pointers (op1 and op2), sets the result into an another hpcp_limb_t passed as pointer (rop) and return the remaider of the addition*/
-int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2)
+/*a function that add two hpcp_limb_t passed as pointers (op1 and op2), sets the result into an another hpcp_limb_t passed as pointer (rop) and return the remaider of the addition, dec in bits*/
+int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1_top, const hpcp_limb_t op1_bottom, const hpcp_limb_t op2, const uint16_t dec)
 {
   // helper macros for the hpcp_add function for keeping the remaiders
 #define HPCP_ADD_GET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
@@ -280,19 +308,28 @@ int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t 
 #define HPCP_ADD_CLR_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) &= ~(1 << (((N)-1) % 8)))
 
   // this will be one if an only if the result of the sum is bigger than 2^(64*10) - 1
-  // if the result doesn't fit in the 64*10 bits availible in hpcp_limb_t
+  // if the result doesn't fit in the 64*HPCP_LIMB_SIZE bits availible in hpcp_limb_t
   uint8_t rem = 0;
 
   // using an array to store all of the remainders of the sums : each bit represents a remainder
   // in binary a remainder can only be 0 or 1
-  uint8_t *arrem1 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1), *arrem2 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1); // It is needed to calloc these to have them as pointers
+  uint8_t *arrem1 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1),
+          *arrem2 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1); // It's needed to calloc these to have them as pointers
   if (arrem1 == NULL || arrem2 == NULL)
     return HPCP_ERR_RET_ALLOC;
+
+  // the number of uint64_t that wont need to be split before
+  // uint8_t safe_parts = (dec - (dec % sizeof(uint64_t))) / sizeof(uint64_t);
+
+  uint8_t uint64_dec = dec % sizeof(uint64_t);
+  uint64_t mask = ((1ull << uint64_dec) - 1);
 
   // summing each pair of uint64_t individually
   for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
   {
-    if (hpcp_add_uint64(&(*rop)[i], op1[i], op2[i]))
+
+    uint64_t nval = (op1_top[i] & mask) | (op1_top[i] & ~mask);
+    if (hpcp_add_uint64(&(*rop)[i], nval, op2[i]))
       HPCP_ADD_SET_REM_BIT(arrem1, i + 1);
   }
 
@@ -339,8 +376,12 @@ int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t 
 }
 
 /*function that add two const hpcp_t passed as pointers (op1 and op2) and sets the result into an another hpcp_t pointer (rop)*/
-int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
+int hpcp_add(hpcp_ref_t rop_ref, hpcp_ref_t op1_ref, hpcp_ref_t op2_ref)
 {
+  HPCP_GET_PTR(rop);
+  HPCP_GET_PTR(op1);
+  HPCP_GET_PTR(op2);
+
   // using an array to store all of the remainders of the sums : each bit represents a remainder
   // in binary a remainder can only be 0 or 1
   uint8_t *arrem1 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1), *arrem2 = calloc(1, ((uint64_t)(HPCP_LIMB_SIZE / 8)) + 1); // It is needed to calloc these to have them as pointers
@@ -357,11 +398,11 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
   // open all of the file containing the mantissas of the operands
   char filename[64];
 
-  hpcp_get_filename(filename, op1);
+  hpcp_get_filename(filename, op1_ref);
   FILE *op1bin;
   OPEN_FILE_OR_PANIC(filename, "rb", op1bin);
 
-  hpcp_get_filename(filename, op2);
+  hpcp_get_filename(filename, op2_ref);
   FILE *op2bin;
   OPEN_FILE_OR_PANIC(filename, "rb", op2bin);
 
@@ -400,7 +441,7 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
     printf("%i\n", i);
   }
   // open rop's mantissa only when needing to save
-  hpcp_get_filename(filename, rop);
+  hpcp_get_filename(filename, rop_ref);
   FILE *ropbin;
   OPEN_FILE_OR_PANIC(filename, "wb", ropbin);
 
@@ -427,7 +468,7 @@ int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2)
 
 inline int hpcp_negate(hpcp_ref_t rop_ref, hpcp_ref_t op_ref)
 {
-  hpcp_t *rop = ALL_HPCP_FLOAT_NAME[rop_ref], *op = ALL_HPCP_FLOAT_NAME[op_ref];
+  hpcp_t *rop = all_hpcp_floats[rop_ref], *op = all_hpcp_floats[op_ref];
 
   rop->head = op->head ^ HPCP_MINUS;
 
@@ -441,17 +482,17 @@ void hpcp_clear(hpcp_ref_t rop_ref)
   HPCP_GET_PTR(rop);
   free(*(rop->start));
   char filename[64];
-  hpcp_get_filename(filename, rop);
+  hpcp_get_filename(filename, rop_ref);
   printf("%s\n", filename);
   remove(filename);
   free((void *)rop);
-  ALL_HPCP_FLOAT_NAME[rop_ref] = NULL;
+  all_hpcp_floats[rop_ref] = NULL;
   return;
 }
 
 int hpcp_copy(hpcp_ref_t dst_ref, hpcp_ref_t src_ref)
 {
-  // hpcp_t *dst = ALL_HPCP_FLOAT_NAME[dst_ref], *src = ALL_HPCP_FLOAT_NAME[src_ref];
+  // hpcp_t *dst = all_hpcp_floats[dst_ref], *src = all_hpcp_floats[src_ref];
   HPCP_GET_PTR(dst);
   HPCP_GET_PTR(src);
 
@@ -462,9 +503,9 @@ int hpcp_copy(hpcp_ref_t dst_ref, hpcp_ref_t src_ref)
   dst->real_prec_dec = src->real_prec_dec;
 
   char filename[64];
-  hpcp_get_filename(filename, src);
+  hpcp_get_filename(filename, src_ref);
   FILE *srcbin = fopen(filename, "rb");
-  hpcp_get_filename(filename, dst);
+  hpcp_get_filename(filename, dst_ref);
   FILE *dstbin = fopen(filename, "wb");
 
   if (srcbin == NULL || dstbin == NULL)

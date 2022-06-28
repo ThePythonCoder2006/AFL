@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #ifndef __HPCP
 #define __HPCP
@@ -107,9 +108,16 @@ size_t hpcp_printf(const char *const format, ...);
 int hpcp_printf_bin_sci(hpcp_ref_t op_ref);
 int hpcp_copy(hpcp_ref_t dst_ref, hpcp_ref_t src_ref);
 size_t hpcp_get_filename(char filename[64], hpcp_ref_t op_ref);
+
+// shift functions
+
+int hpcp_div_2_ui(hpcp_ref_t rop_ref, hpcp_ref_t op_ref, const uint64_t dec);
+
+// add functions
+
 uint8_t hpcp_add_uint64(uint64_t *rop, const uint64_t op1, const uint64_t op2);
-int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1, const hpcp_limb_t op2);
-int hpcp_add(hpcp_t *rop, const hpcp_t *const op1, const hpcp_t *const op2);
+int8_t hpcp_add_limb(hpcp_limb_t *rop, const hpcp_limb_t op1_top, const hpcp_limb_t op1_bottom, const hpcp_limb_t op2, const uint16_t dec);
+int hpcp_add(hpcp_ref_t rop_ref, hpcp_ref_t op1_ref, hpcp_ref_t op2_ref);
 
 int hpcp_negate(hpcp_ref_t rop_ref, hpcp_ref_t op_ref);
 void hpcp_clear(hpcp_ref_t rop_ref);
