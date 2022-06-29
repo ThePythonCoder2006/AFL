@@ -33,26 +33,28 @@ int main(int argc, char **argv)
 
   hpcp_set_ui(test, UINT64_MAX);
 
-  printf("printf_bin(test) : ");
-  hpcp_printf_bin_sci(test);
+  // printf("printf_bin(test) : ");
+  // hpcp_printf_bin_sci(test);
 
-  // hpcp_limb_t rop, op1, op2 = {1};
+  // // hpcp_limb_t rop, op1, op2 = {1};
 
-  // for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
-  //   op1[i] = UINT64_MAX;
+  // // for (size_t i = 0; i < HPCP_LIMB_SIZE; ++i)
+  // //   op1[i] = UINT64_MAX;
 
-  // hpcp_add_limb(&rop, op1, op2);
+  // // hpcp_add_limb(&rop, op1, op2);
 
-  // uint64_t rop, op1 = UINT64_MAX, op2 = UINT64_MAX;
+  // // uint64_t rop, op1 = UINT64_MAX, op2 = UINT64_MAX;
 
-  // uint8_t rem = hpcp_add_uint64(&rop, op1, op2);
+  // // uint8_t rem = hpcp_add_uint64(&rop, op1, op2);
 
-  // printf("%i, %" PRIu64 ", 0000000%i " PRINTF_BINARY_PATTERN_INT64 "\n", rem, rop, rem, PRINTF_BYTE_TO_BINARY_INT64(rop));
+  // // printf("%i, %" PRIu64 ", 0000000%i " PRINTF_BINARY_PATTERN_INT64 "\n", rem, rop, rem, PRINTF_BYTE_TO_BINARY_INT64(rop));
 
-  hpcp_add(test, test, test);
+  // hpcp_add(test, test, test);
 
-  printf("\nprintf_bin(test) : ");
-  hpcp_printf_bin_sci(test);
+  // printf("\nprintf_bin(test) : ");
+  // hpcp_printf_bin_sci(test);
+
+  hpcp_limb_t one, one_bott, two;
 
   pause();
 
