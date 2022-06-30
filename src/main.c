@@ -54,7 +54,26 @@ int main(int argc, char **argv)
   // printf("\nprintf_bin(test) : ");
   // hpcp_printf_bin_sci(test);
 
-  hpcp_limb_t one, one_bott, two;
+  hpcp_limb_t *rop, one, one_bott, two;
+
+  hpcp_limb_set_ui(one, UINT64_MAX);
+  hpcp_limb_set_ui(one_bott, UINT64_MAX);
+  hpcp_limb_set_ui(two, 1);
+
+  PRINT_LIMB(one);
+  PRINT_LIMB(one_bott);
+  for (size_t i = 0; i < 16; ++i)
+  {
+    printf(" ");
+    if (i % 8 == 0)
+    {
+      printf(" ");
+    }
+  }
+  PRINT_LIMB(two);
+
+  printf("%i\n", hpcp_add_limb(rop, one, one_bott, two, 16));
+  PRINT_LIMB(*rop);
 
   pause();
 
