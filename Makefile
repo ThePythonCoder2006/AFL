@@ -3,13 +3,11 @@ CFLAGS=-I include -Wall -Wextra -O3
 DEPS=include/HPCP.h
 ODIR=src/obj
 
-CHECKS_BIN=checks/bin
+CHECKS_BIN_DIR=checks/bin
+CHECKS_SRC_DIR=checks
 
 CHECKS_SRC=limb.c
 CHECKS=$(addprefix $(CHECKS_BIN)/, $(CHECKS_SRC:.c=.exe))
-
-tmp:
-	$(info $(CHECKS_BIN)/%.exe)
 
 all: comphead comp run
 
@@ -26,7 +24,7 @@ comphead: $(ODIR)/header_before_comp.o
 check: $(CHECKS)
 	./$(CHECKS)
 
-$(CHECKS_BIN)/%.exe: check/%.c $(DEPS)
+$(CHECKS_BIN_DIR)/%.exe: check/%.c $(DEPS)
 	$(CC) -o $@ $< $(CFLAGS)
 
 $(ODIR)/%.o: src/%.c $(DEPS)

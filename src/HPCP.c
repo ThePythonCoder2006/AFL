@@ -7,12 +7,17 @@
 #include <HPCP.h>
 #include <time.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #ifdef _WIN32
 #include <io.h>
 #define F_OK 0
 #define access _access
 #endif
+
+static const __uint128_t UINT128_MAX = (__uint128_t)((__int128_t)(-1L));
+static const __int128_t INT128_MAX = UINT128_MAX >> 1;
+static const __int128_t INT128_MIN = -INT128_MAX - 1;
 
 #define TMPPATH "bin/tmp"
 
@@ -282,7 +287,7 @@ int hpcp_div_2_ui(hpcp_ref_t rop_ref, hpcp_ref_t op_ref, const uint64_t dec)
     rop->head |= HPCP_EXP_MINUS;
     return 0;
   }
-  if (op->head | HPCP_EXP_MINUS == op->head)
+  if ((op->head | HPCP_EXP_MINUS) == op->head)
     dec2 = -dec;
 
   rop->exp = op->exp - dec2;
@@ -412,7 +417,11 @@ int hpcp_add(hpcp_ref_t rop_ref, hpcp_ref_t op1_ref, hpcp_ref_t op2_ref)
   FILE *op2bin;
   OPEN_FILE_OR_PANIC(filename, "rb", op2bin);
 
-  const uint32_t limb_dec = (dec - (dec % sizeof(hpcp_limb_t)));
+  __int128_t dec_tmp = op1->exp - op2->exp;
+  uint8_t dec_sign = dec_tmp < 0 ? 1 : 0;
+  uint64_t dec = abs2(dec_tmp);
+
+  const uint32_t limb_dec = (dec - (dec % sizeof(hpcp_limb_t))) / sizeof(hpcp_limb_t);
 
   // add the limbs in pair for the start of both op's
   if (hpcp_add_limb(ropstart, *op1start, *op2start, limb_dec) == 1)
@@ -567,9 +576,9 @@ FILE *fopen_mkdir(const char *const path, const char *const mode)
 
 // general purpuse stuff -------------------------------------------------
 
-inline int64_t abs2(const int64_t op)
+inline int64_t abs2(const __int128_t op)
 {
-  int const mask = op >> ((sizeof(int) * 8) - 1);
+  int const mask = op >> ((sizeof(__int128_t) * CHAR_BIT) - 1);
 
   return (op + mask) ^ mask;
 }
