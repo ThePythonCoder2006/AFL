@@ -5,7 +5,7 @@
 #include <inttypes.h>
 #include <math.h>
 
-#include "../../../C/useful_macros.h"
+#include "../../C/useful_macros.h"
 
 #define DAF_RET_SUCESS (0)
 #define DAF_RET_ERR_ALLOC (-1)
