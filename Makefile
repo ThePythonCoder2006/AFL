@@ -17,7 +17,7 @@ comp: $(ODIR)/main.o $(ODIR)/DAFL.o
 	$(CC) -o bin/main $^ $(CFLAGS)
 
 comphead:
-	../../C/comphead
+	./comphead
 
 $(ODIR)/%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)

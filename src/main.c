@@ -3,16 +3,16 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include <DAFL.h>
+#include "DAFL.h"
 
 int main(int argc, char **argv)
 {
   (void)argc;
   (void)argv;
 
-  uin64_t num = (ten_9_MAX - 30);
+  daf_ref_t num = daf_init(200);
 
-  printf("hello DAFL !!!, %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", num, (TRC(num, 0)), (TRC_PRT(num, 0)));
+  printf("Hello DAF !! %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", DAF_GET(num, prec), (uint64_t)DAF_GET(num, real_prec_dec), (uint64_t)(DAF_GET(num, prec) + (uint64_t)DAF_GET(num, real_prec_dec)) % TEN_9_DECIMAL_SIZE);
 
   return 0;
 }
