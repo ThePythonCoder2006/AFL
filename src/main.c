@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include <DAFL.h>
 
@@ -8,11 +10,9 @@ int main(int argc, char **argv)
   (void)argc;
   (void)argv;
 
-  int num = MYRIAGIT_MAX + 1;
+  uin64_t num = (ten_9_MAX - 30);
 
-  printf("hello DAFL !!!, %i, %i, %i\n", num, TRC(num, 0), TRC_PRT(num, 0));
-
-  printf("%" PRIu32 ", %" PRIu32 ", %" PRIu32 "\n", MYRIAGIT_DEC, (0 * MYRIAGIT_DEC), (MYRIAGIT_MAX - (0U * MYRIAGIT_DEC)));
+  printf("hello DAFL !!!, %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", num, (TRC(num, 0)), (TRC_PRT(num, 0)));
 
   return 0;
 }

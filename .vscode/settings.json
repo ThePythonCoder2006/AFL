@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "dafl.h": "c",
+    "useful_macros.h": "c",
+    "stdlib.h": "c"
+  }
+}
