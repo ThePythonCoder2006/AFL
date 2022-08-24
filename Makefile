@@ -1,5 +1,7 @@
 CC=gcc
-CFLAGS=-I include -Wall -Wextra -O3
+CMNCFLAGS=-I include -Wall -Wextra
+CFLAGS=$(CMNCFLAGS) -O3
+DBCFLAGS=$(CMNCFLAGS) -O0
 DEPS=include/DAFL.h
 ODIR=src/obj
 
@@ -21,6 +23,10 @@ comphead:
 
 $(ODIR)/%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+db:
+	$(CC) -g -o bin/main_db.exe src/main.c src/DAFl.c $(DBCFLAGS)
+	gdb bin/main_db.exe
 
 pre: src/main.c
 	$(CC) -E $^ $(CFLAGS) > preprocessor_build.c

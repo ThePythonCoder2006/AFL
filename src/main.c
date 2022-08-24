@@ -12,7 +12,16 @@ int main(int argc, char **argv)
 
   daf_ref_t num = daf_init(200);
 
-  printf("Hello DAF !! %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", DAF_GET(num, prec), (uint64_t)DAF_GET(num, real_prec_dec), (uint64_t)(DAF_GET(num, prec) + (uint64_t)DAF_GET(num, real_prec_dec)) % TEN_9_DECIMAL_SIZE);
+  printf("Hello DAF !! %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", DAF_GET(num, prec), (uint64_t)DAF_GET(num, real_prec_dec), (uint64_t)(DAF_GET(num, prec) + (uint64_t)DAF_GET(num, real_prec_dec)) % DAF_LIMB_DECIMAL_SIZE);
+
+  for (size_t i = 0; i < TEN_9_MAX; ++i)
+  {
+    daf_set_ui(num, i * (TEN_9_MAX + 1));
+
+    daf_printf("%DF\n", num);
+  }
+
+  daf_clear(num);
 
   return 0;
 }
