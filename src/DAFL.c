@@ -126,7 +126,7 @@ daf_ret_t daf_clear(daf_ref_t op_ref)
 
 // print functions
 
-daf_ret_t daf_printf(const char *fmt, ...)
+daf_ret_t daf_fprintf(FILE *stream, const char *fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
@@ -137,7 +137,7 @@ daf_ret_t daf_printf(const char *fmt, ...)
     if (curr != '%') // if the char is not a '%' then just print it
     {
       ++fmt;
-      putchar(curr);
+      putc(curr, stream);
       continue;
     }
 
@@ -156,35 +156,39 @@ daf_ret_t daf_printf(const char *fmt, ...)
     }
     else
     {
-      fprintf(stderr, PRINTF_ERROR " the print type '%%%c' is not (yet) implemented", curr);
-      return DAF_RET_ERR_ALLOC;
+      char buff[16];
+      snprintf(buff, sizeof(buff), "%%%c", *(fmt++));
+      printf("%s \t ", buff);
+      vfprintf(stream, buff, args);
+      // fprintf(stderr, PRINTF_ERROR " the print type '%%%c' is not (yet) implemented", curr);
+      // return DAF_RET_ERR_ALLOC;
     }
   }
 
   return DAF_RET_SUCESS;
 }
 
-daf_ret_t daf_out_str(daf_ref_t op_ref, uint64_t prec)
+daf_ret_t daf_out_file_str(FILE *stream, daf_ref_t op_ref, uint64_t prec)
 {
   DAF_GET_PTR(op);
 
   if (DAF_IS_NaN(op_ref))
   {
-    printf("NaN");
+    fprintf(stream, "NaN");
     return DAF_RET_SUCESS;
   }
 
-  printf("%c", (op->head | DAF_HEAD_MINUS) == op->head ? '-' : 0);
+  fprintf(stream, "%c", (op->head | DAF_HEAD_MINUS) == op->head ? '-' : 0);
 
   if (DAF_IS_ZERO(op_ref))
   {
-    printf("0");
+    fprintf(stream, "0");
     return DAF_RET_SUCESS;
   }
 
   if (DAF_IS_INF(op_ref))
   {
-    printf("Inf");
+    fprintf(stream, "Inf");
     return DAF_RET_SUCESS;
   }
 
@@ -197,12 +201,12 @@ daf_ret_t daf_out_str(daf_ref_t op_ref, uint64_t prec)
 
   uint64_t printed_ten_9 = 1;
 
-  printf("%i", (*(op->start))[0]);
+  fprintf(stream, "%i", (*(op->start))[0]);
   if (op->exp >= DAF_LIMB_SIZE && (prec > DAF_LIMB_SIZE || prec == 0))
   {
     for (uint8_t i = 1; i < DAF_LIMB_SIZE; ++i)
     {
-      printf(" %09" PRIu32, (*(op->start))[i]);
+      fprintf(stream, " %09" PRIu32, (*(op->start))[i]);
     }
     if (op->exp == DAF_LIMB_SIZE)
       putchar(sep);
@@ -212,7 +216,7 @@ daf_ret_t daf_out_str(daf_ref_t op_ref, uint64_t prec)
   {
     for (uint8_t i = 1; i < DAF_LIMB_SIZE; ++i)
     {
-      printf(" %09" PRIu32, (*(op->start))[i]);
+      fprintf(stream, " %09" PRIu32, (*(op->start))[i]);
       if ((printed_ten_9++ == op->exp && DAF_IS_INT(op_ref)) || (op->exp == 0 && DAF_IS_INT(op_ref)))
         return DAF_RET_SUCESS;
       else if (printed_ten_9 == op->exp && !DAF_IS_INT(op_ref))
@@ -225,7 +229,7 @@ daf_ret_t daf_out_str(daf_ref_t op_ref, uint64_t prec)
 
   for (uint64_t i = 0; i < op->prec - DAF_LIMB_SIZE; ++i)
   {
-    printf(" %09" PRIu32, DAF_MTSA_NTH(op_ref, i));
+    fprintf(stream, " %09" PRIu32, DAF_MTSA_NTH(op_ref, i));
     if (++printed_ten_9 == op->exp)
       putchar(sep);
   }
