@@ -156,9 +156,11 @@ daf_ret_ref_t daf_init(uint64_t prec);
 daf_ret_t daf_clear(daf_ref_t op_ref);
 
 // print functions
-daf_ret_t daf_out_str(daf_ref_t ref, uint64_t prec);
+daf_ret_t daf_out_file_str(FILE *stream, daf_ref_t ref, uint64_t prec);
+static inline daf_ret_t daf_out_str(daf_ref_t ref, uint64_t prec) { return daf_out_file_str(stdout, ref, prec); }
 static inline daf_ret_t daf_all_out_str(daf_ref_t ref) { return daf_out_str(ref, 0); }
-daf_ret_t daf_printf(const char *fmt, ...);
+daf_ret_t daf_fprintf(FILE *stream, const char *fmt, ...);
+#define daf_printf(fmt, ...) daf_fprintf(stdout, fmt, __VA_ARGS__)
 
 size_t daf_get_filename(char filename[64], daf_ref_t op_ref);
 
@@ -172,8 +174,7 @@ daf_ret_t daf_set_minus_inf(daf_ref_t op_ref);
 daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op);
 
 // arthimetric functions ------------------------------------------------------
-daf_ret_t
-daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
+daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
 
 // file functions
 void rek_mkdir(const char *const path);
