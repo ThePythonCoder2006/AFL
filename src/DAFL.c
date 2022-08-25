@@ -126,11 +126,8 @@ daf_ret_t daf_clear(daf_ref_t op_ref)
 
 // print functions
 
-daf_ret_t daf_printf(const char *fmt, ...)
+daf_ret_t daf_primitive_vnprint(uint64_t *stream, const uint64_t n, const char *fmt, va_list args)
 {
-  va_list args;
-  va_start(args, fmt);
-
   char curr;
   while ((curr = *fmt) != '\0')
   {
