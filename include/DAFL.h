@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
+#include <float.h>
 
 #include "../../../C/useful_macros.h"
 
@@ -60,6 +61,17 @@
 #define DAF_MTSA_LIMB_AT_NTH_UINT30(ref, n) ((*(all_daf[ref])).loaded_mtsa[(n - (n % DAF_LIMB_SIZE)) / DAF_LIMB_SIZE])
 #define DAF_MTSA_NTH(ref, n) ((*DAF_MTSA_LIMB_AT_NTH_UINT30(ref, n))[n % DAF_LIMB_SIZE])
 
+#define SMOD_2x(op, m) (op - (op > m) * (m))
+#define SMOD_4x(op, m) SMOD_2x(SMOD_2x(op, 2 * m), m)
+#define SMOD_8x(op, m) SMOD_4x(SMOD_4x(op, 4 * m), m)
+
+#define OPEN_FILE_OR_PANIC(path, mode, var)                          \
+  if (((var) = fopen((path), (mode))) == NULL)                       \
+  {                                                                  \
+    fprintf(stderr, PRINTF_ERROR " could not open file %s", (path)); \
+    return DAF_RET_ERR_READ_FILE;                                    \
+  }
+
 /*-------------------------------end inline functions-------------------------------*/
 /*-------------------------start PRINTF_BYTE_TO_BINARY--------------------------*/
 
@@ -104,6 +116,15 @@
 #define PRINTF_ERROR PRINTF_RED "[ERROR]" PRINTF_RESET
 #define PRINTF_SUCESS PRINTF_GREEN "[SUCESS]" PRINTF_RESET
 #define PRINTF_WARNING PRINTF_YELLOW "[WARNING]" PRINTF_RESET
+
+#define PRINTF_NaN "NaN"
+#define PRITNF_NaN_len sizeof(PRINTF_NaN)
+
+#define PRINTF_INF "Inf"
+#define PRITNF_INF_len sizeof(PRINTF_INF)
+
+#define PRINTF_0 "0"
+#define PRITNF_0_len sizeof(PRINTF_0)
 
 /*-------------------------------end printf colors-------------------------------*/
 /*-------------------------------start custom types-------------------------------*/
@@ -156,11 +177,44 @@ daf_ret_ref_t daf_init(uint64_t prec);
 daf_ret_t daf_clear(daf_ref_t op_ref);
 
 // print functions
-daf_ret_t daf_out_file_str(FILE *stream, daf_ref_t ref, uint64_t prec);
-static inline daf_ret_t daf_out_str(daf_ref_t ref, uint64_t prec) { return daf_out_file_str(stdout, ref, prec); }
-static inline daf_ret_t daf_all_out_str(daf_ref_t ref) { return daf_out_str(ref, 0); }
-daf_ret_t daf_fprintf(FILE *stream, const char *fmt, ...);
-#define daf_printf(fmt, ...) daf_fprintf(stdout, fmt, __VA_ARGS__)
+daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t n, daf_ref_t op_ref, uint64_t prec);
+daf_ret_t daf_primitive_vnprint(FILE *stream, char *buff, const uint64_t n, const char *fmt, va_list args);
+
+static inline daf_ret_t daf_vfprintf(FILE *stream, const char *fmt, va_list args) { return daf_primitive_vnprint(stream, NULL, UINT64_MAX, fmt, args); }
+static inline daf_ret_t daf_vprintf(const char *fmt, va_list args) { return daf_vfprintf(stdout, fmt, args); }
+static inline daf_ret_t daf_fprintf(FILE *stream, const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  return daf_vfprintf(stream, fmt, args);
+}
+static inline daf_ret_t daf_eprintf(const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  return daf_vfprintf(stderr, fmt, args);
+}
+static inline daf_ret_t daf_printf(const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  return daf_vprintf(fmt, args);
+}
+
+static inline daf_ret_t daf_vsnprintf(char *buff, const uint64_t n, const char *fmt, va_list args) { return daf_primitive_vnprint(NULL, buff, n, fmt, args); }
+static inline daf_ret_t daf_vsprintf(char *buff, const char *fmt, va_list args) { return daf_vsnprintf(buff, UINT64_MAX, fmt, args); };
+static inline daf_ret_t daf_snprintf(char *buff, const uint64_t n, const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  return daf_vsnprintf(buff, n, fmt, args);
+};
+static inline daf_ret_t daf_sprintf(char *buff, const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  return daf_vsnprintf(buff, UINT64_MAX, fmt, args);
+};
 
 size_t daf_get_filename(char filename[64], daf_ref_t op_ref);
 
@@ -176,9 +230,14 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op);
 // arthimetric functions ------------------------------------------------------
 daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
 
+daf_ret_t daf_ten_9_add(uint30_t *rop, uint30_t op1, uint30_t op2);
+daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint16_t dec);
+
 // file functions
 void rek_mkdir(const char *const path);
 FILE *fopen_mkdir(const char *const path, const char *const mode);
+
+void swap_ptr_uint8(uint8_t **const a, uint8_t **const b);
 
 /*-------------------------------end functions-------------------------------*/
 

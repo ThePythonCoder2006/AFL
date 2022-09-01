@@ -14,12 +14,11 @@ int main(int argc, char **argv)
 
   printf("Hello DAF !! %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", DAF_GET(num, prec), (uint64_t)DAF_GET(num, real_prec_dec), (uint64_t)(DAF_GET(num, prec) + (uint64_t)DAF_GET(num, real_prec_dec)) % DAF_LIMB_DECIMAL_SIZE);
 
-  for (size_t i = 0; i < 100; ++i)
-  {
-    daf_set_ui(num, i * (TEN_9_MAX + 1));
+  uint30_t rop;
 
-    daf_printf("%DF \t %3i\n", num, i);
-  }
+  daf_ten_9_add(&rop, (TEN_9_MAX), 1);
+  printf(PRINTF_BINARY_PATTERN_INT32 "\n", PRINTF_BYTE_TO_BINARY_INT32(rop));
+  printf("%i + %i = %i carry %i\n", 34, 35, rop & ~(1 << 30), rop >> 30);
 
   daf_clear(num);
 
