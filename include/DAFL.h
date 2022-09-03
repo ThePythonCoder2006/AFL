@@ -178,7 +178,7 @@ daf_ret_t daf_clear(daf_ref_t op_ref);
 
 // print functions
 daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t n, daf_ref_t op_ref, uint64_t prec);
-daf_ret_t daf_primitive_vnprint(FILE *stream, char *buff, const uint64_t n, const char *fmt, va_list args);
+daf_ret_t daf_primitive_vnprint(FILE *stream, char *const buff, const uint64_t n, const char *fmt, va_list args);
 
 static inline daf_ret_t daf_vfprintf(FILE *stream, const char *fmt, va_list args) { return daf_primitive_vnprint(stream, NULL, UINT64_MAX, fmt, args); }
 static inline daf_ret_t daf_vprintf(const char *fmt, va_list args) { return daf_vfprintf(stdout, fmt, args); }
@@ -232,6 +232,7 @@ daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
 
 daf_ret_t daf_ten_9_add(uint30_t *rop, uint30_t op1, uint30_t op2);
 daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint16_t dec);
+daf_ret_t daf_limb_pp(daf_limb_t *rop, daf_limb_t op); // adds one to the limb
 
 // file functions
 void rek_mkdir(const char *const path);

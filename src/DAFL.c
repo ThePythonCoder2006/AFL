@@ -8,7 +8,7 @@ daf_t **all_daf = NULL;
 char *(err_message)[DAF_ERR_COUNT] = {
     PRINTF_SUCESS " everything appended as intended",
     PRINTF_ERROR " some memory couldn't be allocated",
-    PRINTF_ERROR " the file containing the flaots mantissa couldn't be read",
+    PRINTF_ERROR " the file containing the float's mantissa couldn't be read",
     PRINTF_ERROR " the float you passed in is invalid",
     PRINTF_ERROR " this funcitonnality was not (yet) implemented"};
 
@@ -483,6 +483,30 @@ daf_ret_t daf_ten_9_add(uint30_t *const rop, const uint30_t op1, const uint30_t 
   }
   return DAF_RET_SUCESS;
 }
+daf_ret_t daf_limb_pp(daf_limb_t *rop, daf_limb_t op) // adds one to the limb
+{
+  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
+  {
+    const uint8_t less = (*rop)[i] < TEN_9_MAX;
+    if (less)
+    {
+      (*rop)[i]++;
+      break;
+    }
+    else if ((*rop)[i] == TEN_9_MAX)
+    {
+      (*rop)[i] = 0;
+      continue;
+    }
+    else if ((*rop)[i] > TEN_9_MAX)
+    {
+      fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %" PRIu64 "\n", i, i, (*rop)[i], TEN_9_MAX);
+      return DAF_RET_ERR_INVALID_FLOAT;
+    }
+  }
+
+  return DAF_RET_SUCESS;
+}
 
 daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint16_t dec)
 {
@@ -572,8 +596,6 @@ daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   uint8_t *arrem1 = arrem1_arr;
   uint8_t *arrem2 = arrem2_arr;
 
-  daf_limb_t *ropstart = rop->start, *op1start = op1->start, *op2start = op2->start;
-
   // the number of limbs used by the return operand (rop)
   const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(daf_limb_t)) / sizeof(daf_limb_t);
 
@@ -590,11 +612,14 @@ daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   FILE *op2bin;
   OPEN_FILE_OR_PANIC(filename, "rb", op2bin);
 
-  const uint64_t limb_dec = (dec - (dec % sizeof(daf_limb_t)));
+  const uint8_t dec_sign = (op1->exp >= op2->exp);
+  const uint64_t dec = dec_sign ? op1->exp - op2->exp : op2->exp - op1->exp;
+
+  const uint32_t limb_dec = (dec - (dec % sizeof(daf_limb_t)));
 
   // add the limbs in pair for the start of both op's
   uint8_t carry;
-  daf_limb_add(&carry, ropstart, *op1start, *op2start, limb_dec);
+  daf_limb_add(&carry, rop->start, *(op1->start), *(op2->start), limb_dec);
   if (carry == 1)
     DAF_ADD_SET_REM_BIT(arrem1, 1);
 
