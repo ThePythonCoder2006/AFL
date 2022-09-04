@@ -72,6 +72,9 @@
     return DAF_RET_ERR_READ_FILE;                                    \
   }
 
+#define PPCAT_NX(A, B) A##B
+#define PPCAT(A, B) PPCAT_NX(A, B)
+
 /*-------------------------------end inline functions-------------------------------*/
 /*-------------------------start PRINTF_BYTE_TO_BINARY--------------------------*/
 

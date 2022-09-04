@@ -583,10 +583,12 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
 /*function that add two const hpcp_t passed as pointers (op1 and op2) and sets the result into an another hpcp_t pointer (rop)*/
 daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 {
-
   DAF_GET_PTR(rop);
-  DAF_GET_PTR(op1);
-  DAF_GET_PTR(op2);
+  daf_t *op1, *op2;
+  {
+    const uint8_t op_ref_ptr_offset = ((DAF_GET(op1_ref, exp) <= DAF_GET(op2_ref, exp)) * sizeof(op1_ref));
+    op1 = all_daf[*(&op1_ref + op_ref_ptr_offset)], op2 = all_daf[*(&op1_ref + 4 - op_ref_ptr_offset)]; // op1->exp >= op2->exp
+  }
 
   // using an array to store all of the remainders of the sums : each bit represents a remainder
   // in binary a remainder can only be 0 or 1
