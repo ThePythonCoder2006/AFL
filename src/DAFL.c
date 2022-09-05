@@ -508,7 +508,7 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop, daf_limb_t op) // adds one to the limb
   return DAF_RET_SUCESS;
 }
 
-daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint16_t dec)
+daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint8_t uint30_dec)
 {
   // helper macros for the hpcp_add function for keeping the remaiders
 #define DAF_ADD_GET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
@@ -523,16 +523,10 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
   if (arrcarry1 == NULL || arrcarry2 == NULL)
     return DAF_RET_ERR_ALLOC;
 
-  // the number of uint30_t that wont need to be split before
-  const uint8_t uint30_dec = (dec - (dec % sizeof(uint30_t))) / sizeof(uint30_t);
-
-  const uint8_t bit_dec = dec % sizeof(uint30_t);
-  const uint64_t mask = ((1ull << bit_dec) - 1);
-
   // summing each pair of uint30_t individually
   for (size_t i = 0; i < DAF_LIMB_SIZE; ++i)
   {
-    uint64_t nval = (op1_bott[i + uint30_dec] & mask) | (op1_top[i + uint30_dec] & ~mask);
+    uint64_t nval = (op1_bott[i + uint30_dec]) | (op1_top[i + uint30_dec]);
     daf_ten_9_add(&(*rop)[i], nval, op2[i]);
     if (DAF_ADD_GET_CARRY((*rop)[i]) == 1)
       DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
@@ -580,20 +574,20 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
   return DAF_RET_SUCESS;
 }
 
-/*function that add two const hpcp_t passed as pointers (op1 and op2) and sets the result into an another hpcp_t pointer (rop)*/
+/*function that add two const hpcp_t passed as refs (op1_ref and op2_ref) and sets the result into an another hpcp_t ref (rop_ref)*/
 daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 {
   DAF_GET_PTR(rop);
   daf_t *op1, *op2;
   {
     const uint8_t op_ref_ptr_offset = ((DAF_GET(op1_ref, exp) <= DAF_GET(op2_ref, exp)) * sizeof(op1_ref));
-    op1 = all_daf[*(&op1_ref + op_ref_ptr_offset)], op2 = all_daf[*(&op1_ref + 4 - op_ref_ptr_offset)]; // op1->exp >= op2->exp
+    op1 = all_daf[*(&op1_ref + op_ref_ptr_offset)], op2 = all_daf[*(&op1_ref + 4 - op_ref_ptr_offset)]; // => op1->exp >= op2->exp
   }
 
   // using an array to store all of the remainders of the sums : each bit represents a remainder
   // in binary a remainder can only be 0 or 1
   uint8_t arrem1_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1],
-      arrem2_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1]; // It is needed to calloc these to have them as pointers
+      arrem2_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1];
 
   uint8_t *arrem1 = arrem1_arr;
   uint8_t *arrem2 = arrem2_arr;
@@ -603,36 +597,44 @@ daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 
   rop->loaded_mtsa = calloc(sizeof(daf_limb_t *), max_limb_numb);
 
-  // open all of the file containing the mantissas of the operands
-  char filename[64];
+  // loading all of the mantissa of the operands
 
-  daf_get_filename(filename, op1_ref);
-  FILE *op1bin;
-  OPEN_FILE_OR_PANIC(filename, "rb", op1bin);
+  daf_load_mantissa(op1_ref);
+  daf_load_mantissa(op2_ref);
 
-  daf_get_filename(filename, op2_ref);
-  FILE *op2bin;
-  OPEN_FILE_OR_PANIC(filename, "rb", op2bin);
-
-  const uint8_t dec_sign = (op1->exp >= op2->exp);
-  const uint64_t dec = dec_sign ? op1->exp - op2->exp : op2->exp - op1->exp;
-
-  const uint32_t limb_dec = (dec - (dec % sizeof(daf_limb_t)));
+  const uint64_t dec = op1->exp - op2->exp;             // the number of uint30_t that the two operands are offseted by to each other
+  const uint64_t limb_dec = dec / DAF_LIMB_SIZE;        // the number of limbs that the two operands are offseted by to each other
+  const uint64_t uint30_limb_dec = dec % DAF_LIMB_SIZE; // the number of uint30_t in a limbs that the two operands are offseted by to each other
 
   // add the limbs in pair for the start of both op's
   uint8_t carry;
-  daf_limb_add(&carry, rop->start, *(op1->start), *(op2->start), limb_dec);
+  if (dec <= DAF_LIMB_SIZE)
+    daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->start), dec);
+  else
+    daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->loaded_mtsa[limb_dec]), uint30_limb_dec);
+
   if (carry == 1)
     DAF_ADD_SET_REM_BIT(arrem1, 1);
 
-  daf_limb_t tmpop1, tmpop2;
   for (size_t i = 0; i < max_limb_numb; ++i)
   {
     (rop->loaded_mtsa)[i] = malloc(sizeof(daf_limb_t));
+    if (i > limb_dec)
+      daf_limb_add(&carry, (rop->loaded_mtsa)[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), op2->loaded_mtsa[i + limb_dec - 1], uint30_limb_dec);
+    else if (i == limb_dec)
+      daf_limb_add(&carry, rop->loaded_mtsa[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), *(op2->start), uint30_limb_dec);
+    else
+    {
+      for (uint8_t j = 0; j < DAF_LIMB_SIZE; ++j)
+      {
+        if (j < uint30_limb_dec)
+          (*(rop->loaded_mtsa[i]))[j] = (*(op1->loaded_mtsa[i]))[j];
+        else
+          (*(rop->loaded_mtsa[i]))[j] = (*(op1->loaded_mtsa[i + 1]))[j];
+      }
+    }
 
-    fread(&tmpop1, sizeof(tmpop1), 1, op1bin);
-    fread(&tmpop2, sizeof(tmpop2), 1, op2bin);
-    if (daf_limb_add(&carry, (rop->loaded_mtsa)[i], tmpop1, tmpop2) == 1)
+    if (carry == 1)
       DAF_ADD_SET_REM_BIT(arrem1, i + 1);
 
     int limb_i_is_max = 0;

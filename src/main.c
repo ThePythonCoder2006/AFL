@@ -7,8 +7,8 @@
 
 int main(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
+  // remove the first element of the call (the name of the program)
+  --argc, argv++;
 
   daf_ref_t num = daf_init(200);
 
