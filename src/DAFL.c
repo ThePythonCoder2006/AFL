@@ -483,7 +483,7 @@ daf_ret_t daf_ten_9_add(uint30_t *const rop, const uint30_t op1, const uint30_t 
   }
   return DAF_RET_SUCESS;
 }
-daf_ret_t daf_limb_pp(daf_limb_t *rop, daf_limb_t op) // adds one to the limb
+daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
 {
   for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
   {
@@ -575,17 +575,16 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
 }
 
 /*function that add two const hpcp_t passed as refs (op1_ref and op2_ref) and sets the result into an another hpcp_t ref (rop_ref)*/
-daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
+daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 {
   DAF_GET_PTR(rop);
   daf_t *op1, *op2;
   {
-    const uint8_t op_ref_ptr_offset = ((DAF_GET(op1_ref, exp) <= DAF_GET(op2_ref, exp)) * sizeof(op1_ref));
-    op1 = all_daf[*(&op1_ref + op_ref_ptr_offset)], op2 = all_daf[*(&op1_ref + 4 - op_ref_ptr_offset)]; // => op1->exp >= op2->exp
+    const uint8_t op_ref_ptr_offset = (DAF_GET(op1_ref, exp) <= DAF_GET(op2_ref, exp));
+    op1 = all_daf[*(&op1_ref - op_ref_ptr_offset)], op2 = all_daf[*(&op1_ref + 1 - op_ref_ptr_offset)]; // => op1->exp >= op2->exp
   }
 
-  // using an array to store all of the remainders of the sums : each bit represents a remainder
-  // in binary a remainder can only be 0 or 1
+  // using a bit field to store all of the remainders of the sums
   uint8_t arrem1_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1],
       arrem2_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1];
 
@@ -595,12 +594,11 @@ daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   // the number of limbs used by the return operand (rop)
   const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(daf_limb_t)) / sizeof(daf_limb_t);
 
-  rop->loaded_mtsa = calloc(sizeof(daf_limb_t *), max_limb_numb);
-
   // loading all of the mantissa of the operands
 
   daf_load_mantissa(op1_ref);
   daf_load_mantissa(op2_ref);
+  daf_load_mantissa(rop_ref);
 
   const uint64_t dec = op1->exp - op2->exp;             // the number of uint30_t that the two operands are offseted by to each other
   const uint64_t limb_dec = dec / DAF_LIMB_SIZE;        // the number of limbs that the two operands are offseted by to each other
@@ -620,7 +618,7 @@ daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   {
     (rop->loaded_mtsa)[i] = malloc(sizeof(daf_limb_t));
     if (i > limb_dec)
-      daf_limb_add(&carry, (rop->loaded_mtsa)[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), op2->loaded_mtsa[i + limb_dec - 1], uint30_limb_dec);
+      daf_limb_add(&carry, (rop->loaded_mtsa)[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), *(op2->loaded_mtsa[i + limb_dec - 1]), uint30_limb_dec);
     else if (i == limb_dec)
       daf_limb_add(&carry, rop->loaded_mtsa[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), *(op2->start), uint30_limb_dec);
     else
@@ -637,44 +635,23 @@ daf_ret_t hpcp_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
     if (carry == 1)
       DAF_ADD_SET_REM_BIT(arrem1, i + 1);
 
-    int limb_i_is_max = 0;
+    uint8_t limb_i_is_max = 0;
     for (size_t j = 0; j < DAF_LIMB_SIZE; ++j)
-      if ((*((rop->loaded_mtsa)[i])[j]) == TEN_9_MAX)
+      if ((((*(rop->loaded_mtsa))[i])[j]) == TEN_9_MAX)
       {
         limb_i_is_max = 1;
         break;
       }
 
-    daf_limb_t limb_one;
-    daf_limb_set_ui(limb_one, 1);
-
     // check if rop is at max if not then do add the remaider
     if (limb_i_is_max == 0)
     {
-      daf_limb_add(&carry, (rop->loaded_mtsa)[i], *((rop->loaded_mtsa)[i]), limb_one);
+      daf_limb_pp(&(*(rop->loaded_mtsa))[i]);
       DAF_ADD_CLR_REM_BIT(arrem1, i + 1);
     }
 
     printf("%i\n", i);
   }
-  // open rop's mantissa only when needing to save
-  daf_get_filename(filename, rop_ref);
-  FILE *ropbin;
-  OPEN_FILE_OR_PANIC(filename, "wb", ropbin);
-
-  for (size_t i = 0; i < max_limb_numb; ++i)
-  {
-    fwrite((rop->loaded_mtsa)[i], sizeof(daf_limb_t), 1, ropbin);
-  }
-
-  fclose(ropbin);
-  fclose(op1bin);
-  fclose(op2bin);
-
-  for (size_t i = 0; i < max_limb_numb; ++i)
-    free(*((rop->loaded_mtsa)[i]));
-
-  free((rop->loaded_mtsa));
 
   return DAF_RET_SUCESS;
 

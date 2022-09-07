@@ -234,8 +234,9 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op);
 daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
 
 daf_ret_t daf_ten_9_add(uint30_t *rop, uint30_t op1, uint30_t op2);
-daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint16_t dec);
-daf_ret_t daf_limb_pp(daf_limb_t *rop, daf_limb_t op); // adds one to the limb
+daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint8_t uint30_dec);
+daf_ret_t daf_limb_pp(daf_limb_t *rop); // adds one to the limb
+daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref);
 
 // file functions
 void rek_mkdir(const char *const path);

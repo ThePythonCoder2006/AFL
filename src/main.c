@@ -10,17 +10,18 @@ int main(int argc, char **argv)
   // remove the first element of the call (the name of the program)
   --argc, argv++;
 
-  daf_ref_t num = daf_init(200);
+  daf_ref_t op1 = daf_init(200), op2 = daf_init(200), rop = daf_init(200);
 
-  printf("Hello DAF !! %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n", DAF_GET(num, prec), (uint64_t)DAF_GET(num, real_prec_dec), (uint64_t)(DAF_GET(num, prec) + (uint64_t)DAF_GET(num, real_prec_dec)) % DAF_LIMB_DECIMAL_SIZE);
+  daf_set_ui(op1, 35);
+  daf_set_ui(op2, 34);
 
-  uint30_t rop;
+  daf_add(rop, op1, op2);
 
-  daf_ten_9_add(&rop, (TEN_9_MAX), 1);
-  printf(PRINTF_BINARY_PATTERN_INT32 "\n", PRINTF_BYTE_TO_BINARY_INT32(rop));
-  printf("%i + %i = %i carry %i\n", 34, 35, rop & ~(1 << 30), rop >> 30);
+  daf_printf("%DF + %DF = %DF", op1, op2, rop);
 
-  daf_clear(num);
+  daf_clear(op1);
+  daf_clear(op2);
+  daf_clear(rop);
 
   return 0;
 }
