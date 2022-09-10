@@ -12,12 +12,12 @@ int main(int argc, char **argv)
 
   daf_ref_t op1 = daf_init(200), op2 = daf_init(200), rop = daf_init(200);
 
-  daf_set_ui(op1, 35);
-  daf_set_ui(op2, 34);
+  daf_set_ui(op1, (TEN_9_MAX + 1) * 2);
+  daf_set_ui(op2, 1);
 
   daf_add(rop, op1, op2);
 
-  daf_printf("%DF + %DF = %DF", op1, op2, rop);
+  daf_printf("%DF + %DF = %DF\n", op1, op2, rop);
 
   daf_clear(op1);
   daf_clear(op2);

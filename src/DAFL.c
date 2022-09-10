@@ -36,6 +36,7 @@ daf_ret_t daf_load_mantissa(daf_ref_t op_ref)
 
     fread(op->loaded_mtsa[i], sizeof(uint30_t), 1, fmantissa);
   }
+  fclose(fmantissa);
   return DAF_RET_SUCESS;
 }
 
@@ -47,8 +48,6 @@ daf_ret_t daf_set_file_mantissa_zero(daf_ref_t op_ref)
     return DAF_RET_SUCESS;
 
   const uint64_t binmax = (op->prec - DAF_LIMB_SIZE) + op->real_prec_dec;
-
-  // printf("binmax : %" PRIu64 "\n", binmax);
 
   char filename[64];
   daf_get_filename(filename, op_ref);
@@ -116,6 +115,7 @@ daf_ret_t daf_clear(daf_ref_t op_ref)
   free(*(op->start));
   char filename[64];
   daf_get_filename(filename, op_ref);
+  printf("%s\n", filename);
   remove(filename);
 
   if (op->loaded_mtsa != NULL)
@@ -359,6 +359,13 @@ daf_ret_t daf_err_to_str(daf_ret_t err, char *const buff)
 
 // set functions ------------------------------------------------------
 
+daf_ret_t daf_limb_set_zero(daf_limb_t *rop)
+{
+  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
+    (*rop)[i] = 0;
+  return DAF_RET_SUCESS;
+}
+
 daf_ret_t daf_set_plus_zero(daf_ref_t op_ref)
 {
   DAF_GET_PTR(op);
@@ -500,7 +507,7 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
     }
     else if ((*rop)[i] > TEN_9_MAX)
     {
-      fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %" PRIu64 "\n", i, i, (*rop)[i], TEN_9_MAX);
+      fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %u\n", i, i, (*rop)[i], (uint32_t)TEN_9_MAX);
       return DAF_RET_ERR_INVALID_FLOAT;
     }
   }
@@ -511,9 +518,9 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
 daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint8_t uint30_dec)
 {
   // helper macros for the hpcp_add function for keeping the remaiders
-#define DAF_ADD_GET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
-#define DAF_ADD_SET_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) |= (1 << (((N)-1) % 8)))
-#define DAF_ADD_CLR_REM_BIT(rem_var, N) (((rem_var)[(size_t)((N) / 8)]) &= ~(1 << (((N)-1) % 8)))
+#define DAF_ADD_GET_REM_BIT(rem_var, N) (((rem_var)[(uint64_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
+#define DAF_ADD_SET_REM_BIT(rem_var, N) (((rem_var)[(uint64_t)((N) / 8)]) |= (1 << (((N)-1) % 8)))
+#define DAF_ADD_CLR_REM_BIT(rem_var, N) (((rem_var)[(uint64_t)((N) / 8)]) &= ~(1 << (((N)-1) % 8)))
 
   // using an array as bitfield to store all of the carrys of the sums
   uint8_t *arrcarry1 = calloc(1, ((uint64_t)(DAF_LIMB_SIZE / 8)) + 1),
@@ -526,8 +533,14 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
   // summing each pair of uint30_t individually
   for (size_t i = 0; i < DAF_LIMB_SIZE; ++i)
   {
-    uint64_t nval = (op1_bott[i + uint30_dec]) | (op1_top[i + uint30_dec]);
-    daf_ten_9_add(&(*rop)[i], nval, op2[i]);
+    if (i < uint30_dec)
+    {
+      daf_ten_9_add(&(*rop)[i], op1_bott[i], op2[i]);
+    }
+    else
+    {
+      daf_ten_9_add(&(*rop)[i], op1_top[i + uint30_dec], op2[i]);
+    }
     if (DAF_ADD_GET_CARRY((*rop)[i]) == 1)
       DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
   }
@@ -579,17 +592,61 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 {
   DAF_GET_PTR(rop);
   daf_t *op1, *op2;
+  if (DAF_GET(op1_ref, exp) >= DAF_GET(op2_ref, exp))
   {
-    const uint8_t op_ref_ptr_offset = (DAF_GET(op1_ref, exp) <= DAF_GET(op2_ref, exp));
-    op1 = all_daf[*(&op1_ref - op_ref_ptr_offset)], op2 = all_daf[*(&op1_ref + 1 - op_ref_ptr_offset)]; // => op1->exp >= op2->exp
+    op1 = all_daf[op1_ref];
+    op2 = all_daf[op2_ref];
+  }
+  else
+  {
+    op2 = all_daf[op1_ref];
+    op1 = all_daf[op2_ref];
+  }
+
+  rop->head = 0;
+
+  if (DAF_IS_INT(op1_ref) && DAF_IS_INT(op2_ref))
+  {
+    rop->head |= DAF_HEAD_INT;
+
+    if (DAF_IS_ZERO(op1_ref) && DAF_IS_ZERO(op2_ref))
+    {
+      if (DAF_IS_POS(op1_ref) && DAF_IS_POS(op2_ref))
+      {
+        daf_set_plus_zero(rop_ref);
+        return DAF_RET_SUCESS;
+      }
+    }
+  }
+
+  if (DAF_IS_NaN(op1_ref) || DAF_IS_NaN(op2_ref))
+  {
+    daf_set_NaN(rop_ref);
+    return DAF_RET_SUCESS;
+  }
+
+  if (DAF_IS_INF(op1_ref) || DAF_IS_INF(op2_ref))
+  {
+    if (DAF_IS_POS(op1_ref) && DAF_IS_POS(op2_ref))
+    {
+      daf_set_plus_inf(rop_ref);
+      return DAF_RET_SUCESS;
+    }
+    else if (!DAF_IS_POS(op1_ref) && !DAF_IS_POS(op2_ref))
+    {
+      daf_set_minus_inf(rop_ref);
+      return DAF_RET_SUCESS;
+    }
+    daf_set_plus_zero(rop_ref);
+    return DAF_RET_SUCESS;
   }
 
   // using a bit field to store all of the remainders of the sums
-  uint8_t arrem1_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1],
-      arrem2_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1];
+  uint8_t arrcarry1_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1],
+      arrcarry2_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1];
 
-  uint8_t *arrem1 = arrem1_arr;
-  uint8_t *arrem2 = arrem2_arr;
+  uint8_t *arrcarry1 = arrcarry1_arr;
+  uint8_t *arrcarry2 = arrcarry2_arr;
 
   // the number of limbs used by the return operand (rop)
   const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(daf_limb_t)) / sizeof(daf_limb_t);
@@ -612,7 +669,7 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
     daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->loaded_mtsa[limb_dec]), uint30_limb_dec);
 
   if (carry == 1)
-    DAF_ADD_SET_REM_BIT(arrem1, 1);
+    DAF_ADD_SET_REM_BIT(arrcarry1, 1);
 
   for (size_t i = 0; i < max_limb_numb; ++i)
   {
@@ -631,26 +688,51 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
           (*(rop->loaded_mtsa[i]))[j] = (*(op1->loaded_mtsa[i + 1]))[j];
       }
     }
-
     if (carry == 1)
-      DAF_ADD_SET_REM_BIT(arrem1, i + 1);
+      DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
+  }
+  uint8_t run = 1;
 
-    uint8_t limb_i_is_max = 0;
-    for (size_t j = 0; j < DAF_LIMB_SIZE; ++j)
-      if ((((*(rop->loaded_mtsa))[i])[j]) == TEN_9_MAX)
-      {
-        limb_i_is_max = 1;
-        break;
-      }
-
-    // check if rop is at max if not then do add the remaider
-    if (limb_i_is_max == 0)
+  while (run)
+  {
+    for (uint64_t i = 0; i < max_limb_numb; ++i)
     {
-      daf_limb_pp(&(*(rop->loaded_mtsa))[i]);
-      DAF_ADD_CLR_REM_BIT(arrem1, i + 1);
+      uint8_t limb_i_is_max = 0;
+      for (size_t j = 0; j < DAF_LIMB_SIZE; ++j)
+        if ((((*(rop->loaded_mtsa))[i])[j]) == TEN_9_MAX)
+        {
+          limb_i_is_max = 1;
+          break;
+        }
+
+      // check if rop is at max if not then do add the remaider
+      if (limb_i_is_max == 0)
+      {
+        daf_limb_pp(&(*(rop->loaded_mtsa))[i + 1]);
+        DAF_ADD_CLR_REM_BIT(arrcarry1, i + 1);
+      }
+      else
+      {
+        DAF_ADD_SET_REM_BIT(arrcarry2, i + 2);
+        daf_limb_set_zero(&(*(rop->loaded_mtsa))[i]);
+      }
+    }
+    // suppose that there is no more carry
+    run = 0;
+
+    // reset the carry array n°1 that has allready been used to 0 and check if the second array contains any non zero value
+    for (uint8_t i = 0; i < ((size_t)(DAF_LIMB_SIZE / 8)) + 1; ++i)
+    {
+      arrcarry1[i] = 0;
+      if (arrcarry2[i])
+      // if the second carry array does contain non-zero element(s) then keep running and skip the swaping of the arrays
+      {
+        run = 1;
+        continue;
+      }
     }
 
-    printf("%i\n", i);
+    swap_ptr_uint8(&arrcarry1, &arrcarry2);
   }
 
   return DAF_RET_SUCESS;
@@ -672,7 +754,7 @@ void rek_mkdir(const char *const path)
     *sep = '/';
   }
   if (mkdir(path) && errno != EEXIST)
-    printf("error while trying to create '%s'\n", path);
+    printf(PRINTF_ERROR "error while trying to create '%s'\n", path);
 }
 
 FILE *fopen_mkdir(const char *const path, const char *const mode)

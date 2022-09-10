@@ -38,7 +38,7 @@
 #define TEN_9_MAX (999999999ULL)
 #define TEN_9_DEC ((UINT30_MAX) - (TEN_9_MAX))
 
-#define TMPPATH "./tmp"
+#define TMPPATH "./bin/tmp"
 
 #define DAF_LIMB_SIZE (50)
 
@@ -53,6 +53,7 @@
 #define DAF_IS_NaN(ref) (((all_daf[ref])->head | (DAF_HEAD_NaN)) == (all_daf[ref])->head)
 #define DAF_IS_INF(ref) (((all_daf[ref])->head | (DAF_HEAD_INF)) == (all_daf[ref])->head)
 #define DAF_IS_INT(ref) (((all_daf[ref])->head | (DAF_HEAD_INT)) == (all_daf[ref])->head)
+#define DAF_IS_POS(ref) (((all_daf[ref])->head | (DAF_HEAD_MINUS)) != (all_daf[ref])->head)
 
 #define DAF_GET_PTR(op) daf_t *op = all_daf[op##_ref]
 
