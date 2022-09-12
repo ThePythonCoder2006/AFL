@@ -71,7 +71,7 @@ daf_ret_t init_all_daf(void)
 {
   if (!all_daf_already_init)
   {
-    printf("%i\n", all_daf_already_init);
+    // printf("%i\n", all_daf_already_init);
     all_daf = calloc(10, sizeof(daf_t *));
     all_daf_already_init = 1;
   }
@@ -444,7 +444,7 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op)
   p1 = op % (TEN_9_MAX + 1);
   tmp = (op - p1);
   p2 = ((tmp / (TEN_9_MAX + 1))) % (TEN_9_MAX + 1);
-  p3 = ((tmp - p2) / (TEN_9_MAX + 1)) % (TEN_9_MAX + 1);
+  p3 = (((tmp / (TEN_9_MAX + 1)) - p2) / (TEN_9_MAX + 1)) % (TEN_9_MAX + 1);
 
   DAF_GET_PTR(rop);
   rop->head = DAF_HEAD_INT;
@@ -505,9 +505,8 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
     }
     else
     {
-      fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %u, %lu)\n", i, i, (*rop)[i], (uint32_t)TEN_9_MAX, UINT32_MAX);
-      printf("rop[%" PRIu8 "] = " PRINTF_BINARY_PATTERN_INT32 "\n", i, PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]));
-
+      printf("  " PRINTF_BINARY_PATTERN_INT32 "\n& " PRINTF_BINARY_PATTERN_INT32 "\n= " PRINTF_BINARY_PATTERN_INT32 "\n", PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]), PRINTF_BYTE_TO_BINARY_INT32(~(1 << 31)), PRINTF_BYTE_TO_BINARY_INT32((*rop)[i] & ~(1 << 31)));
+      fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %u\n", i, i, (*rop)[i], (uint32_t)TEN_9_MAX);
       return DAF_RET_ERR_INVALID_FLOAT;
     }
   }
@@ -535,17 +534,20 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
   {
     if (i < uint30_dec)
     {
-      daf_ten_9_add(&(*rop)[i], op1_bott[i], op2[i]);
+      (*rop)[i] = op1_top[i];
     }
     else
     {
-      daf_ten_9_add(&(*rop)[i], op1_top[i + uint30_dec], op2[i]);
-    }
-    if (DAF_ADD_GET_CARRY((*rop)[i]) == 1)
-      DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
+      if (i + uint30_dec < DAF_LIMB_SIZE)
+        daf_ten_9_add(&(*rop)[i], op1_top[i], op2[i - uint30_dec]);
+      else
+        daf_ten_9_add(&(*rop)[i], op1_bott[i], op2[i - uint30_dec]);
 
-    ;
-    printf("rop[%" PRIu8 "] = " PRINTF_BINARY_PATTERN_INT32 "\n", i, PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]));
+      if (DAF_ADD_GET_CARRY((*rop)[i]) == 1)
+        DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
+
+      (*rop)[i] &= ~(1 << 30);
+    }
   }
 
   uint8_t run = 1;
@@ -644,6 +646,9 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
     return DAF_RET_SUCESS;
   }
 
+  rop->prec = op1->prec > op2->prec ? op1->prec : op2->prec;
+  rop->exp = op1->exp > op2->exp ? op1->exp : op2->exp;
+
   // using a bit field to store all of the remainders of the sums
   uint8_t arrcarry1_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1],
       arrcarry2_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1];
@@ -676,7 +681,6 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 
   for (size_t i = 0; i < max_limb_numb; ++i)
   {
-    (rop->loaded_mtsa)[i] = malloc(sizeof(daf_limb_t));
     if (i > limb_dec)
       daf_limb_add(&carry, (rop->loaded_mtsa)[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), *(op2->loaded_mtsa[i + limb_dec - 1]), uint30_limb_dec);
     else if (i == limb_dec)
@@ -700,24 +704,15 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   {
     for (uint64_t i = 0; i < max_limb_numb; ++i)
     {
-      uint8_t limb_i_is_max = 0;
-      for (size_t j = 0; j < DAF_LIMB_SIZE; ++j)
-        if ((((*(rop->loaded_mtsa))[i])[j]) == TEN_9_MAX)
+      for (uint8_t j = 0; j < DAF_LIMB_SIZE; ++j)
+      {
+        if (DAF_ADD_GET_REM_BIT(arrcarry1, i * j))
         {
-          limb_i_is_max = 1;
-          break;
+          if ((*rop->loaded_mtsa)[i][j] == TEN_9_MAX)
+            DAF_ADD_SET_REM_BIT(arrcarry2, i + 1);
+          else
+            ++((*rop->loaded_mtsa)[i][j]);
         }
-
-      // check if rop is at max if not then do add the remaider
-      if (limb_i_is_max == 0)
-      {
-        daf_limb_pp(&(*(rop->loaded_mtsa))[i + 1]);
-        DAF_ADD_CLR_REM_BIT(arrcarry1, i + 1);
-      }
-      else
-      {
-        DAF_ADD_SET_REM_BIT(arrcarry2, i + 2);
-        daf_limb_set_zero(&(*(rop->loaded_mtsa))[i]);
       }
     }
     // suppose that there is no more carry
@@ -734,7 +729,6 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
         continue;
       }
     }
-
     swap_ptr_uint8(&arrcarry1, &arrcarry2);
   }
 

@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 
   daf_ref_t op1 = daf_init(200), op2 = daf_init(200), rop = daf_init(200);
 
-  daf_set_ui(op1, (TEN_9_MAX + 1) * 2);
+  daf_set_ui(op1, (TEN_9_MAX + 1) * 2 + TEN_9_MAX);
   daf_set_ui(op2, 1);
 
   daf_add(rop, op1, op2);
