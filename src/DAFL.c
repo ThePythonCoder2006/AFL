@@ -115,7 +115,6 @@ daf_ret_t daf_clear(daf_ref_t op_ref)
   free(*(op->start));
   char filename[64];
   daf_get_filename(filename, op_ref);
-  printf("%s\n", filename);
   remove(filename);
 
   if (op->loaded_mtsa != NULL)
@@ -229,7 +228,7 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
   }
 
   // adding sign
-  char tmp = (op->head | DAF_HEAD_MINUS) == op->head ? '-' : 0;
+  const char tmp = (op->head | DAF_HEAD_MINUS) == op->head ? '-' : 0;
   if (sn)
     strncat(buff, &tmp, 1);
   else
@@ -249,7 +248,7 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
     return DAF_RET_SUCESS;
   }
 
-  char sep = '.';
+  const char sep = '.';
 
   daf_ret_t err;
   if ((err = daf_load_mantissa(op_ref)) != DAF_RET_SUCESS)
@@ -494,8 +493,7 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
 {
   for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
   {
-    const uint8_t less = (*rop)[i] < TEN_9_MAX;
-    if (less)
+    if ((*rop)[i] < TEN_9_MAX)
     {
       (*rop)[i]++;
       break;
@@ -505,9 +503,11 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
       (*rop)[i] = 0;
       continue;
     }
-    else if ((*rop)[i] > TEN_9_MAX)
+    else
     {
-      fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %u\n", i, i, (*rop)[i], (uint32_t)TEN_9_MAX);
+      fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %u, %lu)\n", i, i, (*rop)[i], (uint32_t)TEN_9_MAX, UINT32_MAX);
+      printf("rop[%" PRIu8 "] = " PRINTF_BINARY_PATTERN_INT32 "\n", i, PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]));
+
       return DAF_RET_ERR_INVALID_FLOAT;
     }
   }
@@ -543,6 +543,9 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
     }
     if (DAF_ADD_GET_CARRY((*rop)[i]) == 1)
       DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
+
+    ;
+    printf("rop[%" PRIu8 "] = " PRINTF_BINARY_PATTERN_INT32 "\n", i, PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]));
   }
 
   uint8_t run = 1;
