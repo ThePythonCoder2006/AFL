@@ -99,7 +99,7 @@ daf_ret_ref_t daf_init(uint64_t prec)
 
   all_daf[ref]->exp = 0ULL;
   all_daf[ref]->prec = prec;
-  all_daf[ref]->real_prec_dec = DAF_LIMB_DECIMAL_SIZE - (prec % DAF_LIMB_DECIMAL_SIZE);
+  all_daf[ref]->real_prec_dec = DAF_LIMB_SIZE - (prec % DAF_LIMB_SIZE);
   all_daf[ref]->head = DAF_HEAD_INT | DAF_HEAD_ZERO;
 
   daf_set_file_mantissa_zero(ref);
@@ -560,8 +560,8 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
       if (DAF_ADD_GET_REM_BIT(arrcarry1, i + 1))
       {
         // if there will not be an owerflow then apply the carry
-        if ((*rop)[i] < TEN_9_MAX)
-          DAF_ADD_CLR_REM_BIT(arrcarry1, i + 1), ((*rop)[i])++;
+        if ((*rop)[i - 1] < TEN_9_MAX)
+          DAF_ADD_CLR_REM_BIT(arrcarry1, i + 1), ((*rop)[i - 1])++;
         else // else set the carry for the next value and reset the uint64_t to 0
           DAF_ADD_SET_REM_BIT(arrcarry2, i + 2), ((*rop)[i]) = 0;
       }
@@ -658,7 +658,7 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   uint8_t *arrcarry2 = arrcarry2_arr;
 
   // the number of limbs used by the return operand (rop)
-  const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - sizeof(daf_limb_t)) / sizeof(daf_limb_t);
+  const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - DAF_LIMB_SIZE) / DAF_LIMB_SIZE;
 
   // loading all of the mantissa of the operands
 
@@ -673,7 +673,22 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   // add the limbs in pair for the start of both op's
   uint8_t carry;
   if (dec <= DAF_LIMB_SIZE)
-    daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->start), dec);
+  {
+    if (op1->prec + op1->real_prec_dec == DAF_LIMB_SIZE)
+    {
+      daf_limb_t zero;
+      daf_limb_set_zero(&zero);
+      daf_limb_add(&carry, rop->start, *(op1->start), zero, *(op2->start), dec);
+    }
+    else
+      daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->start), dec);
+  }
+  else if (op1->prec + op1->real_prec_dec == 1)
+  {
+    daf_limb_t zero;
+    daf_limb_set_zero(&zero);
+    daf_limb_add(&carry, rop->start, *(op1->start), zero, *(op2->loaded_mtsa[limb_dec]), uint30_limb_dec);
+  }
   else
     daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->loaded_mtsa[limb_dec]), uint30_limb_dec);
 
