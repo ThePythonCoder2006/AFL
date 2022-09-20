@@ -19,11 +19,20 @@ daf_ret_t daf_load_mantissa(daf_ref_t op_ref)
   if (op->loaded_mtsa != NULL)
     return DAF_RET_SUCESS;
 
+  if (op->prec <= DAF_LIMB_SIZE)
+    return DAF_RET_SUCESS;
+
   uint64_t mtsa_size = (op->prec + op->real_prec_dec) - DAF_LIMB_SIZE;
 
   char filename[64];
   daf_get_filename(filename, op_ref);
   FILE *fmantissa = fopen(filename, "rb");
+
+  if (fmantissa == NULL)
+  {
+    fprintf(stderr, PRINTF_ERROR " could not open the file \"%s\" of the mantissa of the daf with ref %" PRIu64 "\n", filename, op_ref);
+    return DAF_RET_ERR_READ_FILE;
+  }
 
   op->loaded_mtsa = calloc(mtsa_size / DAF_LIMB_SIZE, sizeof(daf_t *));
   if (op->loaded_mtsa == NULL)
@@ -356,6 +365,48 @@ daf_ret_t daf_err_to_str(daf_ret_t err, char *const buff)
   return DAF_RET_SUCESS;
 }
 
+daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name)
+{
+  printf("%s\n", name);
+
+  DAF_GET_PTR(op);
+
+  printf("|- head : %" PRIu8 " : %c ; %s ; %s ; %s ; %s ; %s\n", op->head,
+         DAF_IS_POS(op_ref) ? '+' : '-',
+         DAF_IS_ZERO(op_ref) ? "0" : "!= 0",
+         DAF_IS_INF(op_ref) ? "Inf" : "finite",
+         DAF_IS_NaN(op_ref) ? "NaN" : "aN",
+         !op->head | DAF_HEAD_EXP_MINUS == op->head ? "| | < 1" : "| | >= 1",
+         DAF_IS_INT(op_ref) ? "Int" : "Float");
+
+  printf("|- exp : %" PRIu64 "\n", op->exp);
+  printf("|- prec : %" PRIu64 "\n", op->prec);
+  printf("|- reak_prec_dec : %" PRIu8 "\n", op->real_prec_dec);
+  printf("|- start : 0x%p\n", op->start);
+  printf("\t|- *start : 0x%p\n", *op->start);
+  printf("\t\t|- {%u", (*op->start)[0]);
+  for (uint8_t i = 1; i < DAF_LIMB_SIZE; ++i)
+    printf(",%u ", (*op->start)[i]);
+  printf("}\n");
+
+  printf("|- load_mtsa : 0x%p\n", op->loaded_mtsa);
+  if (op->loaded_mtsa == NULL)
+  {
+    return DAF_RET_SUCESS;
+  }
+
+  printf("\t|- *loaded_mtsa : 0x%p\n", *op->loaded_mtsa);
+  for (uint64_t i = 0; i < (op->prec + op->real_prec_dec) / DAF_LIMB_SIZE - 1; ++i)
+  {
+    printf("\t\t");
+    for (uint8_t j = 1; j < DAF_LIMB_SIZE; ++j)
+    {
+    }
+  }
+
+  return DAF_RET_SUCESS;
+}
+
 // set functions ------------------------------------------------------
 
 daf_ret_t daf_limb_set_zero(daf_limb_t *rop)
@@ -532,6 +583,9 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
   // summing each pair of uint30_t individually
   for (size_t i = 0; i < DAF_LIMB_SIZE; ++i)
   {
+    if (op1_top[i] == 0 && op2)
+      ;
+
     if (i < uint30_dec)
     {
       (*rop)[i] = op1_top[i];
@@ -559,8 +613,8 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
       if (DAF_ADD_GET_REM_BIT(arrcarry1, i + 1))
       {
         // if there will not be an owerflow then apply the carry
-        if ((*rop)[i - 1] < TEN_9_MAX)
-          DAF_ADD_CLR_REM_BIT(arrcarry1, i + 1), ((*rop)[i - 1])++;
+        if ((*rop)[i] < TEN_9_MAX)
+          DAF_ADD_CLR_REM_BIT(arrcarry1, i + 1), ((*rop)[i + 1])++;
         else // else set the carry for the next value and reset the uint64_t to 0
           DAF_ADD_SET_REM_BIT(arrcarry2, i + 2), ((*rop)[i]) = 0;
       }
@@ -582,7 +636,7 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
       // if the second carry array does contain non-zero element(s) then keep running and skip the swaping of the arrays
       {
         run = 1;
-        continue;
+        break;
       }
     }
 
@@ -646,18 +700,13 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
     return DAF_RET_SUCESS;
   }
 
-  rop->prec = op1->prec > op2->prec ? op1->prec : op2->prec;
   rop->exp = op1->exp > op2->exp ? op1->exp : op2->exp;
 
-  // using a bit field to store all of the remainders of the sums
-  uint8_t arrcarry1_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1],
-      arrcarry2_arr[((uint64_t)(DAF_LIMB_SIZE / 8)) + 1];
-
-  uint8_t *arrcarry1 = arrcarry1_arr;
-  uint8_t *arrcarry2 = arrcarry2_arr;
-
   // the number of limbs used by the return operand (rop)
-  const uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec) - DAF_LIMB_SIZE) / DAF_LIMB_SIZE;
+  uint64_t max_limb_numb = ((rop->prec + rop->real_prec_dec)) / DAF_LIMB_SIZE;
+
+  uint8_t *arrcarry1 = calloc(1, (uint64_t)(max_limb_numb / 8));
+  uint8_t *arrcarry2 = calloc(1, (uint64_t)(max_limb_numb / 8));
 
   // loading all of the mantissa of the operands
 
@@ -694,7 +743,7 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   if (carry == 1)
     DAF_ADD_SET_REM_BIT(arrcarry1, 1);
 
-  for (size_t i = 0; i < max_limb_numb; ++i)
+  for (size_t i = 0; i < max_limb_numb - 1; ++i)
   {
     if (i > limb_dec)
       daf_limb_add(&carry, (rop->loaded_mtsa)[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), *(op2->loaded_mtsa[i + limb_dec - 1]), uint30_limb_dec);
@@ -710,26 +759,44 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
           (*(rop->loaded_mtsa[i]))[j] = (*(op1->loaded_mtsa[i + 1]))[j];
       }
     }
-    if (carry == 1)
+    if (carry | 1 == carry)
+    {
+      if (max_limb_numb == 0)
+        ++max_limb_numb;
       DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
+    }
+    if (carry | 2 == carry)
+      ++rop->exp;
   }
   uint8_t run = 1;
+
+  uint8_t limb_i_is_max = 1;
 
   while (run)
   {
     for (uint64_t i = 0; i < max_limb_numb; ++i)
     {
-      for (uint8_t j = 0; j < DAF_LIMB_SIZE; ++j)
+      if (DAF_ADD_GET_REM_BIT(arrcarry1, i))
       {
-        if (DAF_ADD_GET_REM_BIT(arrcarry1, i * j))
+        for (uint8_t j = 0; i < DAF_LIMB_SIZE; ++j)
         {
-          if ((*rop->loaded_mtsa)[i][j] == TEN_9_MAX)
-            DAF_ADD_SET_REM_BIT(arrcarry2, i + 1);
-          else
-            ++((*rop->loaded_mtsa)[i][j]);
+          if ((*rop->loaded_mtsa)[i][j] <= TEN_9_MAX)
+          {
+            limb_i_is_max = 0;
+            break;
+          }
         }
+        if (!limb_i_is_max)
+        {
+          DAF_ADD_SET_REM_BIT(arrcarry2, i + 1);
+          daf_limb_set_zero(&((*rop->loaded_mtsa)[i]));
+        }
+        else
+          ++((*rop->loaded_mtsa)[i][DAF_LIMB_SIZE - 1]);
+        DAF_ADD_CLR_REM_BIT(arrcarry1, i + 1);
       }
     }
+
     // suppose that there is no more carry
     run = 0;
 

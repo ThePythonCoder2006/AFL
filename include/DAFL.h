@@ -222,6 +222,8 @@ static inline daf_ret_t daf_sprintf(char *buff, const char *fmt, ...)
 
 size_t daf_get_filename(char filename[64], daf_ref_t op_ref);
 
+daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name);
+
 // set functions ------------------------------------------------------
 daf_ret_t daf_set_plus_zero(daf_ref_t op_ref);
 daf_ret_t daf_set_minus_zero(daf_ref_t op_ref);
