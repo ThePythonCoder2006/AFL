@@ -376,7 +376,7 @@ daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name)
          DAF_IS_ZERO(op_ref) ? "0" : "!= 0",
          DAF_IS_INF(op_ref) ? "Inf" : "finite",
          DAF_IS_NaN(op_ref) ? "NaN" : "aN",
-         !op->head | DAF_HEAD_EXP_MINUS == op->head ? "| | < 1" : "| | >= 1",
+         !((op->head | DAF_HEAD_EXP_MINUS) == op->head) ? "| | < 1" : "| | >= 1",
          DAF_IS_INT(op_ref) ? "Int" : "Float");
 
   printf("|- exp : %" PRIu64 "\n", op->exp);
@@ -384,7 +384,7 @@ daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name)
   printf("|- reak_prec_dec : %" PRIu8 "\n", op->real_prec_dec);
   printf("|- start : 0x%p\n", op->start);
   printf("\t|- *start : 0x%p\n", *op->start);
-  printf("\t\t|- {%u", (*op->start)[0]);
+  printf("\t\t|- {%u ", (*op->start)[0]);
   for (uint8_t i = 1; i < DAF_LIMB_SIZE; ++i)
     printf(",%u ", (*op->start)[i]);
   printf("}\n");
@@ -580,25 +580,35 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
   if (arrcarry1 == NULL || arrcarry2 == NULL)
     return DAF_RET_ERR_ALLOC;
 
+  uint8_t max_ten_9_start = DAF_LIMB_SIZE - 1;
+
   // summing each pair of uint30_t individually
   for (size_t i = 0; i < DAF_LIMB_SIZE; ++i)
   {
-    if (op1_top[i] == 0 && op2)
-      ;
 
     if (i < uint30_dec)
     {
       (*rop)[i] = op1_top[i];
+      if (op1_top[i] == 0 && i < max_ten_9_start)
+        max_ten_9_start = i;
     }
     else
     {
       if (i + uint30_dec < DAF_LIMB_SIZE)
+      {
         daf_ten_9_add(&(*rop)[i], op1_top[i], op2[i - uint30_dec]);
+        if (op1_top[i] == 0 && op2[i - uint30_dec] == 0 && i < max_ten_9_start)
+          max_ten_9_start = i;
+      }
       else
-        daf_ten_9_add(&(*rop)[i], op1_bott[i], op2[i - uint30_dec]);
+      {
+        daf_ten_9_add(&(*rop)[i], op1_bott[i + uint30_dec], op2[i - uint30_dec]);
+        if (op1_bott[i + uint30_dec] == 0 && op2[i - uint30_dec] == 0 && i < max_ten_9_start)
+          max_ten_9_start = i;
+      }
 
       if (DAF_ADD_GET_CARRY((*rop)[i]) == 1)
-        DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
+        DAF_ADD_SET_REM_BIT(arrcarry1, i);
 
       (*rop)[i] &= ~(1 << 30);
     }
@@ -608,15 +618,15 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
   while (run)
   {
     // the (i + 1) are because the i's start from 0 and not from 1
-    for (size_t i = 0; i < (DAF_LIMB_SIZE - 1); ++i)
+    for (size_t i = 0; i < (DAF_LIMB_SIZE); ++i)
     {
-      if (DAF_ADD_GET_REM_BIT(arrcarry1, i + 1))
+      if (DAF_ADD_GET_REM_BIT(arrcarry1, i))
       {
         // if there will not be an owerflow then apply the carry
         if ((*rop)[i] < TEN_9_MAX)
-          DAF_ADD_CLR_REM_BIT(arrcarry1, i + 1), ((*rop)[i + 1])++;
+          DAF_ADD_CLR_REM_BIT(arrcarry1, i), ((*rop)[i])++;
         else // else set the carry for the next value and reset the uint64_t to 0
-          DAF_ADD_SET_REM_BIT(arrcarry2, i + 2), ((*rop)[i]) = 0;
+          DAF_ADD_SET_REM_BIT(arrcarry2, i - 1), ((*rop)[i]) = 0;
       }
     }
 
@@ -729,13 +739,13 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
       daf_limb_add(&carry, rop->start, *(op1->start), zero, *(op2->start), dec);
     }
     else
-      daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->start), dec);
+      daf_limb_add(&carry, rop->start, *(op1->start), (*op1->loaded_mtsa)[0], *(op2->start), dec);
   }
   else if (op1->prec + op1->real_prec_dec == 1)
   {
     daf_limb_t zero;
     daf_limb_set_zero(&zero);
-    daf_limb_add(&carry, rop->start, *(op1->start), zero, *(op2->loaded_mtsa[limb_dec]), uint30_limb_dec);
+    daf_limb_add(&carry, rop->start, *(op1->start), zero, (*op2->loaded_mtsa)[limb_dec], uint30_limb_dec);
   }
   else
     daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->loaded_mtsa[limb_dec]), uint30_limb_dec);
@@ -746,9 +756,9 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
   for (size_t i = 0; i < max_limb_numb - 1; ++i)
   {
     if (i > limb_dec)
-      daf_limb_add(&carry, (rop->loaded_mtsa)[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), *(op2->loaded_mtsa[i + limb_dec - 1]), uint30_limb_dec);
+      daf_limb_add(&carry, (rop->loaded_mtsa)[i], (*op1->loaded_mtsa)[i], (*op1->loaded_mtsa)[i + 1], (*op2->loaded_mtsa)[i + limb_dec - 1], uint30_limb_dec);
     else if (i == limb_dec)
-      daf_limb_add(&carry, rop->loaded_mtsa[i], *(op1->loaded_mtsa[i]), *(op1->loaded_mtsa[i + 1]), *(op2->start), uint30_limb_dec);
+      daf_limb_add(&carry, rop->loaded_mtsa[i], (*op1->loaded_mtsa)[i], (*op1->loaded_mtsa)[i + 1], (*op2->start), uint30_limb_dec);
     else
     {
       for (uint8_t j = 0; j < DAF_LIMB_SIZE; ++j)
@@ -759,13 +769,13 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
           (*(rop->loaded_mtsa[i]))[j] = (*(op1->loaded_mtsa[i + 1]))[j];
       }
     }
-    if (carry | 1 == carry)
+    if ((carry | 1) == carry)
     {
       if (max_limb_numb == 0)
         ++max_limb_numb;
       DAF_ADD_SET_REM_BIT(arrcarry1, i + 1);
     }
-    if (carry | 2 == carry)
+    if ((carry | 2) == carry)
       ++rop->exp;
   }
   uint8_t run = 1;
