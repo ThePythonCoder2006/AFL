@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __DAFL__
 #define __DAFL__
 
@@ -10,6 +11,7 @@
 #include <string.h>
 #include <errno.h>
 #include <float.h>
+#include <assert.h>
 
 #include "../../../C/useful_macros.h"
 
@@ -21,12 +23,12 @@
 
 /*-------------------------------start constants-------------------------------*/
 
-#define DAF_HEAD_MINUS (0x01)     // 0b00000001
-#define DAF_HEAD_ZERO (0x02)      // 0b00000010
-#define DAF_HEAD_INF (0x04)       // 0b00000100
-#define DAF_HEAD_NaN (0x08)       // 0b00001000
-#define DAF_HEAD_EXP_MINUS (0x10) // 0b00010000
-#define DAF_HEAD_INT (0x20)       // 0b00100000
+#define DAF_HEAD_MINUS (1 << DAF_HEAD_EXP_MINUS_COMP)         // 0b00000001
+#define DAF_HEAD_ZERO (1 << DAF_HEAD_EXP_ZERO_COMP)           // 0b00000010
+#define DAF_HEAD_INF (1 << DAF_HEAD_EXP_INF_COMP)             // 0b00000100
+#define DAF_HEAD_NaN (1 << DAF_HEAD_EXP_NaN_COMP)             // 0b00001000
+#define DAF_HEAD_EXP_MINUS (1 << DAF_HEAD_EXP_EXP_MINUS_COMP) // 0b00010000
+#define DAF_HEAD_INT (1 << DAF_HEAD_EXP_INT_COMP)             // 0b00100000
 
 #define FLOAT_UNIT_BIN_SIZE (30)
 #define FLOAT_UNIT_DECIMAL_SIZE (9)
@@ -61,6 +63,7 @@
 
 #define DAF_MTSA_LIMB_AT_NTH_UINT30(ref, n) ((*(all_daf[ref])).loaded_mtsa[(n - (n % DAF_LIMB_SIZE)) / DAF_LIMB_SIZE])
 #define DAF_MTSA_NTH(ref, n) ((*DAF_MTSA_LIMB_AT_NTH_UINT30(ref, n))[n % DAF_LIMB_SIZE])
+#define DAF_MTSA_GET_LIMB(ref, n) *((*(all_daf[ref])).loaded_mtsa[n])
 
 #define SMOD_2x(op, m) (op - (op > m) * (m))
 #define SMOD_4x(op, m) SMOD_2x(SMOD_2x(op, 2 * m), m)
@@ -150,6 +153,16 @@ typedef enum daf_ret_t
   DAF_ERR_COUNT
 } daf_ret_t;
 
+typedef enum daf_head_commponants_exp
+{
+  DAF_HEAD_EXP_MINUS_COMP,
+  DAF_HEAD_EXP_ZERO_COMP,
+  DAF_HEAD_EXP_INF_COMP,
+  DAF_HEAD_EXP_NaN_COMP,
+  DAF_HEAD_EXP_EXP_MINUS_COMP,
+  DAF_HEAD_EXP_INT_COMP
+} daf_head_commponants_exp;
+
 /* a decimal floating point number of the form : ((10^9)^exp) * mantissa */
 typedef struct daf
 {
@@ -157,7 +170,6 @@ typedef struct daf
   uint64_t exp;             // the exponent of the float
   uint64_t prec;            // the number of myriagit asked
   uint8_t real_prec_dec;    // the number of myriagit actually used (an offset to the prec)
-  daf_limb_t *start;        // the first limb of the mantissa (to be used to start calculations before the rest would be loaded)
   daf_limb_t **loaded_mtsa; // the mantissa of the float if it had already load before for calculations
 } daf_t;
 
@@ -225,6 +237,12 @@ size_t daf_get_filename(char filename[64], daf_ref_t op_ref);
 daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name);
 
 // set functions ------------------------------------------------------
+static inline daf_ret_t daf_limb_set(daf_limb_t *rop, daf_limb_t *op)
+{
+  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
+    (*rop)[i] = (*op)[i];
+  return DAF_RET_SUCESS;
+}
 daf_ret_t daf_set_plus_zero(daf_ref_t op_ref);
 daf_ret_t daf_set_minus_zero(daf_ref_t op_ref);
 daf_ret_t daf_set_NaN(daf_ref_t op_ref);

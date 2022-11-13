@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   daf_debug_out(op2, "op2");
   daf_debug_out(rop, "rop");
 
-  daf_printf("%DF\n", rop);
+  // daf_printf("%DF\n", rop);
 
   daf_clear(op1);
   daf_clear(op2);

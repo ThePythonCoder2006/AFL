@@ -852,11 +852,11 @@ typedef unsigned int uint_fast32_t;
 typedef long long int_fast64_t;
 typedef unsigned long long uint_fast64_t;
 # 106 "c:\\mingw\\include\\stdint.h" 3
- typedef int __intptr_t;
+typedef int __intptr_t;
 
 typedef __intptr_t intptr_t;
 # 118 "c:\\mingw\\include\\stdint.h" 3
- typedef unsigned int __uintptr_t;
+typedef unsigned int __uintptr_t;
 
 typedef __uintptr_t uintptr_t;
 
@@ -915,6 +915,7 @@ uintmax_t __attribute__((__cdecl__)) __attribute__((__nothrow__)) wcstoumax (con
 # 5 "src/main.c" 2
 
 # 1 "include/DAFL.h" 1
+       
 
 
 
@@ -1467,13 +1468,13 @@ extern float __attribute__((__cdecl__)) fmaf (float, float, float);
 extern long double __attribute__((__cdecl__)) fmal (long double, long double, long double);
 # 931 "c:\\mingw\\include\\math.h" 3
 
-# 7 "include/DAFL.h" 2
+# 8 "include/DAFL.h" 2
 
 
 # 1 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stdarg.h" 1 3 4
 # 99 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\stdarg.h" 3 4
 typedef __gnuc_va_list va_list;
-# 10 "include/DAFL.h" 2
+# 11 "include/DAFL.h" 2
 # 1 "c:\\mingw\\include\\string.h" 1 3
 # 34 "c:\\mingw\\include\\string.h" 3
        
@@ -1667,7 +1668,7 @@ extern inline __attribute__((__gnu_inline__)) __attribute__((__always_inline__))
 
 
 
-# 11 "include/DAFL.h" 2
+# 12 "include/DAFL.h" 2
 # 1 "c:\\mingw\\include\\errno.h" 1 3
 # 103 "c:\\mingw\\include\\errno.h" 3
 
@@ -1677,7 +1678,7 @@ extern inline __attribute__((__gnu_inline__)) __attribute__((__always_inline__))
 
 
 
-# 12 "include/DAFL.h" 2
+# 13 "include/DAFL.h" 2
 # 1 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\float.h" 1 3 4
 # 273 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\float.h" 3 4
 # 1 "c:\\mingw\\include\\float.h" 1 3 4
@@ -1743,10 +1744,14 @@ void fpreset (void){ fesetenv ((const fenv_t *)(0)); }
 
 
 # 274 "c:\\mingw\\lib\\gcc\\mingw32\\6.3.0\\include\\float.h" 2 3 4
-# 13 "include/DAFL.h" 2
+# 14 "include/DAFL.h" 2
+# 1 "c:\\mingw\\include\\assert.h" 1 3
+# 38 "c:\\mingw\\include\\assert.h" 3
+ void __attribute__((__cdecl__)) __attribute__((__nothrow__)) _assert (const char*, const char*, int) __attribute__((__noreturn__));
+# 15 "include/DAFL.h" 2
 
 # 1 "include/../../../C/useful_macros.h" 1
-# 15 "include/DAFL.h" 2
+# 17 "include/DAFL.h" 2
 
 
 # 1 "c:\\mingw\\include\\io.h" 1 3
@@ -2037,10 +2042,10 @@ __off64_t lseek64 (int fd, __off64_t offset, int whence)
  __attribute__((__cdecl__)) __attribute__((__nothrow__)) int write (int, const void*, unsigned int);
 # 701 "c:\\mingw\\include\\io.h" 3
 
-# 18 "include/DAFL.h" 2
-# 135 "include/DAFL.h"
+# 20 "include/DAFL.h" 2
+# 139 "include/DAFL.h"
 
-# 135 "include/DAFL.h"
+# 139 "include/DAFL.h"
 typedef uint64_t daf_ret_ref_t;
 typedef const daf_ret_ref_t daf_ref_t;
 
@@ -2065,7 +2070,6 @@ typedef struct daf
   uint64_t exp;
   uint64_t prec;
   uint8_t real_prec_dec;
-  daf_limb_t *start;
   daf_limb_t **loaded_mtsa;
 } daf_t;
 
@@ -2093,34 +2097,34 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
 daf_ret_t daf_primitive_vnprint(FILE *stream, char *const buff, const uint64_t n, const char *fmt, va_list args);
 
 static inline daf_ret_t daf_vfprintf(FILE *stream, const char *fmt, va_list args) { return daf_primitive_vnprint(stream, 
-# 186 "include/DAFL.h" 3 4
+# 189 "include/DAFL.h" 3 4
                                                                                                                         ((void *)0)
-# 186 "include/DAFL.h"
+# 189 "include/DAFL.h"
                                                                                                                             , 
-# 186 "include/DAFL.h" 3
+# 189 "include/DAFL.h" 3
                                                                                                                               0xffffffffffffffffULL
-# 186 "include/DAFL.h"
+# 189 "include/DAFL.h"
                                                                                                                                         , fmt, args); }
 static inline daf_ret_t daf_vprintf(const char *fmt, va_list args) { return daf_vfprintf(
-# 187 "include/DAFL.h" 3
+# 190 "include/DAFL.h" 3
                                                                                         (&_iob[1])
-# 187 "include/DAFL.h"
+# 190 "include/DAFL.h"
                                                                                               , fmt, args); }
 static inline daf_ret_t daf_fprintf(FILE *stream, const char *fmt, ...)
 {
   va_list args;
   
-# 191 "include/DAFL.h" 3 4
+# 194 "include/DAFL.h" 3 4
  __builtin_va_start(
-# 191 "include/DAFL.h"
+# 194 "include/DAFL.h"
  args
-# 191 "include/DAFL.h" 3 4
+# 194 "include/DAFL.h" 3 4
  ,
-# 191 "include/DAFL.h"
+# 194 "include/DAFL.h"
  fmt
-# 191 "include/DAFL.h" 3 4
+# 194 "include/DAFL.h" 3 4
  )
-# 191 "include/DAFL.h"
+# 194 "include/DAFL.h"
                     ;
   return daf_vfprintf(stream, fmt, args);
 }
@@ -2128,68 +2132,68 @@ static inline daf_ret_t daf_eprintf(const char *fmt, ...)
 {
   va_list args;
   
-# 197 "include/DAFL.h" 3 4
+# 200 "include/DAFL.h" 3 4
  __builtin_va_start(
-# 197 "include/DAFL.h"
+# 200 "include/DAFL.h"
  args
-# 197 "include/DAFL.h" 3 4
+# 200 "include/DAFL.h" 3 4
  ,
-# 197 "include/DAFL.h"
+# 200 "include/DAFL.h"
  fmt
-# 197 "include/DAFL.h" 3 4
+# 200 "include/DAFL.h" 3 4
  )
-# 197 "include/DAFL.h"
+# 200 "include/DAFL.h"
                     ;
   return daf_vfprintf(
-# 198 "include/DAFL.h" 3
+# 201 "include/DAFL.h" 3
                      (&_iob[2])
-# 198 "include/DAFL.h"
+# 201 "include/DAFL.h"
                            , fmt, args);
 }
 static inline daf_ret_t daf_printf(const char *fmt, ...)
 {
   va_list args;
   
-# 203 "include/DAFL.h" 3 4
+# 206 "include/DAFL.h" 3 4
  __builtin_va_start(
-# 203 "include/DAFL.h"
+# 206 "include/DAFL.h"
  args
-# 203 "include/DAFL.h" 3 4
+# 206 "include/DAFL.h" 3 4
  ,
-# 203 "include/DAFL.h"
+# 206 "include/DAFL.h"
  fmt
-# 203 "include/DAFL.h" 3 4
+# 206 "include/DAFL.h" 3 4
  )
-# 203 "include/DAFL.h"
+# 206 "include/DAFL.h"
                     ;
   return daf_vprintf(fmt, args);
 }
 
 static inline daf_ret_t daf_vsnprintf(char *buff, const uint64_t n, const char *fmt, va_list args) { return daf_primitive_vnprint(
-# 207 "include/DAFL.h" 3 4
+# 210 "include/DAFL.h" 3 4
                                                                                                                                  ((void *)0)
-# 207 "include/DAFL.h"
+# 210 "include/DAFL.h"
                                                                                                                                      , buff, n, fmt, args); }
 static inline daf_ret_t daf_vsprintf(char *buff, const char *fmt, va_list args) { return daf_vsnprintf(buff, 
-# 208 "include/DAFL.h" 3
+# 211 "include/DAFL.h" 3
                                                                                                             0xffffffffffffffffULL
-# 208 "include/DAFL.h"
+# 211 "include/DAFL.h"
                                                                                                                       , fmt, args); };
 static inline daf_ret_t daf_snprintf(char *buff, const uint64_t n, const char *fmt, ...)
 {
   va_list args;
   
-# 212 "include/DAFL.h" 3 4
+# 215 "include/DAFL.h" 3 4
  __builtin_va_start(
-# 212 "include/DAFL.h"
+# 215 "include/DAFL.h"
  args
-# 212 "include/DAFL.h" 3 4
+# 215 "include/DAFL.h" 3 4
  ,
-# 212 "include/DAFL.h"
+# 215 "include/DAFL.h"
  fmt
-# 212 "include/DAFL.h" 3 4
+# 215 "include/DAFL.h" 3 4
  )
-# 212 "include/DAFL.h"
+# 215 "include/DAFL.h"
                     ;
   return daf_vsnprintf(buff, n, fmt, args);
 };
@@ -2197,28 +2201,31 @@ static inline daf_ret_t daf_sprintf(char *buff, const char *fmt, ...)
 {
   va_list args;
   
-# 218 "include/DAFL.h" 3 4
+# 221 "include/DAFL.h" 3 4
  __builtin_va_start(
-# 218 "include/DAFL.h"
+# 221 "include/DAFL.h"
  args
-# 218 "include/DAFL.h" 3 4
+# 221 "include/DAFL.h" 3 4
  ,
-# 218 "include/DAFL.h"
+# 221 "include/DAFL.h"
  fmt
-# 218 "include/DAFL.h" 3 4
+# 221 "include/DAFL.h" 3 4
  )
-# 218 "include/DAFL.h"
+# 221 "include/DAFL.h"
                     ;
   return daf_vsnprintf(buff, 
-# 219 "include/DAFL.h" 3
+# 222 "include/DAFL.h" 3
                             0xffffffffffffffffULL
-# 219 "include/DAFL.h"
+# 222 "include/DAFL.h"
                                       , fmt, args);
 };
 
 size_t daf_get_filename(char filename[64], daf_ref_t op_ref);
 
+daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name);
 
+
+static inline daf_ret_t daf_limb_set(daf_limb_t *rop, daf_limb_t *op);
 daf_ret_t daf_set_plus_zero(daf_ref_t op_ref);
 daf_ret_t daf_set_minus_zero(daf_ref_t op_ref);
 daf_ret_t daf_set_NaN(daf_ref_t op_ref);
@@ -2231,8 +2238,9 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op);
 daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
 
 daf_ret_t daf_ten_9_add(uint30_t *rop, uint30_t op1, uint30_t op2);
-daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint16_t dec);
-daf_ret_t daf_limb_pp(daf_limb_t *rop, daf_limb_t op);
+daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint8_t uint30_dec);
+daf_ret_t daf_limb_pp(daf_limb_t *rop);
+daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref);
 
 
 void rek_mkdir(const char *const path);
@@ -2241,34 +2249,39 @@ FILE *fopen_mkdir(const char *const path, const char *const mode);
 void swap_ptr_uint8(uint8_t **const a, uint8_t **const b);
 # 7 "src/main.c" 2
 
+
+
 int main(int argc, char **argv)
 {
-  (void)argc;
-  (void)argv;
 
-  daf_ref_t num = daf_init(200);
+  --argc, argv++;
 
-  printf("Hello DAF !! %" 
-# 15 "src/main.c" 3
-                         "I64u" 
-# 15 "src/main.c"
-                                ", %" 
-# 15 "src/main.c" 3
-                                      "I64u" 
-# 15 "src/main.c"
-                                             ", %" 
-# 15 "src/main.c" 3
-                                                   "I64u" 
-# 15 "src/main.c"
-                                                          "\n", (all_daf[(num)]->prec), (uint64_t)(all_daf[(num)]->real_prec_dec), (uint64_t)((all_daf[(num)]->prec) + (uint64_t)(all_daf[(num)]->real_prec_dec)) % ((50) * ((9))));
+  daf_ref_t op1 = daf_init(51), op2 = daf_init(51), rop = daf_init(51);
+  daf_set_ui(op2, 1);
 
-  uint30_t rop;
+  daf_set_ui(op1, (999999999ULL) + 2);
 
-  daf_ten_9_add(&rop, ((999999999ULL)), 1);
-  printf("%c%c%c%c%c%c%c%c " "%c%c%c%c%c%c%c%c " "%c%c%c%c%c%c%c%c " "%c%c%c%c%c%c%c%c " "\n", (((((rop) >> 16) >> 8)&0x80ll) ? '1' : '0'), (((((rop) >> 16) >> 8)&0x40ll) ? '1' : '0'), (((((rop) >> 16) >> 8)&0x20ll) ? '1' : '0'), (((((rop) >> 16) >> 8)&0x10ll) ? '1' : '0'), (((((rop) >> 16) >> 8)&0x08ll) ? '1' : '0'), (((((rop) >> 16) >> 8)&0x04ll) ? '1' : '0'), (((((rop) >> 16) >> 8)&0x02ll) ? '1' : '0'), (((((rop) >> 16) >> 8)&0x01ll) ? '1' : '0'), ((((rop) >> 16)&0x80ll) ? '1' : '0'), ((((rop) >> 16)&0x40ll) ? '1' : '0'), ((((rop) >> 16)&0x20ll) ? '1' : '0'), ((((rop) >> 16)&0x10ll) ? '1' : '0'), ((((rop) >> 16)&0x08ll) ? '1' : '0'), ((((rop) >> 16)&0x04ll) ? '1' : '0'), ((((rop) >> 16)&0x02ll) ? '1' : '0'), ((((rop) >> 16)&0x01ll) ? '1' : '0'), ((((rop) >> 8)&0x80ll) ? '1' : '0'), ((((rop) >> 8)&0x40ll) ? '1' : '0'), ((((rop) >> 8)&0x20ll) ? '1' : '0'), ((((rop) >> 8)&0x10ll) ? '1' : '0'), ((((rop) >> 8)&0x08ll) ? '1' : '0'), ((((rop) >> 8)&0x04ll) ? '1' : '0'), ((((rop) >> 8)&0x02ll) ? '1' : '0'), ((((rop) >> 8)&0x01ll) ? '1' : '0'), (((rop)&0x80ll) ? '1' : '0'), (((rop)&0x40ll) ? '1' : '0'), (((rop)&0x20ll) ? '1' : '0'), (((rop)&0x10ll) ? '1' : '0'), (((rop)&0x08ll) ? '1' : '0'), (((rop)&0x04ll) ? '1' : '0'), (((rop)&0x02ll) ? '1' : '0'), (((rop)&0x01ll) ? '1' : '0'));
-  printf("%i + %i = %i carry %i\n", 34, 35, rop & ~(1 << 30), rop >> 30);
+  for (uint64_t i = 0; i < 3; ++i)
+  {
+    daf_set_ui(op1, ((999999999ULL) + 1) * i + (999999999ULL));
 
-  daf_clear(num);
+    daf_add(rop, op1, op2);
 
-  return 0;
+    daf_printf("%DF + %DF = %DF\n", op1, op2, rop);
+  }
+  daf_debug_out(op1, "op1");
+  daf_debug_out(op2, "op2");
+  daf_debug_out(rop, "rop");
+
+  daf_printf("%DF\n", rop);
+
+  daf_clear(op1);
+  daf_clear(op2);
+  daf_clear(rop);
+
+  return 
+# 38 "src/main.c" 3
+        0
+# 38 "src/main.c"
+                    ;
 }

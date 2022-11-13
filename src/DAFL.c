@@ -7,22 +7,22 @@ daf_t **all_daf = NULL;
 
 char *(err_message)[DAF_ERR_COUNT] = {
     PRINTF_SUCESS " everything appended as intended",
-    PRINTF_ERROR " some memory couldn't be allocated",
-    PRINTF_ERROR " the file containing the float's mantissa couldn't be read",
+    PRINTF_ERROR " failed to allocated some memory",
+    PRINTF_ERROR " failed to read the file containing the float's mantissa",
     PRINTF_ERROR " the float you passed in is invalid",
-    PRINTF_ERROR " this funcitonnality was not (yet) implemented"};
+    PRINTF_ERROR " this funcitonnality is not (yet) implemented"};
 
 daf_ret_t daf_load_mantissa(daf_ref_t op_ref)
 {
+  fprintf(stderr, PRINTF_ERROR "working with mtsa in files is not allowed for now !\n");
+  assert(0);
+
   DAF_GET_PTR(op);
 
   if (op->loaded_mtsa != NULL)
     return DAF_RET_SUCESS;
 
-  if (op->prec <= DAF_LIMB_SIZE)
-    return DAF_RET_SUCESS;
-
-  uint64_t mtsa_size = (op->prec + op->real_prec_dec) - DAF_LIMB_SIZE;
+  uint64_t mtsa_size = op->prec + op->real_prec_dec;
 
   char filename[64];
   daf_get_filename(filename, op_ref);
@@ -51,6 +51,9 @@ daf_ret_t daf_load_mantissa(daf_ref_t op_ref)
 
 daf_ret_t daf_set_file_mantissa_zero(daf_ref_t op_ref)
 {
+  fprintf(stderr, PRINTF_ERROR "working with mtsa in files is not allowed for now !\n");
+  assert(0);
+
   DAF_GET_PTR(op);
 
   if (op->prec < DAF_LIMB_SIZE)
@@ -72,6 +75,16 @@ daf_ret_t daf_set_file_mantissa_zero(daf_ref_t op_ref)
 
   fclose(bin);
   return 0;
+}
+
+daf_ret_t daf_set_mtsa_zero(daf_ref_t op_ref)
+{
+  DAF_GET_PTR(op);
+
+  for (uint64_t i = 0; i < op->prec + op->real_prec_dec; ++i)
+    DAF_MTSA_NTH(op_ref, i) = 0;
+
+  return DAF_RET_SUCESS;
 }
 
 // init functions
@@ -102,16 +115,24 @@ daf_ret_ref_t daf_init(uint64_t prec)
   if (all_daf[ref] == NULL)
     return DAF_RET_ERR_ALLOC;
 
-  all_daf[ref]->start = calloc(DAF_LIMB_SIZE, sizeof(uint30_t));
-  if (all_daf[ref]->start == NULL)
-    return DAF_RET_ERR_ALLOC;
-
   all_daf[ref]->exp = 0ULL;
   all_daf[ref]->prec = prec;
-  all_daf[ref]->real_prec_dec = DAF_LIMB_SIZE - (prec % DAF_LIMB_SIZE);
+  all_daf[ref]->real_prec_dec = DAF_LIMB_SIZE - prec % DAF_LIMB_SIZE;
   all_daf[ref]->head = DAF_HEAD_INT | DAF_HEAD_ZERO;
 
-  daf_set_file_mantissa_zero(ref);
+  // allocated the mantissa.
+
+  all_daf[ref]->loaded_mtsa = calloc((prec + all_daf[ref]->real_prec_dec) / DAF_LIMB_SIZE, sizeof(daf_t *));
+  if (all_daf[ref]->loaded_mtsa == NULL)
+    return DAF_RET_ERR_ALLOC;
+  for (uint64_t i = 0; i < (prec + all_daf[ref]->real_prec_dec) / DAF_LIMB_SIZE; ++i)
+  {
+    all_daf[ref]->loaded_mtsa[i] = calloc(DAF_LIMB_SIZE, sizeof(uint30_t));
+    if (all_daf[ref]->loaded_mtsa[i] == NULL)
+      return DAF_RET_ERR_ALLOC;
+  }
+
+  daf_set_mtsa_zero(ref);
 
   return ref;
 }
@@ -121,7 +142,6 @@ daf_ret_ref_t daf_init(uint64_t prec)
 daf_ret_t daf_clear(daf_ref_t op_ref)
 {
   DAF_GET_PTR(op);
-  free(*(op->start));
   char filename[64];
   daf_get_filename(filename, op_ref);
   remove(filename);
@@ -259,78 +279,11 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
 
   const char sep = '.';
 
-  daf_ret_t err;
-  if ((err = daf_load_mantissa(op_ref)) != DAF_RET_SUCESS)
-    return err;
+  // daf_ret_t err;
+  // if ((err = daf_load_mantissa(op_ref)) != DAF_RET_SUCESS)
+  //   return err;
 
   uint64_t printed_ten_9 = 1;
-
-  if (sn)
-  {
-    uint8_t len;
-    char tmp_buff[64];
-    snprintf(tmp_buff, sizeof(tmp_buff), "%i", (*(op->start))[0]);
-    strncat(buff, "%i", len = strlen("%i"));
-    printed_chars += len;
-  }
-  else
-    printed_chars += fprintf(stream, "%i", (*(op->start))[0]);
-
-  if (0 == op->exp && DAF_IS_INT(op_ref))
-    return DAF_RET_SUCESS;
-
-  if (printed_chars >= n && n != UINT64_MAX)
-    return DAF_RET_SUCESS;
-
-  if (op->exp >= DAF_LIMB_SIZE && (prec > DAF_LIMB_SIZE || prec == 0))
-  {
-    for (uint8_t i = 1; i < DAF_LIMB_SIZE; ++i)
-    {
-      out_args(" %09" PRIu32, (*(op->start))[i])
-    }
-    if (op->exp == DAF_LIMB_SIZE)
-    {
-      if (sn)
-        strncat(buff, &sep, 1);
-      else
-        putchar(sep);
-      ++printed_chars;
-    }
-
-    printed_ten_9 = DAF_LIMB_SIZE, printed_chars += (DAF_LIMB_SIZE - 1) * TEN_9_DECIMAL_SIZE; // printed_ten_9 += DAF_LIMB_SIZE; is equivalent because printed_ten_9 is zero
-
-    if (printed_chars >= n && n != UINT64_MAX)
-      return DAF_RET_SUCESS;
-  }
-  else
-  {
-    for (uint8_t i = 1; i < DAF_LIMB_SIZE; ++i)
-    {
-      out_args(" %09" PRIu32, (*(op->start))[i]);
-
-      printed_chars += 9;
-      if (printed_chars >= n && n != UINT64_MAX)
-        return DAF_RET_SUCESS;
-
-      if ((printed_ten_9++ == op->exp && DAF_IS_INT(op_ref)))
-      {
-        return DAF_RET_SUCESS;
-      }
-      else
-      {
-        if (printed_ten_9 == op->exp && !DAF_IS_INT(op_ref))
-        {
-          if (sn)
-            strncat(buff, &sep, 1);
-          else
-            putchar(sep);
-        }
-      }
-
-      if (printed_ten_9 == prec)
-        return DAF_RET_SUCESS;
-    }
-  }
 
   for (uint64_t i = 0; i < op->prec - DAF_LIMB_SIZE; ++i)
   {
@@ -382,26 +335,17 @@ daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name)
   printf("|- exp : %" PRIu64 "\n", op->exp);
   printf("|- prec : %" PRIu64 "\n", op->prec);
   printf("|- reak_prec_dec : %" PRIu8 "\n", op->real_prec_dec);
-  printf("|- start : 0x%p\n", op->start);
-  printf("\t|- *start : 0x%p\n", *op->start);
-  printf("\t\t|- {%u ", (*op->start)[0]);
-  for (uint8_t i = 1; i < DAF_LIMB_SIZE; ++i)
-    printf(",%u ", (*op->start)[i]);
-  printf("}\n");
+  printf("|- loaded_mtsa : 0x%p\n", op->loaded_mtsa);
 
-  printf("|- load_mtsa : 0x%p\n", op->loaded_mtsa);
-  if (op->loaded_mtsa == NULL)
+  printf("\t|- *loaded_mtsa : 0x%p\n", *(op->loaded_mtsa));
+  for (uint64_t i = 0; i < (op->prec + op->real_prec_dec) / DAF_LIMB_SIZE; ++i)
   {
-    return DAF_RET_SUCESS;
-  }
-
-  printf("\t|- *loaded_mtsa : 0x%p\n", *op->loaded_mtsa);
-  for (uint64_t i = 0; i < (op->prec + op->real_prec_dec) / DAF_LIMB_SIZE - 1; ++i)
-  {
-    printf("\t\t");
+    printf("\t\t|- *(loaded_mtsa)[%" PRIu64 "] : 0x%p\n\t\t\t|- [%u", i, (*(op->loaded_mtsa))[i], ((*(op->loaded_mtsa))[i])[0]);
     for (uint8_t j = 1; j < DAF_LIMB_SIZE; ++j)
     {
+      printf(", %u", ((*(op->loaded_mtsa))[i])[j]);
     }
+    printf("]\n");
   }
 
   return DAF_RET_SUCESS;
@@ -423,9 +367,6 @@ daf_ret_t daf_set_plus_zero(daf_ref_t op_ref)
   op->head = DAF_HEAD_ZERO | DAF_HEAD_INT;
   op->exp = 0;
 
-  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
-    (*(op->start))[i] = 0;
-
   return daf_set_file_mantissa_zero(op_ref);
 }
 
@@ -435,9 +376,6 @@ daf_ret_t daf_set_minus_zero(daf_ref_t op_ref)
 
   op->head = DAF_HEAD_ZERO | DAF_HEAD_INT | DAF_HEAD_MINUS;
   op->exp = 0;
-
-  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
-    (*(op->start))[i] = 0;
 
   return daf_set_file_mantissa_zero(op_ref);
 }
@@ -449,9 +387,6 @@ daf_ret_t daf_set_NaN(daf_ref_t op_ref)
   op->head = DAF_HEAD_NaN;
   op->exp = 0;
 
-  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
-    (*(op->start))[i] = 0;
-
   return daf_set_file_mantissa_zero(op_ref);
 }
 
@@ -462,9 +397,6 @@ daf_ret_t daf_set_plus_inf(daf_ref_t op_ref)
   op->head = DAF_HEAD_INF;
   op->exp = UINT64_MAX;
 
-  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
-    (*(op->start))[i] = 0;
-
   return daf_set_file_mantissa_zero(op_ref);
 }
 
@@ -474,9 +406,6 @@ daf_ret_t daf_set_minus_inf(daf_ref_t op_ref)
 
   op->head = DAF_HEAD_INF | DAF_HEAD_MINUS;
   op->exp = UINT64_MAX;
-
-  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
-    (*(op->start))[i] = 0;
 
   return daf_set_file_mantissa_zero(op_ref);
 }
@@ -499,24 +428,27 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op)
 
   DAF_GET_PTR(rop);
   rop->head = DAF_HEAD_INT;
+
+  daf_set_mtsa_zero(rop_ref);
+
   if (p3 == 0)
   {
     if (p2 == 0)
     {
       rop->exp = 0;
-      (*(rop->start))[0] = p1;
+      DAF_MTSA_NTH(rop_ref, 0) = p1;
       return DAF_RET_SUCESS;
     }
     rop->exp = 1;
-    (*(rop->start))[1] = p1;
-    (*(rop->start))[0] = p2;
+    DAF_MTSA_NTH(rop_ref, 1) = p1;
+    DAF_MTSA_NTH(rop_ref, 0) = p2;
     return DAF_RET_SUCESS;
   }
 
   rop->exp = 2;
-  (*(rop->start))[2] = p1;
-  (*(rop->start))[1] = p2;
-  (*(rop->start))[0] = p3;
+  DAF_MTSA_NTH(rop_ref, 2) = p1;
+  DAF_MTSA_NTH(rop_ref, 1) = p2;
+  DAF_MTSA_NTH(rop_ref, 0) = p3;
 
   return DAF_RET_SUCESS;
 }
@@ -659,6 +591,7 @@ daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_li
 /*function that add two const hpcp_t passed as refs (op1_ref and op2_ref) and sets the result into an another hpcp_t ref (rop_ref)*/
 daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 {
+  // assert(0);
   DAF_GET_PTR(rop);
   daf_t *op1, *op2;
   if (DAF_GET(op1_ref, exp) >= DAF_GET(op2_ref, exp))
@@ -720,9 +653,9 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 
   // loading all of the mantissa of the operands
 
-  daf_load_mantissa(op1_ref);
-  daf_load_mantissa(op2_ref);
-  daf_load_mantissa(rop_ref);
+  // daf_load_mantissa(op1_ref);
+  // daf_load_mantissa(op2_ref);
+  // daf_load_mantissa(rop_ref);
 
   const uint64_t dec = op1->exp - op2->exp;             // the number of uint30_t that the two operands are offseted by to each other
   const uint64_t limb_dec = dec / DAF_LIMB_SIZE;        // the number of limbs that the two operands are offseted by to each other
@@ -730,35 +663,11 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 
   // add the limbs in pair for the start of both op's
   uint8_t carry;
-  if (dec <= DAF_LIMB_SIZE)
-  {
-    if (op1->prec + op1->real_prec_dec == DAF_LIMB_SIZE)
-    {
-      daf_limb_t zero;
-      daf_limb_set_zero(&zero);
-      daf_limb_add(&carry, rop->start, *(op1->start), zero, *(op2->start), dec);
-    }
-    else
-      daf_limb_add(&carry, rop->start, *(op1->start), (*op1->loaded_mtsa)[0], *(op2->start), dec);
-  }
-  else if (op1->prec + op1->real_prec_dec == 1)
-  {
-    daf_limb_t zero;
-    daf_limb_set_zero(&zero);
-    daf_limb_add(&carry, rop->start, *(op1->start), zero, (*op2->loaded_mtsa)[limb_dec], uint30_limb_dec);
-  }
-  else
-    daf_limb_add(&carry, rop->start, *(op1->start), *(op1->loaded_mtsa[0]), *(op2->loaded_mtsa[limb_dec]), uint30_limb_dec);
-
-  if (carry == 1)
-    DAF_ADD_SET_REM_BIT(arrcarry1, 1);
 
   for (size_t i = 0; i < max_limb_numb - 1; ++i)
   {
     if (i > limb_dec)
       daf_limb_add(&carry, (rop->loaded_mtsa)[i], (*op1->loaded_mtsa)[i], (*op1->loaded_mtsa)[i + 1], (*op2->loaded_mtsa)[i + limb_dec - 1], uint30_limb_dec);
-    else if (i == limb_dec)
-      daf_limb_add(&carry, rop->loaded_mtsa[i], (*op1->loaded_mtsa)[i], (*op1->loaded_mtsa)[i + 1], (*op2->start), uint30_limb_dec);
     else
     {
       for (uint8_t j = 0; j < DAF_LIMB_SIZE; ++j)
