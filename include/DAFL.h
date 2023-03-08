@@ -13,7 +13,7 @@
 #include <float.h>
 #include <assert.h>
 
-#include "include/useful_macros.h"
+#include "useful_macros.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -23,12 +23,12 @@
 
 /*-------------------------------start constants-------------------------------*/
 
-#define DAF_HEAD_MINUS (1 << DAF_HEAD_EXP_MINUS_COMP)         // 0b00000001
-#define DAF_HEAD_ZERO (1 << DAF_HEAD_EXP_ZERO_COMP)           // 0b00000010
-#define DAF_HEAD_INF (1 << DAF_HEAD_EXP_INF_COMP)             // 0b00000100
-#define DAF_HEAD_NaN (1 << DAF_HEAD_EXP_NaN_COMP)             // 0b00001000
+#define DAF_HEAD_MINUS (1 << DAF_HEAD_EXP_MINUS_COMP)					// 0b00000001
+#define DAF_HEAD_ZERO (1 << DAF_HEAD_EXP_ZERO_COMP)						// 0b00000010
+#define DAF_HEAD_INF (1 << DAF_HEAD_EXP_INF_COMP)							// 0b00000100
+#define DAF_HEAD_NaN (1 << DAF_HEAD_EXP_NaN_COMP)							// 0b00001000
 #define DAF_HEAD_EXP_MINUS (1 << DAF_HEAD_EXP_EXP_MINUS_COMP) // 0b00010000
-#define DAF_HEAD_INT (1 << DAF_HEAD_EXP_INT_COMP)             // 0b00100000
+#define DAF_HEAD_INT (1 << DAF_HEAD_EXP_INT_COMP)							// 0b00100000
 
 #define FLOAT_UNIT_BIN_SIZE (30)
 #define FLOAT_UNIT_DECIMAL_SIZE (9)
@@ -61,6 +61,8 @@
 
 #define DAF_GET(ref, key) (all_daf[(ref)]->key)
 
+#define DAF_GET_PREC(ref) (all_daf[(ref)]->prec + all_daf[(ref)]->real_prec_dec)
+
 #define DAF_MTSA_LIMB_AT_NTH_UINT30(ref, n) ((*(all_daf[ref])).loaded_mtsa[(n - (n % DAF_LIMB_SIZE)) / DAF_LIMB_SIZE])
 #define DAF_MTSA_NTH(ref, n) ((*DAF_MTSA_LIMB_AT_NTH_UINT30(ref, n))[n % DAF_LIMB_SIZE])
 #define DAF_MTSA_GET_LIMB(ref, n) *((*(all_daf[ref])).loaded_mtsa[n])
@@ -70,41 +72,42 @@
 #define SMOD_8x(op, m) SMOD_4x(SMOD_4x(op, 4 * m), m)
 
 #define OPEN_FILE_OR_PANIC(path, mode, var)                          \
-  if (((var) = fopen((path), (mode))) == NULL)                       \
-  {                                                                  \
-    fprintf(stderr, PRINTF_ERROR " could not open file %s", (path)); \
-    return DAF_RET_ERR_READ_FILE;                                    \
-  }
+	if (((var) = fopen((path), (mode))) == NULL)                       \
+	{                                                                  \
+		fprintf(stderr, PRINTF_ERROR " could not open file %s", (path)); \
+		return DAF_RET_ERR_READ_FILE;                                    \
+	}
 
 #define PPCAT_NX(A, B) A##B
 #define PPCAT(A, B) PPCAT_NX(A, B)
 
 /*-------------------------------end inline functions-------------------------------*/
+
 /*-------------------------start PRINTF_BYTE_TO_BINARY--------------------------*/
 
 #define PRINTF_BINARY_PATTERN_INT8 "%c%c%c%c%c%c%c%c "
 #define PRINTF_BYTE_TO_BINARY_INT8(i) \
-  (((i)&0x80ll) ? '1' : '0'),         \
-      (((i)&0x40ll) ? '1' : '0'),     \
-      (((i)&0x20ll) ? '1' : '0'),     \
-      (((i)&0x10ll) ? '1' : '0'),     \
-      (((i)&0x08ll) ? '1' : '0'),     \
-      (((i)&0x04ll) ? '1' : '0'),     \
-      (((i)&0x02ll) ? '1' : '0'),     \
-      (((i)&0x01ll) ? '1' : '0')
+	(((i)&0x80ll) ? '1' : '0'),         \
+			(((i)&0x40ll) ? '1' : '0'),     \
+			(((i)&0x20ll) ? '1' : '0'),     \
+			(((i)&0x10ll) ? '1' : '0'),     \
+			(((i)&0x08ll) ? '1' : '0'),     \
+			(((i)&0x04ll) ? '1' : '0'),     \
+			(((i)&0x02ll) ? '1' : '0'),     \
+			(((i)&0x01ll) ? '1' : '0')
 
 #define PRINTF_BINARY_PATTERN_INT16 \
-  PRINTF_BINARY_PATTERN_INT8 PRINTF_BINARY_PATTERN_INT8
+	PRINTF_BINARY_PATTERN_INT8 PRINTF_BINARY_PATTERN_INT8
 #define PRINTF_BYTE_TO_BINARY_INT16(i) \
-  PRINTF_BYTE_TO_BINARY_INT8((i) >> 8), PRINTF_BYTE_TO_BINARY_INT8(i)
+	PRINTF_BYTE_TO_BINARY_INT8((i) >> 8), PRINTF_BYTE_TO_BINARY_INT8(i)
 #define PRINTF_BINARY_PATTERN_INT32 \
-  PRINTF_BINARY_PATTERN_INT16 PRINTF_BINARY_PATTERN_INT16
+	PRINTF_BINARY_PATTERN_INT16 PRINTF_BINARY_PATTERN_INT16
 #define PRINTF_BYTE_TO_BINARY_INT32(i) \
-  PRINTF_BYTE_TO_BINARY_INT16((i) >> 16), PRINTF_BYTE_TO_BINARY_INT16(i)
+	PRINTF_BYTE_TO_BINARY_INT16((i) >> 16), PRINTF_BYTE_TO_BINARY_INT16(i)
 #define PRINTF_BINARY_PATTERN_INT64 \
-  PRINTF_BINARY_PATTERN_INT32 PRINTF_BINARY_PATTERN_INT32
+	PRINTF_BINARY_PATTERN_INT32 PRINTF_BINARY_PATTERN_INT32
 #define PRINTF_BYTE_TO_BINARY_INT64(i) \
-  PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), PRINTF_BYTE_TO_BINARY_INT32(i)
+	PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), PRINTF_BYTE_TO_BINARY_INT32(i)
 
 /*-------------------------end PRINTF_BYTE_TO_BINARY--------------------------*/
 
@@ -145,32 +148,32 @@ typedef uint30_t daf_limb_t[(DAF_LIMB_SIZE)];
 
 typedef enum daf_ret_t
 {
-  DAF_RET_SUCESS,
-  DAF_RET_ERR_ALLOC,
-  DAF_RET_ERR_READ_FILE,
-  DAF_RET_ERR_INVALID_FLOAT,
-  DAF_RET_ERR_NOT_IMPLEMENTED,
-  DAF_ERR_COUNT
+	DAF_RET_SUCESS,
+	DAF_RET_ERR_ALLOC,
+	DAF_RET_ERR_READ_FILE,
+	DAF_RET_ERR_INVALID_FLOAT,
+	DAF_RET_ERR_NOT_IMPLEMENTED,
+	DAF_ERR_COUNT
 } daf_ret_t;
 
 typedef enum daf_head_commponants_exp
 {
-  DAF_HEAD_EXP_MINUS_COMP,
-  DAF_HEAD_EXP_ZERO_COMP,
-  DAF_HEAD_EXP_INF_COMP,
-  DAF_HEAD_EXP_NaN_COMP,
-  DAF_HEAD_EXP_EXP_MINUS_COMP,
-  DAF_HEAD_EXP_INT_COMP
+	DAF_HEAD_EXP_MINUS_COMP,
+	DAF_HEAD_EXP_ZERO_COMP,
+	DAF_HEAD_EXP_INF_COMP,
+	DAF_HEAD_EXP_NaN_COMP,
+	DAF_HEAD_EXP_EXP_MINUS_COMP,
+	DAF_HEAD_EXP_INT_COMP
 } daf_head_commponants_exp;
 
 /* a decimal floating point number of the form : ((10^9)^exp) * mantissa */
 typedef struct daf
 {
-  daf_head_t head;          // the "head" of the number, it contains metadata of the number (ex: the sign, the sign of the exponent or denormalized values like zero, infinity or NaN)
-  uint64_t exp;             // the exponent of the float
-  uint64_t prec;            // the number of myriagit asked
-  uint8_t real_prec_dec;    // the number of myriagit actually used (an offset to the prec)
-  daf_limb_t **loaded_mtsa; // the mantissa of the float if it had already load before for calculations
+	daf_head_t head;					// the "head" of the number, it contains metadata of the number (ex: the sign, the sign of the exponent or denormalized values like zero, infinity or NaN)
+	uint64_t exp;							// the exponent of the float
+	uint64_t prec;						// the number of myriagit asked
+	uint8_t real_prec_dec;		// the number of myriagit actually used (an offset to the prec)
+	daf_limb_t **loaded_mtsa; // the mantissa of the float if it had already load before for calculations
 } daf_t;
 
 /*-------------------------------end custom types-------------------------------*/
@@ -200,36 +203,36 @@ static inline daf_ret_t daf_vfprintf(FILE *stream, const char *fmt, va_list args
 static inline daf_ret_t daf_vprintf(const char *fmt, va_list args) { return daf_vfprintf(stdout, fmt, args); }
 static inline daf_ret_t daf_fprintf(FILE *stream, const char *fmt, ...)
 {
-  va_list args;
-  va_start(args, fmt);
-  return daf_vfprintf(stream, fmt, args);
+	va_list args;
+	va_start(args, fmt);
+	return daf_vfprintf(stream, fmt, args);
 }
 static inline daf_ret_t daf_eprintf(const char *fmt, ...)
 {
-  va_list args;
-  va_start(args, fmt);
-  return daf_vfprintf(stderr, fmt, args);
+	va_list args;
+	va_start(args, fmt);
+	return daf_vfprintf(stderr, fmt, args);
 }
 static inline daf_ret_t daf_printf(const char *fmt, ...)
 {
-  va_list args;
-  va_start(args, fmt);
-  return daf_vprintf(fmt, args);
+	va_list args;
+	va_start(args, fmt);
+	return daf_vprintf(fmt, args);
 }
 
 static inline daf_ret_t daf_vsnprintf(char *buff, const uint64_t n, const char *fmt, va_list args) { return daf_primitive_vnprint(NULL, buff, n, fmt, args); }
 static inline daf_ret_t daf_vsprintf(char *buff, const char *fmt, va_list args) { return daf_vsnprintf(buff, UINT64_MAX, fmt, args); };
 static inline daf_ret_t daf_snprintf(char *buff, const uint64_t n, const char *fmt, ...)
 {
-  va_list args;
-  va_start(args, fmt);
-  return daf_vsnprintf(buff, n, fmt, args);
+	va_list args;
+	va_start(args, fmt);
+	return daf_vsnprintf(buff, n, fmt, args);
 };
 static inline daf_ret_t daf_sprintf(char *buff, const char *fmt, ...)
 {
-  va_list args;
-  va_start(args, fmt);
-  return daf_vsnprintf(buff, UINT64_MAX, fmt, args);
+	va_list args;
+	va_start(args, fmt);
+	return daf_vsnprintf(buff, UINT64_MAX, fmt, args);
 };
 
 size_t daf_get_filename(char filename[64], daf_ref_t op_ref);
@@ -239,9 +242,9 @@ daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name);
 // set functions ------------------------------------------------------
 static inline daf_ret_t daf_limb_set(daf_limb_t *rop, daf_limb_t *op)
 {
-  for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
-    (*rop)[i] = (*op)[i];
-  return DAF_RET_SUCESS;
+	for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
+		(*rop)[i] = (*op)[i];
+	return DAF_RET_SUCESS;
 }
 daf_ret_t daf_set_plus_zero(daf_ref_t op_ref);
 daf_ret_t daf_set_minus_zero(daf_ref_t op_ref);
@@ -253,11 +256,6 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op);
 
 // arthimetric functions ------------------------------------------------------
 daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
-
-daf_ret_t daf_ten_9_add(uint30_t *rop, uint30_t op1, uint30_t op2);
-daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint8_t uint30_dec);
-daf_ret_t daf_limb_pp(daf_limb_t *rop); // adds one to the limb
-daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref);
 
 // file functions
 void rek_mkdir(const char *const path);

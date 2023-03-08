@@ -5,35 +5,31 @@
 
 #include "DAFL.h"
 
-#define PREC 51
+#define PREC 1
 
 int main(int argc, char **argv)
 {
-  // remove the first element of the call (the name of the program)
-  --argc, argv++;
+	// remove the first element of the call (the name of the program)
+	--argc, argv++;
 
-  daf_ref_t op1 = daf_init(PREC), op2 = daf_init(PREC), rop = daf_init(PREC);
-  daf_set_ui(op2, 1);
+	daf_ref_t op1 = daf_init(PREC),
+						op2 = daf_init(PREC);
 
-  daf_set_ui(op1, TEN_9_MAX + 2);
+	daf_set_ui(op1, 1);
+	daf_set_ui(op2, 1);
 
-  for (uint64_t i = 0; i < 3; ++i)
-  {
-    daf_set_ui(op1, (TEN_9_MAX + 1) * i + TEN_9_MAX);
+	daf_debug_out(op1, "op1");
+	daf_debug_out(op2, "op2");
 
-    daf_add(rop, op1, op2);
+	daf_add(op1, op1, op2);
 
-    daf_printf("%DF + %DF = %DF\n", op1, op2, rop);
-  }
-  daf_debug_out(op1, "op1");
-  daf_debug_out(op2, "op2");
-  daf_debug_out(rop, "rop");
+	daf_debug_out(op1, "op1");
+	daf_debug_out(op2, "op2");
 
-  // daf_printf("%DF\n", rop);
+	daf_printf("op1 : %DF", op1);
 
-  daf_clear(op1);
-  daf_clear(op2);
-  daf_clear(rop);
+	daf_clear(op1);
+	daf_clear(op2);
 
-  return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }

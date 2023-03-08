@@ -1,28 +1,33 @@
 CC=gcc
-CMNCFLAGS=-I include -Wall -Wextra
+
+CMNCFLAGS=-Wall -Wextra
 CFLAGS=$(CMNCFLAGS) -O3
 DBCFLAGS=$(CMNCFLAGS) -O0
-DEPS=include/DAFL.h
+
+LKFLAGS=-I include 
+
+IDIR=include
+DEPS=$(wildcard $(IDIR)/*.h)
+
+SRCDIR=src
+SRCFILES=$(wildcard $(SRCDIR)/*.c)
+
 ODIR=src/obj
-
-CHECKS_BIN=checks/bin
-
-CHECKS_SRC=limb.c
-CHECKS=$(addprefix $(CHECKS_BIN)/, $(CHECKS_SRC:.c=.exe))
+OFILES= $(addprefix $(ODIR)/, $(notdir $(patsubst %.c, %.o, $(SRCFILES))))
 
 all: comphead comp run
 
 run:
 	./bin/main
 
-comp: $(ODIR)/main.o $(ODIR)/DAFL.o
-	$(CC) -o bin/main $^ $(CFLAGS)
+comp: $(OFILES)
+	$(CC) -o bin/main $^ $(CFLAGS) $(LKFLAGS)
 
 comphead:
 	./comphead
 
 $(ODIR)/%.o: src/%.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(LKFLAGS)
 
 db:
 	$(CC) -g -o bin/main_db.exe src/main.c src/DAFl.c $(DBCFLAGS)
