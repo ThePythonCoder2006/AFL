@@ -30,7 +30,7 @@ $(ODIR)/%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(LKFLAGS) $(CFLAGS)
 
 db:
-	$(CC) -g -o bin/main_db.exe src/main.c src/DAFl.c $(DBCFLAGS)
+	$(CC) -g -o bin/main_db.exe $(SRCFILES) src/main.c $(LKFLAGS) $(DBCFLAGS)
 	gdb bin/main_db.exe
 
 pre: src/main.c
