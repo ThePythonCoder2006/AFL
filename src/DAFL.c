@@ -1,11 +1,12 @@
 #include "DAFL.h"
+#include "DAFL_add.h"
 
 uint64_t nb_daf = 0;
 
 uint8_t all_daf_already_init = 0;
 daf_t **all_daf = NULL;
 
-char *(err_message)[DAF_ERR_COUNT] = {
+const char *const(err_message)[DAF_ERR_COUNT] = {
 		PRINTF_SUCESS " everything appended as intended",
 		PRINTF_ERROR " failed to allocated some memory",
 		PRINTF_ERROR " failed to read the file containing the float's mantissa",

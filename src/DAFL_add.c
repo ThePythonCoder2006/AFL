@@ -1,3 +1,4 @@
+#include "DAFL_add.h"
 #include "DAFL.h"
 
 daf_ret_t daf_limb_copy(daf_limb_t rop, daf_limb_t op)
@@ -34,18 +35,22 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
 			(*rop)[i] = 0;
 			continue;
 		}
-		else
-		{
-			printf("  " PRINTF_BINARY_PATTERN_INT32 "\n& " PRINTF_BINARY_PATTERN_INT32 "\n= " PRINTF_BINARY_PATTERN_INT32 "\n", PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]), PRINTF_BYTE_TO_BINARY_INT32(~(1 << 31)), PRINTF_BYTE_TO_BINARY_INT32((*rop)[i] & ~(1 << 31)));
-			fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %u\n", i, i, (*rop)[i], (uint32_t)TEN_9_MAX);
-			return DAF_RET_ERR_INVALID_FLOAT;
-		}
+
+		// error, value is unreable
+		printf("  " PRINTF_BINARY_PATTERN_INT32 "\n& " PRINTF_BINARY_PATTERN_INT32 "\n= " PRINTF_BINARY_PATTERN_INT32 "\n", PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]), PRINTF_BYTE_TO_BINARY_INT32(~(1 << 31)), PRINTF_BYTE_TO_BINARY_INT32((*rop)[i] & ~(1 << 31)));
+		fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %u\n", i, i, (*rop)[i], (uint32_t)TEN_9_MAX);
+		return DAF_RET_ERR_INVALID_FLOAT;
 	}
 
 	return DAF_RET_SUCESS;
 }
 
-daf_ret_t daf_limb_add(uint8_t *const carry, daf_limb_t *const rop, const daf_limb_t op1_top, const daf_limb_t op1_bott, const daf_limb_t op2, const uint8_t uint30_dec)
+daf_ret_t daf_limb_add(uint8_t *const carry,
+											 daf_limb_t *const rop,
+											 const daf_limb_t op1_top,
+											 const daf_limb_t op1_bott,
+											 const daf_limb_t op2,
+											 const uint8_t uint30_dec)
 {
 	// helper macros for the hpcp_add function for keeping the remaiders
 #define DAF_ADD_GET_REM_BIT(rem_var, N) (((rem_var)[(uint64_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
