@@ -1,12 +1,28 @@
 #include "DAFL_add.h"
 #include "DAFL.h"
 
-daf_ret_t daf_limb_copy(daf_limb_t rop, daf_limb_t op)
+daf_ret_t daf_limb_copy(daf_limb_t *rop, daf_limb_t op)
 {
 	for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
-		rop[i] = op[i];
+		(*rop)[i] = op[i];
 
 	return DAF_RET_SUCESS;
+}
+
+uint8_t daf_limb_is_max(daf_limb_t op)
+{
+	uint8_t is_max = 1;
+
+	for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
+	{
+		if (op[i] < TEN_9_MAX)
+		{
+			is_max = 0;
+			break;
+		}
+	}
+
+	return is_max;
 }
 
 daf_ret_t daf_ten_9_add(uint30_t *const rop, const uint30_t op1, const uint30_t op2)
@@ -227,47 +243,30 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 	while (run)
 	{
 		for (uint64_t i = 0; i < max_limb_numb; ++i)
-		{
 			if (arrcarry1[i])
 			{
-				for (uint8_t j = 0; i < DAF_LIMB_SIZE; ++j)
-				{
-					if ((*rop->loaded_mtsa)[i][j] <= TEN_9_MAX)
-					{
-						limb_i_is_max = 0;
-						break;
-					}
-				}
-
-				if (!limb_i_is_max)
+				if (!daf_limb_is_max((*rop->loaded_mtsa)[i]))
 				{
 					daf_limb_set_zero(&((*rop->loaded_mtsa)[i]));
 					if (i > 0)
 						arrcarry2[i - 1] = 1;
 					else
-						fprintf(stderr, PRINTF_ERROR " Not yet implemented !!! %i", __LINE__);
+						TODO;
 				}
 				else
 					++((*rop->loaded_mtsa)[i][DAF_LIMB_SIZE - 1]);
 
 				arrcarry1[i] = 0;
 			}
-		}
 
 		// suppose that there is no more carry
 		run = 0;
 
-		// reset the carry array n°1 that has allready been used to 0 and check if the second array contains any non zero value
-		for (uint8_t i = 0; i < ((size_t)(DAF_LIMB_SIZE / 8)) + 1; ++i)
-		{
-			arrcarry1[i] = 0;
-			if (arrcarry2[i])
-			// if the second carry array does contain non-zero element(s) then keep running and skip the swaping of the arrays
-			{
+		// check if the second array contains any non zero value
+		for (uint8_t i = 0; i < max_limb_numb; ++i)
+			if (arrcarry2[i]) // if the second carry array contains any non-zero elements, keep going
 				run = 1;
-				continue;
-			}
-		}
+
 		swap_ptr_uint8(&arrcarry1, &arrcarry2);
 	}
 

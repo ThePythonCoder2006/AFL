@@ -31,7 +31,7 @@ extern const char *const(err_message)[DAF_ERR_COUNT];
 
 /*-------------------------------start functions-------------------------------*/
 
-daf_ret_t daf_load_mantissa(daf_ref_t ref);
+// daf_ret_t daf_load_mantissa(daf_ref_t ref);
 
 // init functions
 daf_ret_ref_t daf_init(uint64_t prec);
@@ -84,12 +84,6 @@ size_t daf_get_filename(char filename[64], daf_ref_t op_ref);
 daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name);
 
 // set functions ------------------------------------------------------
-static inline daf_ret_t daf_limb_set(daf_limb_t *rop, daf_limb_t *op)
-{
-	for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
-		(*rop)[i] = (*op)[i];
-	return DAF_RET_SUCESS;
-}
 daf_ret_t daf_limb_set_zero(daf_limb_t *rop);
 
 daf_ret_t daf_set_plus_zero(daf_ref_t op_ref);
