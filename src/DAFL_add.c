@@ -39,14 +39,15 @@ daf_ret_t daf_ten_9_add(uint30_t *const rop, const uint30_t op1, const uint30_t 
 
 daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
 {
-	for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
+	for (int8_t i = DAF_LIMB_SIZE; i >= 0; --i)
 	{
 		if ((*rop)[i] < TEN_9_MAX)
 		{
 			(*rop)[i]++;
 			break;
 		}
-		else if ((*rop)[i] == TEN_9_MAX)
+
+		if ((*rop)[i] == TEN_9_MAX)
 		{
 			(*rop)[i] = 0;
 			continue;
@@ -243,21 +244,23 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 	while (run)
 	{
 		for (uint64_t i = 0; i < max_limb_numb; ++i)
-			if (arrcarry1[i])
-			{
-				if (!daf_limb_is_max((*rop->loaded_mtsa)[i]))
-				{
-					daf_limb_set_zero(&((*rop->loaded_mtsa)[i]));
-					if (i > 0)
-						arrcarry2[i - 1] = 1;
-					else
-						TODO;
-				}
-				else
-					++((*rop->loaded_mtsa)[i][DAF_LIMB_SIZE - 1]);
+		{
+			if (arrcarry1[i] == 0)
+				continue;
 
-				arrcarry1[i] = 0;
+			if (!daf_limb_is_max((*rop->loaded_mtsa)[i]))
+			{
+				daf_limb_set_zero(&((*rop->loaded_mtsa)[i]));
+				if (i > 0)
+					arrcarry2[i - 1] = 1;
+				else
+					TODO;
 			}
+			else
+				daf_limb_pp(&((*rop->loaded_mtsa)[i]));
+
+			arrcarry1[i] = 0;
+		}
 
 		// suppose that there is no more carry
 		run = 0;
