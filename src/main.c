@@ -15,8 +15,8 @@ int main(int argc, char **argv)
 	daf_ref_t op1 = daf_init(PREC),
 						op2 = daf_init(PREC);
 
-	daf_set_ui(op1, 1);
-	daf_set_ui(op2, 1);
+	daf_set_ui(op1, TEN_9_MAX);
+	daf_set_ui(op2, 2);
 
 	daf_debug_out(op1, "op1");
 	daf_debug_out(op2, "op2");

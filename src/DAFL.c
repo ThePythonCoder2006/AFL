@@ -286,9 +286,9 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
 
 	uint64_t printed_ten_9 = 1;
 
-	out_args("%" PRIu32, DAF_MTSA_NTH(op_ref, 0));
+	out_args("%" PRIu32, DAF_MTSA_NTH(op_ref, DAF_GET_PREC(op_ref) - 1));
 
-	for (uint64_t i = 1; i < op->prec + op->real_prec_dec - DAF_LIMB_SIZE; ++i)
+	for (uint64_t i = (op->prec + op->real_prec_dec - 2); i >= 1; --i)
 	{
 		out_args(" %09" PRIu32, DAF_MTSA_NTH(op_ref, i));
 
@@ -297,6 +297,9 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
 			return DAF_RET_SUCESS;
 
 		if (printed_ten_9 >= prec || printed_ten_9 >= op->prec + op->real_prec_dec)
+			return DAF_RET_SUCESS;
+
+		if (DAF_IS_INT(op_ref) && printed_ten_9 >= op->exp)
 			return DAF_RET_SUCESS;
 
 		if (++printed_ten_9 == op->exp)
@@ -442,19 +445,19 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op)
 		if (p2 == 0)
 		{
 			rop->exp = 0;
-			DAF_MTSA_NTH(rop_ref, 0) = p1;
+			DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 1) = p1;
 			return DAF_RET_SUCESS;
 		}
 		rop->exp = 1;
-		DAF_MTSA_NTH(rop_ref, 1) = p1;
-		DAF_MTSA_NTH(rop_ref, 0) = p2;
+		DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 2) = p1;
+		DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 1) = p2;
 		return DAF_RET_SUCESS;
 	}
 
 	rop->exp = 2;
-	DAF_MTSA_NTH(rop_ref, 2) = p1;
-	DAF_MTSA_NTH(rop_ref, 1) = p2;
-	DAF_MTSA_NTH(rop_ref, 0) = p3;
+	DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 3) = p1;
+	DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 2) = p2;
+	DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 1) = p3;
 
 	return DAF_RET_SUCESS;
 }
