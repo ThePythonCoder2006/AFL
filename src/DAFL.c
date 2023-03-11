@@ -462,6 +462,16 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op)
 	return DAF_RET_SUCESS;
 }
 
+daf_ret_t daf_copy(daf_ref_t rop_ref, daf_ref_t op_ref)
+{
+	// if rop == op : no need to copy
+	if (rop_ref == op_ref)
+		return DAF_RET_SUCESS;
+
+	memcpy(all_daf[rop_ref], all_daf[op_ref], sizeof(daf_t));
+	return DAF_RET_SUCESS;
+}
+
 // arthimetric functions ------------------------------------------------------
 
 daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref)

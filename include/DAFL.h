@@ -94,6 +94,8 @@ daf_ret_t daf_set_minus_inf(daf_ref_t op_ref);
 
 daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op);
 
+daf_ret_t daf_copy(daf_ref_t rop_ref, daf_ref_t op_ref);
+
 // arthimetric functions ------------------------------------------------------
 daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
 
