@@ -146,7 +146,7 @@ daf_ret_t daf_limb_add(uint8_t *const carry,
 }
 
 // function that add two const hpcp_t passed as refs (op1_ref and op2_ref) and sets the result into an another hpcp_t ref (rop_ref)
-daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
+daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 {
 	// assert(0);
 	DAF_GET_PTR(rop);
@@ -298,4 +298,19 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 	// #undef DAF_ADD_GET_REM_BIT
 	// #undef DAF_ADD_SET_REM_BIT
 	// #undef DAF_ADD_CLR_REM_BIT
+}
+
+daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
+{
+	if (rop_ref == op1_ref || rop_ref == op2_ref)
+	{
+		daf_ref_t rop2_ref = daf_init(DAF_GET_PREC(rop_ref));
+		daf_add_restrict(rop2_ref, op1_ref, op2_ref);
+		daf_copy(rop2_ref, rop_ref);
+		daf_clear(rop2_ref);
+		return DAF_RET_SUCESS;
+	}
+
+	daf_add_restrict(rop_ref, op1_ref, op2_ref);
+	return DAF_RET_SUCESS;
 }
