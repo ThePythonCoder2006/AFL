@@ -61,7 +61,7 @@
 #define PPCAT_NX(A, B) A##B
 #define PPCAT(A, B) PPCAT_NX(A, B)
 
-#define TODO fprintf(stderr, PRINTF_ERROR " Not yet implemented !!! %i", __LINE__)
+#define TODO fprintf(stderr, PRINTF_ERROR " Not yet implemented !!! %i\n", __LINE__)
 
 /*-------------------------------end inline functions-------------------------------*/
 

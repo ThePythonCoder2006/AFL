@@ -1,6 +1,16 @@
 #include "DAFL_add.h"
 #include "DAFL.h"
 
+uint8_t daf_limb_is_max(daf_limb_t op)
+{
+	for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
+	{
+		if (op[i] <= TEN_9_MAX)
+			return 0;
+	}
+	return 1;
+}
+
 daf_ret_t daf_limb_copy_aligned(daf_limb_t *rop, daf_limb_t op)
 {
 	for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
@@ -148,7 +158,6 @@ daf_ret_t daf_limb_add(uint8_t *const carry,
 // function that add two const hpcp_t passed as refs (op1_ref and op2_ref) and sets the result into an another hpcp_t ref (rop_ref)
 daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 {
-	// assert(0);
 	DAF_GET_PTR(rop);
 	daf_t *op1, *op2;
 	if (DAF_GET(op1_ref, exp) >= DAF_GET(op2_ref, exp))
@@ -219,32 +228,37 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 	{
 		if (i < limb_dec) // op2->loaded_mtsa[i] doesn't exist
 		{
-			daf_limb_copy_aligned(&((*rop->loaded_mtsa)[i]), (*op1->loaded_mtsa)[i]);
+			daf_limb_copy_aligned((rop->loaded_mtsa)[i], *(op1->loaded_mtsa)[i]);
 			continue;
 		}
 
 		if (i > DAF_GET_PREC(op1_ref) || i > DAF_GET_PREC(op2_ref) + limb_dec)
 		{
 			if (i > DAF_GET_PREC(op1_ref)) // op1->loaded_mtsa[i] doesn't exist
-				daf_limb_copy_misaligned(&((*rop->loaded_mtsa)[i]), (*op2->loaded_mtsa)[i - limb_dec], (*op2->loaded_mtsa)[i], uint30_limb_dec);
+				daf_limb_copy_misaligned((rop->loaded_mtsa)[i], *(op2->loaded_mtsa)[i - limb_dec], *(op2->loaded_mtsa)[i], uint30_limb_dec);
 			else // op2->loaded_mtsa[i] doesn't exist
-				daf_limb_copy_aligned(&((*rop->loaded_mtsa)[i]), (*op1->loaded_mtsa)[i]);
+				daf_limb_copy_aligned((rop->loaded_mtsa)[i], *(op1->loaded_mtsa)[i]);
 			continue;
 		}
 
 		// op1->loaded_mtsa[i] and op2->loaded_mtsa[i - dec] exists
 		daf_limb_add(&carry,
-								 &((*rop->loaded_mtsa)[i]),
-								 (*op1->loaded_mtsa)[i],
-								 (*op2->loaded_mtsa)[i - limb_dec - 1],
-								 (*op2->loaded_mtsa)[i - limb_dec],
+								 (rop->loaded_mtsa)[i],
+								 *(op1->loaded_mtsa)[i],
+								 *(op2->loaded_mtsa)[i - limb_dec - 1],
+								 *(op2->loaded_mtsa)[i - limb_dec],
 								 uint30_limb_dec);
-		arrcarry1[i - 1] = carry;
+		if (i > 0)
+			arrcarry1[i - 1] = carry;
+		else
+		{
+			daf_ror(rop_ref, rop_ref);
+			(*(rop->loaded_mtsa)[i])[0] = 1;
+			++rop->exp;
+		}
 	}
 
 	uint8_t run = 1;
-
-	uint8_t limb_i_is_max = 1;
 
 	while (run)
 	{
@@ -252,25 +266,16 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 		{
 			if (arrcarry1[i])
 			{
-				for (uint8_t j = 0; i < DAF_LIMB_SIZE; ++j)
+				if (!daf_limb_is_max(*(rop->loaded_mtsa)[i]))
 				{
-					if ((*rop->loaded_mtsa)[i][j] <= TEN_9_MAX)
-					{
-						limb_i_is_max = 0;
-						break;
-					}
-				}
-
-				if (!limb_i_is_max)
-				{
-					daf_limb_set_zero(&((*rop->loaded_mtsa)[i]));
-					if (i > 0)
+					daf_limb_set_zero(&(*(rop->loaded_mtsa)[i]));
+					if (i != max_limb_numb - 1)
 						arrcarry2[i - 1] = 1;
 					else
-						fprintf(stderr, PRINTF_ERROR " Not yet implemented !!! %i", __LINE__);
+						TODO;
 				}
 				else
-					++((*rop->loaded_mtsa)[i][DAF_LIMB_SIZE - 1]);
+					++(*(rop->loaded_mtsa)[i][DAF_LIMB_SIZE - 1]);
 
 				arrcarry1[i] = 0;
 			}
@@ -283,8 +288,7 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 		for (uint8_t i = 0; i < ((size_t)(DAF_LIMB_SIZE / 8)) + 1; ++i)
 		{
 			arrcarry1[i] = 0;
-			if (arrcarry2[i])
-			// if the second carry array does contain non-zero element(s) then keep running and skip the swaping of the arrays
+			if (arrcarry2[i]) // if the second carry array does contain non-zero element(s) then keep running and skip the swaping of the arrays
 			{
 				run = 1;
 				continue;
@@ -307,7 +311,9 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 		daf_ref_t rop2_ref = daf_init(DAF_GET_PREC(rop_ref));
 		daf_add_restrict(rop2_ref, op1_ref, op2_ref);
 		daf_copy(rop2_ref, rop_ref);
-		daf_clear(rop2_ref);
+
+		free((void *)all_daf[rop2_ref]);
+		all_daf[rop2_ref] = NULL;
 		return DAF_RET_SUCESS;
 	}
 

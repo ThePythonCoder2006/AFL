@@ -133,8 +133,6 @@ daf_ret_ref_t daf_init(uint64_t prec)
 			return DAF_RET_ERR_ALLOC;
 	}
 
-	daf_set_mtsa_zero(ref);
-
 	return ref;
 }
 
@@ -143,9 +141,9 @@ daf_ret_ref_t daf_init(uint64_t prec)
 daf_ret_t daf_clear(daf_ref_t op_ref)
 {
 	DAF_GET_PTR(op);
-	char filename[64];
-	daf_get_filename(filename, op_ref);
-	remove(filename);
+	// char filename[64];
+	// daf_get_filename(filename, op_ref);
+	// remove(filename);
 
 	if (op->loaded_mtsa != NULL)
 		for (uint64_t i = 0; i < (op->prec + op->real_prec_dec) / 50 - 1; ++i)
@@ -244,8 +242,6 @@ daf_ret_t daf_primitive_vnprint(FILE *stream, char *buff, const uint64_t n, cons
 
 daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t n, daf_ref_t op_ref, uint64_t prec)
 {
-	uint64_t printed_chars = 0;
-
 	const uint8_t sn = (stream == NULL && buff != NULL) ? 1 : 0;
 
 	DAF_GET_PTR(op);
@@ -284,13 +280,19 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
 	// if ((err = daf_load_mantissa(op_ref)) != DAF_RET_SUCESS)
 	// 	return err;
 
+	uint64_t printed_chars = 1;
 	uint64_t printed_ten_9 = 1;
 
-	out_args("%" PRIu32, DAF_MTSA_NTH(op_ref, DAF_GET_PREC(op_ref) - 1));
-
-	for (uint64_t i = (op->prec + op->real_prec_dec - 2); i >= 1; --i)
+	for (uint64_t i = 0; i < (op->prec + op->real_prec_dec - 2); ++i)
 	{
-		out_args(" %09" PRIu32, DAF_MTSA_NTH(op_ref, i));
+		if (i == 0)
+		{
+			out_args("%" PRIu32, DAF_MTSA_NTH(op_ref, 0));
+		}
+		else
+		{
+			out_args(" %09" PRIu32, DAF_MTSA_NTH(op_ref, i));
+		}
 
 		printed_chars += 9;
 		if (printed_chars >= n && n != UINT64_MAX)
@@ -318,7 +320,7 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
 
 size_t daf_get_filename(char filename[64], daf_ref_t op_ref)
 {
-	return sprintf(filename, TMPPATH "/DAF-%" PRIu64 ".bin", op_ref);
+	return snprintf(filename, 64, TMPPATH "/DAF-%" PRIu64 ".bin", op_ref);
 }
 
 daf_ret_t daf_err_to_str(daf_ret_t err, char *const buff)
@@ -338,7 +340,7 @@ daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name)
 				 DAF_IS_ZERO(op_ref) ? "0" : "!= 0",
 				 DAF_IS_INF(op_ref) ? "Inf" : "finite",
 				 DAF_IS_NaN(op_ref) ? "NaN" : "aN",
-				 !((op->head | DAF_HEAD_EXP_MINUS) == op->head) ? "| | < 1" : "| | >= 1",
+				 ((op->head | DAF_HEAD_EXP_MINUS) == op->head) ? "| | < 1" : "| | >= 1",
 				 DAF_IS_INT(op_ref) ? "Int" : "Float");
 
 	printf("|- exp : %" PRIu64 "\n", op->exp);
@@ -349,10 +351,10 @@ daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name)
 	printf("\t|- *loaded_mtsa : 0x%p\n", *(op->loaded_mtsa));
 	for (uint64_t i = 0; i < (op->prec + op->real_prec_dec) / DAF_LIMB_SIZE; ++i)
 	{
-		printf("\t\t|- *(loaded_mtsa)[%" PRIu64 "] : 0x%p\n\t\t\t|- [%u", i, (*(op->loaded_mtsa))[i], ((*(op->loaded_mtsa))[i])[0]);
+		printf("\t\t|- *(loaded_mtsa)[%" PRIu64 "] : 0x%p\n\t\t\t|- [%u", i, *(op->loaded_mtsa)[i], (*(op->loaded_mtsa)[i])[0]);
 		for (uint8_t j = 1; j < DAF_LIMB_SIZE; ++j)
 		{
-			printf(", %u", ((*(op->loaded_mtsa))[i])[j]);
+			printf(", %u", (*(op->loaded_mtsa)[i])[j]);
 		}
 		printf("]\n");
 	}
@@ -445,19 +447,19 @@ daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op)
 		if (p2 == 0)
 		{
 			rop->exp = 0;
-			DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 1) = p1;
+			DAF_MTSA_NTH(rop_ref, 0) = p1;
 			return DAF_RET_SUCESS;
 		}
 		rop->exp = 1;
-		DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 2) = p1;
-		DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 1) = p2;
+		DAF_MTSA_NTH(rop_ref, 0) = p1;
+		DAF_MTSA_NTH(rop_ref, 1) = p2;
 		return DAF_RET_SUCESS;
 	}
 
 	rop->exp = 2;
-	DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 3) = p1;
-	DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 2) = p2;
-	DAF_MTSA_NTH(rop_ref, DAF_LIMB_SIZE - 1) = p3;
+	DAF_MTSA_NTH(rop_ref, 0) = p1;
+	DAF_MTSA_NTH(rop_ref, 1) = p2;
+	DAF_MTSA_NTH(rop_ref, 2) = p3;
 
 	return DAF_RET_SUCESS;
 }
@@ -479,6 +481,35 @@ daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref)
 	all_daf[rop_ref]->head = all_daf[op_ref]->head ^ DAF_HEAD_MINUS;
 	return DAF_RET_SUCESS;
 }
+
+daf_ret_t daf_ror(daf_ref_t rop_ref, daf_ref_t op_ref)
+{
+	DAF_GET_PTR(rop);
+	DAF_GET_PTR(op);
+
+	uint64_t prev = 0;
+	for (uint64_t i = 0; i < DAF_GET_PREC(op_ref) / DAF_LIMB_SIZE; ++i)
+	{
+		memmove((uint32_t *)*(rop->loaded_mtsa)[i] + 1, *(op->loaded_mtsa)[i], sizeof(daf_limb_t) - 1);
+		(*(rop->loaded_mtsa)[i])[0] = prev;
+		prev = (*(op->loaded_mtsa)[i])[DAF_LIMB_SIZE - 1];
+	}
+
+	return DAF_RET_SUCESS;
+}
+
+// daf_ret_t daf_sra(daf_ref_t rop_ref, daf_ref_t op_ref, uint64_t dec)
+// {
+// 	DAF_GET_PTR(rop);
+// 	DAF_GET_PTR(op);
+
+// 	for (uint64_t i = 0; i < DAF_GET_PREC(op_ref) / DAF_LIMB_SIZE; ++i)
+// 	{
+// 		memmove*((rop->loaded_mtsa)[i], *(op->loaded_mtsa)[i], sizeof(daf_limb_t));
+// 	}
+
+// 	return DAF_RET_SUCESS;
+// }
 
 // file stuff ------------------------------------------------------
 

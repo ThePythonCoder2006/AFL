@@ -5,7 +5,7 @@
 
 #include "DAFL.h"
 
-#define PREC 1
+#define PREC 51
 
 int main(int argc, char **argv)
 {
@@ -13,20 +13,22 @@ int main(int argc, char **argv)
 	--argc, argv++;
 
 	daf_ref_t op1 = daf_init(PREC),
-						op2 = daf_init(PREC);
+						op2 = daf_init(PREC),
+						rop = daf_init(PREC);
 
 	daf_set_ui(op1, TEN_9_MAX);
-	daf_set_ui(op2, 2);
+	daf_set_ui(op2, 3);
 
 	daf_debug_out(op1, "op1");
 	daf_debug_out(op2, "op2");
 
-	daf_add(op1, op1, op2);
+	daf_add(rop, op1, op2);
 
 	daf_debug_out(op1, "op1");
 	daf_debug_out(op2, "op2");
+	daf_debug_out(rop, "rop");
 
-	daf_printf("op1 : %DF", op1);
+	daf_printf("rop : %DF", rop);
 
 	daf_clear(op1);
 	daf_clear(op2);

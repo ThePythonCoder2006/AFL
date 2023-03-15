@@ -98,6 +98,7 @@ daf_ret_t daf_copy(daf_ref_t rop_ref, daf_ref_t op_ref);
 
 // arthimetric functions ------------------------------------------------------
 daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref);
+daf_ret_t daf_ror(daf_ref_t rop_ref, daf_ref_t op_ref);
 
 // file functions
 void rek_mkdir(const char *const path);
