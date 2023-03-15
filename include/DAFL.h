@@ -22,6 +22,7 @@
 #include "DAFL_consts.h"
 #include "DAFL_macros.h"
 #include "DAFL_types.h"
+#include "DAFL_set.h"
 #include "DAFL_add.h"
 #include "DAFL_print.h"
 
@@ -38,29 +39,15 @@ extern const char *const(err_message)[DAF_ERR_COUNT];
 
 // daf_ret_t daf_load_mantissa(daf_ref_t ref);
 
-// init functions
 daf_ret_ref_t daf_init(uint64_t prec);
 
-// clear functions
 daf_ret_t daf_clear(daf_ref_t op_ref);
-
-// print functions
 
 size_t daf_get_filename(char filename[64], daf_ref_t op_ref);
 
 daf_ret_t daf_debug_out(daf_ref_t op_ref, const char *const name);
 
 // set functions ------------------------------------------------------
-daf_ret_t daf_limb_set_zero(daf_limb_t *rop);
-
-daf_ret_t daf_set_plus_zero(daf_ref_t op_ref);
-daf_ret_t daf_set_minus_zero(daf_ref_t op_ref);
-daf_ret_t daf_set_NaN(daf_ref_t op_ref);
-daf_ret_t daf_set_plus_inf(daf_ref_t op_ref);
-daf_ret_t daf_set_minus_inf(daf_ref_t op_ref);
-
-daf_ret_t daf_set_ui(daf_ref_t rop_ref, uint64_t op);
-
 daf_ret_t daf_copy(daf_ref_t rop_ref, daf_ref_t op_ref);
 
 // arthimetric functions ------------------------------------------------------
