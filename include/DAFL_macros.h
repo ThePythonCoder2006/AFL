@@ -38,6 +38,10 @@
 
 #define TODO fprintf(stderr, PRINTF_ERROR " Not yet implemented !!! %i\n", __LINE__)
 
+#ifdef _DEBUG
 #define daf_debug(op) daf_debug_out(PPCAT(op, _ref), STR(op))
+#else
+#define daf_debug(op)
+#endif
 
 #endif //__DAFL_MACROS__
