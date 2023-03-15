@@ -68,12 +68,13 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
 	return DAF_RET_SUCESS;
 }
 
-daf_ret_t daf_limb_add(uint8_t *const carry,
-											 daf_limb_t *const rop,
-											 const daf_limb_t op1,
-											 const daf_limb_t op2_bott,
-											 const daf_limb_t op2_top,
-											 const uint8_t uint30_dec)
+daf_ret_t daf_limb_add_full(uint8_t *const carry,
+														daf_limb_t *const rop,
+														const daf_limb_t op1,
+														const daf_limb_t op2_bott,
+														const daf_limb_t op2_top,
+														const uint8_t uint30_dec,
+														const uint8_t is_bott)
 {
 	// helper macros for the daf_add functions for keeping the remaiders
 	// #define DAF_ADD_GET_REM_BIT(rem_var, N) (((rem_var)[(uint64_t)((N) / 8)] >> ((((N)-1) % 8))) & 1)
@@ -93,7 +94,10 @@ daf_ret_t daf_limb_add(uint8_t *const carry,
 
 		if (i < uint30_dec)
 		{
-			(*rop)[i] = op1[i] + op2_bott[DAF_LIMB_SIZE - uint30_dec + i];
+			if (is_bott)
+				(*rop)[i] = op1[i] + op2_bott[DAF_LIMB_SIZE - uint30_dec + i];
+			else
+				(*rop)[i] = op1[i];
 		}
 		else
 		{
@@ -222,10 +226,12 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 	const uint64_t uint30_limb_dec = dec % DAF_LIMB_SIZE; // the number of uint30_t in a limbs that the two operands are offseted by to each other
 
 	// add the limbs in pair for the start of both op's
-	uint8_t carry;
+	uint8_t carry = 0;
 
 	for (size_t i = 0; i < max_limb_numb; ++i)
 	{
+		carry = 0; // reset carry;
+
 		if (i < limb_dec) // op2->loaded_mtsa[i] doesn't exist
 		{
 			daf_limb_copy_aligned((rop->loaded_mtsa)[i], *(op1->loaded_mtsa)[i]);
@@ -241,13 +247,18 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 			continue;
 		}
 
-		// op1->loaded_mtsa[i] and op2->loaded_mtsa[i - dec] exists
-		daf_limb_add(&carry,
-								 (rop->loaded_mtsa)[i],
-								 *(op1->loaded_mtsa)[i],
-								 *(op2->loaded_mtsa)[i - limb_dec - 1],
-								 *(op2->loaded_mtsa)[i - limb_dec],
-								 uint30_limb_dec);
+		if (i == limb_dec)
+			daf_limb_add_full(&carry, (rop->loaded_mtsa)[i], *(op1->loaded_mtsa)[i], 0, *(op2->loaded_mtsa)[i - limb_dec], uint30_limb_dec, 0);
+		else
+			daf_limb_add(&carry,
+									 (rop->loaded_mtsa)[i],
+									 *(op1->loaded_mtsa)[i],
+									 *(op2->loaded_mtsa)[i - limb_dec - 1],
+									 *(op2->loaded_mtsa)[i - limb_dec],
+									 uint30_limb_dec);
+		if (!carry) // if there is no carry, add the next limb
+			continue;
+
 		if (i > 0)
 			arrcarry1[i - 1] = carry;
 		else

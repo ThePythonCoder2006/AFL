@@ -14,24 +14,25 @@ int main(int argc, char **argv)
 
 	daf_ref_t op1 = daf_init(PREC),
 						op2 = daf_init(PREC),
-						rop = daf_init(PREC);
+						rop = daf_init(PREC),
+						rop2 = daf_init(PREC);
 
-	daf_set_ui(op1, TEN_9_MAX);
-	daf_set_ui(op2, 3);
-
-	daf_debug_out(op1, "op1");
-	daf_debug_out(op2, "op2");
+	daf_set_ui(op1, UINT64_MAX);
+	daf_set_ui(op2, UINT64_MAX);
 
 	daf_add(rop, op1, op2);
 
-	daf_debug_out(op1, "op1");
-	daf_debug_out(op2, "op2");
-	daf_debug_out(rop, "rop");
+	daf_copy(rop2, rop);
 
-	daf_printf("rop : %DF", rop);
+	daf_add(rop, rop2, op1);
+
+	daf_printf(PRINTF_RED "%DF" PRINTF_RESET " + " PRINTF_RED "%DF" PRINTF_RESET " = " PRINTF_RED "%DF" PRINTF_RESET "\n", op1, op2, rop2);
+	daf_printf(PRINTF_RED "%DF" PRINTF_RESET "\n", rop);
 
 	daf_clear(op1);
 	daf_clear(op2);
+	daf_clear(rop);
+	daf_clear(rop2);
 
 	return EXIT_SUCCESS;
 }

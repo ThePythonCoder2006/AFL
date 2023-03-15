@@ -30,11 +30,11 @@ $(ODIR)/%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(LKFLAGS) $(CFLAGS)
 
 db:
-	$(CC) -g -o bin/main_db.exe $(SRCFILES) src/main.c $(LKFLAGS) $(DBCFLAGS)
+	$(CC) -ggdb -o bin/main_db.exe -D_DEBUG $(SRCFILES) src/main.c $(LKFLAGS) $(DBCFLAGS)
 	gdb bin/main_db.exe
 
-pre: src/main.c
-	$(CC) -E $^ $(CFLAGS) > preprocessor_build.c
+pre: $(SRCFILES) src/main.c
+	$(CC) -E $^ $(LKFLAGS) $(CFLAGS) > preprocessor_build.c
 
 clean:
 	del /f src\obj\*.o
