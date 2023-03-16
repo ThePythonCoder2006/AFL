@@ -26,8 +26,13 @@ int main(int argc, char **argv)
 
 	daf_add(rop, rop2, op1);
 
-	daf_printf(PRINTF_RED "%DF" PRINTF_RESET " + " PRINTF_RED "%DF" PRINTF_RESET " = " PRINTF_RED "%DF" PRINTF_RESET "\n", op1, op2, rop2);
-	daf_printf(PRINTF_RED "%DF" PRINTF_RESET "\n", rop);
+#ifdef _DEBUG
+#define PRINTF_RED
+#define PRINTF_RESET
+#endif
+
+	daf_printf(PRINTF_RED "%DgF" PRINTF_RESET " + " PRINTF_RED "%DgF" PRINTF_RESET " = " PRINTF_RED "%DgF" PRINTF_RESET "\n", op1, op2, rop2);
+	daf_printf(PRINTF_RED "%DgF" PRINTF_RESET "\n", rop);
 
 	daf_clear(op1);
 	daf_clear(op2);
@@ -60,7 +65,7 @@ void test_limb_add(void)
 		else
 			printf(PRINTF_CYAN "%09u ", op2_top[i - dec]);
 	}
-	printf(PRINTF_RESET);
+	// printf(PRINTF_RESET);
 	putchar('\n');
 
 	daf_limb_add(&carry, &rop, op1, op2_bott, op2_top, dec);

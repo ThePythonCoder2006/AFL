@@ -4,6 +4,7 @@
 		"useful_macros.h": "c",
 		"stdlib.h": "c",
 		"float.h": "c",
-		"dafl_types.h": "c"
+		"dafl_types.h": "c",
+		".C": "cpp"
 	}
 }

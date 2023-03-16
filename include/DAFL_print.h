@@ -3,7 +3,7 @@
 
 #include "DAFL.h"
 
-daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t n, daf_ref_t op_ref, uint64_t prec);
+daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t n, daf_ref_t op_ref, uint64_t prec, const uint8_t grp);
 daf_ret_t daf_primitive_vnprint(FILE *stream, char *const buff, const uint64_t n, const char *fmt, va_list args);
 
 static inline daf_ret_t daf_vfprintf(FILE *stream, const char *fmt, va_list args) { return daf_primitive_vnprint(stream, NULL, UINT64_MAX, fmt, args); }

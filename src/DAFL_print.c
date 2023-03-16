@@ -51,20 +51,30 @@ daf_ret_t daf_primitive_vnprint(FILE *stream, char *buff, const uint64_t n, cons
 
 		if (*(++fmt) == 'D')
 		{
+			uint8_t is_grp = 0;
+		switch_l:
 			switch (*(++fmt))
 			{
 			case 'F':
 				++fmt;
 				if (sn)
-					daf_primitive_out_file_string(NULL, buff, n - printed_chars, (daf_ref_t)va_arg(args, daf_ref_t), ((n - printed_chars) - ((n - printed_chars) % TEN_9_DECIMAL_SIZE)) / TEN_9_DECIMAL_SIZE);
+					daf_primitive_out_file_string(NULL, buff, n - printed_chars,
+																				(daf_ref_t)va_arg(args, daf_ref_t),
+																				((n - printed_chars) - ((n - printed_chars) % TEN_9_DECIMAL_SIZE)) / TEN_9_DECIMAL_SIZE,
+																				is_grp);
 				else
-					daf_primitive_out_file_string(stream, NULL, UINT64_MAX, (daf_ref_t)va_arg(args, daf_ref_t), (n - printed_chars));
+					daf_primitive_out_file_string(stream, NULL, UINT64_MAX, (daf_ref_t)va_arg(args, daf_ref_t), (n - printed_chars), is_grp);
 
 				printed_chars += n - printed_chars;
 
 				if (printed_chars >= n && n != UINT64_MAX)
 					return DAF_RET_SUCESS;
 
+				break;
+
+			case 'g':
+				is_grp = 1;
+				goto switch_l;
 				break;
 
 			default:
@@ -91,7 +101,7 @@ daf_ret_t daf_primitive_vnprint(FILE *stream, char *buff, const uint64_t n, cons
 	return DAF_RET_SUCESS;
 }
 
-daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t n, daf_ref_t op_ref, uint64_t prec)
+daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t n, daf_ref_t op_ref, uint64_t prec, const uint8_t grp)
 {
 	const uint8_t sn = (stream == NULL && buff != NULL) ? 1 : 0;
 
@@ -143,7 +153,8 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
 		}
 		else
 		{
-			out_args(" %09" PRIu32, DAF_MTSA_NTH(op_ref, i));
+			out_args("%c", grp ? ' ' : 0);
+			out_args("%09" PRIu32, DAF_MTSA_NTH(op_ref, i));
 			printed_chars += 9;
 		}
 
@@ -164,6 +175,7 @@ daf_ret_t daf_primitive_out_file_string(FILE *stream, char *buff, const uint64_t
 				strncat(buff, &sep, 1);
 			else
 				putchar(sep);
+			continue;
 		}
 	}
 	return DAF_RET_SUCESS;
