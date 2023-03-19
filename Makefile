@@ -15,9 +15,7 @@ SRCFILES=$(wildcard $(SRCDIR)/DAFL*.c)
 ODIR=src/obj
 OFILES= $(addprefix $(ODIR)/, $(notdir $(patsubst %.c, %.o, $(SRCFILES))))
 
-all: comphead comp run
-
-run:
+run: comphead comp
 	./bin/main
 
 comp: $(OFILES) src/obj/main.o

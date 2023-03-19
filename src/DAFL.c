@@ -13,70 +13,70 @@ const char *const(err_message)[DAF_ERR_COUNT] = {
 		PRINTF_ERROR " the float you passed in is invalid",
 		PRINTF_ERROR " this funcitonnality is not (yet) implemented"};
 
-daf_ret_t daf_load_mantissa(daf_ref_t op_ref)
-{
-	fprintf(stderr, PRINTF_ERROR "working with mtsa in files is not allowed for now !\n");
-	assert(0 && "Illegal");
+// daf_ret_t daf_load_mantissa(daf_ref_t op_ref)
+// {
+// 	fprintf(stderr, PRINTF_ERROR "working with mtsa in files is not allowed for now !\n");
+// 	assert(0 && "Illegal");
 
-	DAF_GET_PTR(op);
+// 	DAF_GET_PTR(op);
 
-	if (op->loaded_mtsa != NULL)
-		return DAF_RET_SUCESS;
+// 	if (op->loaded_mtsa != NULL)
+// 		return DAF_RET_SUCESS;
 
-	uint64_t mtsa_size = op->prec + op->real_prec_dec;
+// 	uint64_t mtsa_size = op->prec + op->real_prec_dec;
 
-	char filename[64];
-	daf_get_filename(filename, op_ref);
-	FILE *fmantissa = fopen(filename, "rb");
+// 	char filename[64];
+// 	daf_get_filename(filename, op_ref);
+// 	FILE *fmantissa = fopen(filename, "rb");
 
-	if (fmantissa == NULL)
-	{
-		fprintf(stderr, PRINTF_ERROR " could not open the file \"%s\" of the mantissa of the daf with ref %" PRIu64 "\n", filename, op_ref);
-		return DAF_RET_ERR_READ_FILE;
-	}
+// 	if (fmantissa == NULL)
+// 	{
+// 		fprintf(stderr, PRINTF_ERROR " could not open the file \"%s\" of the mantissa of the daf with ref %" PRIu64 "\n", filename, op_ref);
+// 		return DAF_RET_ERR_READ_FILE;
+// 	}
 
-	op->loaded_mtsa = calloc(mtsa_size / DAF_LIMB_SIZE, sizeof(daf_t *));
-	if (op->loaded_mtsa == NULL)
-		return DAF_RET_ERR_ALLOC;
-	for (uint64_t i = 0; i < mtsa_size / DAF_LIMB_SIZE; ++i)
-	{
-		op->loaded_mtsa[i] = calloc(DAF_LIMB_SIZE, sizeof(uint30_t));
-		if (op->loaded_mtsa[i] == NULL)
-			return DAF_RET_ERR_ALLOC;
+// 	op->loaded_mtsa = calloc(mtsa_size / DAF_LIMB_SIZE, sizeof(daf_t *));
+// 	if (op->loaded_mtsa == NULL)
+// 		return DAF_RET_ERR_ALLOC;
+// 	for (uint64_t i = 0; i < mtsa_size / DAF_LIMB_SIZE; ++i)
+// 	{
+// 		op->loaded_mtsa[i] = calloc(DAF_LIMB_SIZE, sizeof(uint30_t));
+// 		if (op->loaded_mtsa[i] == NULL)
+// 			return DAF_RET_ERR_ALLOC;
 
-		fread(op->loaded_mtsa[i], sizeof(uint30_t), 1, fmantissa);
-	}
-	fclose(fmantissa);
-	return DAF_RET_SUCESS;
-}
+// 		fread(op->loaded_mtsa[i], sizeof(uint30_t), 1, fmantissa);
+// 	}
+// 	fclose(fmantissa);
+// 	return DAF_RET_SUCESS;
+// }
 
-daf_ret_t daf_set_file_mantissa_zero(daf_ref_t op_ref)
-{
-	fprintf(stderr, PRINTF_ERROR "working with mtsa in files is not allowed for now !\n");
-	assert(0);
+// daf_ret_t daf_set_file_mantissa_zero(daf_ref_t op_ref)
+// {
+// 	fprintf(stderr, PRINTF_ERROR "working with mtsa in files is not allowed for now !\n");
+// 	assert(0);
 
-	DAF_GET_PTR(op);
+// 	DAF_GET_PTR(op);
 
-	if (op->prec < DAF_LIMB_SIZE)
-		return DAF_RET_SUCESS;
+// 	if (op->prec < DAF_LIMB_SIZE)
+// 		return DAF_RET_SUCESS;
 
-	const uint64_t binmax = (op->prec - DAF_LIMB_SIZE) + op->real_prec_dec;
+// 	const uint64_t binmax = (op->prec - DAF_LIMB_SIZE) + op->real_prec_dec;
 
-	char filename[64];
-	daf_get_filename(filename, op_ref);
+// 	char filename[64];
+// 	daf_get_filename(filename, op_ref);
 
-	FILE *bin = fopen_mkdir(filename, "wb");
-	if (bin == NULL)
-		return DAF_RET_ERR_READ_FILE;
+// 	FILE *bin = fopen_mkdir(filename, "wb");
+// 	if (bin == NULL)
+// 		return DAF_RET_ERR_READ_FILE;
 
-	const daf_limb_t buff = {0x00};
+// 	const daf_limb_t buff = {0x00};
 
-	for (uint64_t i = 0; i < binmax / DAF_LIMB_SIZE; ++i)
-		fwrite(&buff, sizeof(buff), 1, bin);
+// 	for (uint64_t i = 0; i < binmax / DAF_LIMB_SIZE; ++i)
+// 		fwrite(&buff, sizeof(buff), 1, bin);
 
-	fclose(bin);
-	return 0;
-}
+// 	fclose(bin);
+// 	return 0;
+// }
 
 // init functions
 
@@ -142,6 +142,9 @@ daf_ret_t daf_clear(daf_ref_t op_ref)
 
 	free((void *)all_daf[op_ref]);
 	all_daf[op_ref] = NULL;
+
+	if (op_ref == nb_daf - 1)
+		--nb_daf;
 	return DAF_RET_SUCESS;
 }
 

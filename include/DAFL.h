@@ -24,6 +24,7 @@
 #include "DAFL_types.h"
 #include "DAFL_set.h"
 #include "DAFL_add.h"
+#include "DAFL_mult.h"
 #include "DAFL_print.h"
 
 /* extern variables */

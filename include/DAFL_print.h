@@ -12,19 +12,25 @@ static inline daf_ret_t daf_fprintf(FILE *stream, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	return daf_vfprintf(stream, fmt, args);
+	daf_ret_t ret = daf_vfprintf(stream, fmt, args);
+	va_end(args);
+	return ret;
 }
 static inline daf_ret_t daf_eprintf(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	return daf_vfprintf(stderr, fmt, args);
+	daf_ret_t ret = daf_vfprintf(stderr, fmt, args);
+	va_end(args);
+	return ret;
 }
 static inline daf_ret_t daf_printf(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	return daf_vprintf(fmt, args);
+	daf_ret_t ret = daf_vprintf(fmt, args);
+	va_end(args);
+	return ret;
 }
 
 static inline daf_ret_t daf_vsnprintf(char *buff, const uint64_t n, const char *fmt, va_list args) { return daf_primitive_vnprint(NULL, buff, n, fmt, args); }
@@ -33,13 +39,17 @@ static inline daf_ret_t daf_snprintf(char *buff, const uint64_t n, const char *f
 {
 	va_list args;
 	va_start(args, fmt);
-	return daf_vsnprintf(buff, n, fmt, args);
-};
+	daf_ret_t ret = daf_vsnprintf(buff, n, fmt, args);
+	va_end(args);
+	return ret;
+}
 static inline daf_ret_t daf_sprintf(char *buff, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	return daf_vsnprintf(buff, UINT64_MAX, fmt, args);
-};
+	daf_ret_t ret = daf_vsnprintf(buff, UINT64_MAX, fmt, args);
+	va_end(args);
+	return ret;
+}
 
 #endif // __DAFL_PRINT__

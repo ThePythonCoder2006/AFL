@@ -60,7 +60,7 @@ daf_ret_t daf_limb_pp(daf_limb_t *rop) // adds one to the limb
 		}
 
 		// error, value is unreable
-		printf("  " PRINTF_BINARY_PATTERN_INT32 "\n& " PRINTF_BINARY_PATTERN_INT32 "\n= " PRINTF_BINARY_PATTERN_INT32 "\n", PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]), PRINTF_BYTE_TO_BINARY_INT32(~(1 << 31)), PRINTF_BYTE_TO_BINARY_INT32((*rop)[i] & ~(1 << 31)));
+		printf("  " PRINTF_BINARY_PATTERN_INT32 "\n& " PRINTF_BINARY_PATTERN_INT32 "\n= " PRINTF_BINARY_PATTERN_INT32 "\n", PRINTF_BYTE_TO_BINARY_INT32((*rop)[i]), PRINTF_BYTE_TO_BINARY_INT32(~(1ULL << 31)), PRINTF_BYTE_TO_BINARY_INT32((*rop)[i] & ~(1ULL << 31)));
 		fprintf(stderr, PRINTF_ERROR "the ten_9 at index %" PRIu8 " had a value higher than the maximum accepted value  (rop[%" PRIu8 "] = %u > %u\n", i, i, (*rop)[i], (uint32_t)TEN_9_MAX);
 		return DAF_RET_ERR_INVALID_FLOAT;
 	}
@@ -89,7 +89,7 @@ daf_ret_t daf_limb_add_full(uint8_t *const carry,
 					*arrcarry2 = arrcarry2_;
 
 	// summing each pair of uint30_t individually
-	for (size_t i = 0; i < DAF_LIMB_SIZE; ++i)
+	for (uint8_t i = 0; i < DAF_LIMB_SIZE; ++i)
 	{
 
 		if (i < uint30_dec)
@@ -118,7 +118,7 @@ daf_ret_t daf_limb_add_full(uint8_t *const carry,
 	while (run)
 	{
 		// the (i + 1) are because the i's start from 0 and not from 1
-		for (size_t i = 0; i < (DAF_LIMB_SIZE); ++i)
+		for (uint8_t i = 0; i < (DAF_LIMB_SIZE); ++i)
 		{
 			if (arrcarry1[i])
 			{
@@ -228,7 +228,7 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 	// add the limbs in pair for the start of both op's
 	uint8_t carry = 0;
 
-	for (size_t i = 0; i < max_limb_numb; ++i)
+	for (uint64_t i = 0; i < max_limb_numb; ++i)
 	{
 		carry = 0; // reset carry;
 
@@ -241,14 +241,22 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 		if (i > DAF_GET_PREC(op1_ref) || i > DAF_GET_PREC(op2_ref) + limb_dec)
 		{
 			if (i > DAF_GET_PREC(op1_ref)) // op1->loaded_mtsa[i] doesn't exist
-				daf_limb_copy_misaligned((rop->loaded_mtsa)[i], *(op2->loaded_mtsa)[i - limb_dec], *(op2->loaded_mtsa)[i], uint30_limb_dec);
+				daf_limb_copy_misaligned((rop->loaded_mtsa)[i],
+																 *(op2->loaded_mtsa)[i - limb_dec],
+																 *(op2->loaded_mtsa)[i],
+																 uint30_limb_dec);
 			else // op2->loaded_mtsa[i] doesn't exist
 				daf_limb_copy_aligned((rop->loaded_mtsa)[i], *(op1->loaded_mtsa)[i]);
 			continue;
 		}
 
 		if (i == limb_dec)
-			daf_limb_add_full(&carry, (rop->loaded_mtsa)[i], *(op1->loaded_mtsa)[i], 0, *(op2->loaded_mtsa)[i - limb_dec], uint30_limb_dec, 0);
+			daf_limb_add_full(&carry,
+												(rop->loaded_mtsa)[i],
+												*(op1->loaded_mtsa)[i],
+												(daf_limb_t){0},
+												*(op2->loaded_mtsa)[0],
+												uint30_limb_dec, 0);
 		else
 			daf_limb_add(&carry,
 									 (rop->loaded_mtsa)[i],
@@ -296,7 +304,7 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 		run = 0;
 
 		// reset the carry array n°1 that has allready been used to 0 and check if the second array contains any non zero value
-		for (uint8_t i = 0; i < ((size_t)(DAF_LIMB_SIZE / 8)) + 1; ++i)
+		for (uint8_t i = 0; i < max_limb_numb + 1; ++i)
 		{
 			arrcarry1[i] = 0;
 			if (arrcarry2[i]) // if the second carry array does contain non-zero element(s) then keep running and skip the swaping of the arrays
@@ -319,12 +327,13 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 {
 	if (rop_ref == op1_ref || rop_ref == op2_ref)
 	{
-		daf_ref_t rop2_ref = daf_init(DAF_GET_PREC(rop_ref));
+		daf_ref_t rop2_ref = daf_init(DAF_GET(rop_ref, prec));
 		daf_add_restrict(rop2_ref, op1_ref, op2_ref);
-		daf_copy(rop2_ref, rop_ref);
+		daf_copy(rop_ref, rop2_ref);
 
-		free((void *)all_daf[rop2_ref]);
-		all_daf[rop2_ref] = NULL;
+		// free((void *)all_daf[rop2_ref]);
+		// all_daf[rop2_ref] = NULL;
+		daf_clear(rop2_ref);
 		return DAF_RET_SUCESS;
 	}
 
