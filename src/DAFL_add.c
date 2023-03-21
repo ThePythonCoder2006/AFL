@@ -328,15 +328,12 @@ daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
 	if (rop_ref == op1_ref || rop_ref == op2_ref)
 	{
 		daf_ref_t rop2_ref = daf_init(DAF_GET(rop_ref, prec));
-		daf_add_restrict(rop2_ref, op1_ref, op2_ref);
+		daf_ret_t ret = daf_add_restrict(rop2_ref, op1_ref, op2_ref);
 		daf_copy(rop_ref, rop2_ref);
 
-		// free((void *)all_daf[rop2_ref]);
-		// all_daf[rop2_ref] = NULL;
 		daf_clear(rop2_ref);
-		return DAF_RET_SUCESS;
+		return ret;
 	}
 
-	daf_add_restrict(rop_ref, op1_ref, op2_ref);
-	return DAF_RET_SUCESS;
+	return daf_add_restrict(rop_ref, op1_ref, op2_ref);
 }

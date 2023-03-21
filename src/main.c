@@ -23,6 +23,8 @@ int main(int argc, char **argv)
 
 	daf_set_ui(op2, TEN_9_MAX);
 
+	daf_sra(op2, op2, 2);
+
 	for (uint8_t i = 0; i < 10; ++i)
 	{
 		daf_add(op1, op1, op2);

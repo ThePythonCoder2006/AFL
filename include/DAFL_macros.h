@@ -36,6 +36,17 @@
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
 
+#define SAFE_CALL(func, rop_ref, ...)                           \
+	if (rop_ref == arg2_ref)                                      \
+	{                                                             \
+		daf_ref_t rop2_ref = daf_init(DAF_GET(arg1_ref, prec));     \
+		daf_ret_t ret = PPCAT(func, _restrict)(rop2_ref, arg1_ref); \
+		daf_copy(arg1_ref, rop2_ref);                               \
+		daf_clear(rop2_ref);                                        \
+		return ret;                                                 \
+	}                                                             \
+	return PPCAT(func, _restrict)(arg1_ref, arg2_ref);
+
 #define TODO fprintf(stderr, PRINTF_ERROR " Not yet implemented !!! %i\n", __LINE__)
 
 #ifdef _DEBUG

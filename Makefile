@@ -1,6 +1,6 @@
 CC=gcc
 
-CMNCFLAGS=-Wall -Wextra -std=c11
+CMNCFLAGS=-Wall -Wextra
 CFLAGS=$(CMNCFLAGS) -O3
 DBCFLAGS=$(CMNCFLAGS) -O0 -dH
 
