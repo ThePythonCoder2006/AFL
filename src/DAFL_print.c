@@ -40,7 +40,7 @@ daf_ret_t daf_primitive_vnprint(FILE *stream, char *buff, const uint64_t n, cons
 			if (sn)
 				strncat(buff, &curr, 1);
 			else
-				fprintf(stream, "%c", curr);
+				putc(curr, stream);
 			++printed_chars;
 
 			if (printed_chars >= n && n != UINT64_MAX)
@@ -83,14 +83,26 @@ daf_ret_t daf_primitive_vnprint(FILE *stream, char *buff, const uint64_t n, cons
 		}
 		else
 		{
-			char tmp[16];
-			snprintf(tmp, sizeof(tmp), "%%%c", *(fmt++));
+			TODO;
+			return DAF_RET_ERR_NOT_IMPLEMENTED;
+
+			const char modif = *(fmt++);
+			if (modif == '%')
+			{
+				if (sn)
+					strncat(buff, "%", 1);
+				else
+					putc('%', stream);
+				continue;
+			}
+
+			const char tmp[16] = {'%', modif, 0};
 			if (sn)
 			{
-				uint8_t len;
-				char tmp_buff[64];
+				const uint8_t len = 64;
+				char tmp_buff[len];
 				vsnprintf(tmp_buff, sizeof(tmp_buff), tmp, args);
-				strncat(buff, tmp_buff, len = strlen(tmp_buff));
+				strncat(buff, tmp_buff, len);
 				printed_chars += len;
 			}
 			else

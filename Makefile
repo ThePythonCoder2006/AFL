@@ -1,8 +1,8 @@
 CC=gcc
 
-CMNCFLAGS=-Wall -Wextra
+CMNCFLAGS=-Wall -Wextra -std=c11
 CFLAGS=$(CMNCFLAGS) -O3
-DBCFLAGS=$(CMNCFLAGS) -O0
+DBCFLAGS=$(CMNCFLAGS) -O0 -dH
 
 LKFLAGS=-I include
 
@@ -28,7 +28,7 @@ $(ODIR)/%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(LKFLAGS) $(CFLAGS)
 
 db:
-	$(CC) -ggdb -o bin/main_db.exe -D_DEBUG $(SRCFILES) src/main.c $(LKFLAGS) $(DBCFLAGS)
+	$(CC) -ggdb3 -o bin/main_db.exe -D_DEBUG $(SRCFILES) src/main.c $(LKFLAGS) $(DBCFLAGS)
 	gdb bin/main_db.exe
 
 pre: $(SRCFILES) src/main.c

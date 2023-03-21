@@ -236,7 +236,7 @@ daf_ret_t daf_ror(daf_ref_t rop_ref, daf_ref_t op_ref)
 	uint64_t prev = 0;
 	for (uint64_t i = 0; i < DAF_GET_PREC(op_ref) / DAF_LIMB_SIZE; ++i)
 	{
-		memmove((uint32_t *)*(rop->loaded_mtsa)[i] + 1, *(op->loaded_mtsa)[i], sizeof(daf_limb_t) - 1);
+		memmove((uint32_t *)*(rop->loaded_mtsa)[i] + 1, *(op->loaded_mtsa)[i], sizeof(daf_limb_t) - sizeof(uint30_t));
 		(*(rop->loaded_mtsa)[i])[0] = prev;
 		prev = (*(op->loaded_mtsa)[i])[DAF_LIMB_SIZE - 1];
 	}
