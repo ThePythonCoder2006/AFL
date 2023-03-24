@@ -1,6 +1,8 @@
 #ifndef __DAFL_MACROS__
 #define __DAFL_MACROS__
 
+#include "foreach.h"
+
 #define DIV_CEIL(p, q) ((p) / (q) + ((p) % (q) != 0))
 
 #define DAF_IS_ZERO(ref) (((all_daf[ref])->head | (DAF_HEAD_ZERO)) == (all_daf[ref])->head)
@@ -36,16 +38,21 @@
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
 
-#define SAFE_CALL(func, rop_ref, ...)                           \
-	if (rop_ref == arg2_ref)                                      \
-	{                                                             \
-		daf_ref_t rop2_ref = daf_init(DAF_GET(arg1_ref, prec));     \
-		daf_ret_t ret = PPCAT(func, _restrict)(rop2_ref, arg1_ref); \
-		daf_copy(arg1_ref, rop2_ref);                               \
-		daf_clear(rop2_ref);                                        \
-		return ret;                                                 \
-	}                                                             \
-	return PPCAT(func, _restrict)(arg1_ref, arg2_ref);
+#define SAFE_CALL(func, rop_ref, ...)                                       \
+	if (FOREACH_OR(rop_ref, __VA_ARGS__, UINT64_MAX))                         \
+	{                                                                         \
+		if (rop_ref == UINT64_MAX)                                              \
+		{                                                                       \
+			fprintf(stderr, PRINTF_ERROR " maximal number of floats reached !!"); \
+			return DAF_RET_ERR_ALLOC;                                             \
+		}                                                                       \
+		daf_ref_t rop2_ref = daf_init(DAF_GET(rop_ref, prec));                  \
+		daf_ret_t ret = PPCAT(func, _restrict)(rop2_ref, __VA_ARGS__);          \
+		daf_copy(rop_ref, rop2_ref);                                            \
+		daf_clear(rop2_ref);                                                    \
+		return ret;                                                             \
+	}                                                                         \
+	return PPCAT(func, _restrict)(rop_ref, __VA_ARGS__);
 
 #define TODO fprintf(stderr, PRINTF_ERROR " Not yet implemented !!! %i\n", __LINE__)
 

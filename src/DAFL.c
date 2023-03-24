@@ -233,9 +233,7 @@ daf_ret_t daf_negate(daf_ref_t rop_ref, daf_ref_t op_ref)
 	return DAF_RET_SUCESS;
 }
 
-daf_ret_t daf_ror(daf_ref_t rop_ref, daf_ref_t op_ref) { SAFE_CALL(daf_ror, rop_ref, op_ref) }
-
-static daf_ret_t daf_ror_restrict(daf_ref_t rop_ref, daf_ref_t op_ref)
+daf_ret_t daf_ror_restrict(daf_ref_t rop_ref, daf_ref_t op_ref)
 {
 	DAF_GET_PTR(rop);
 	DAF_GET_PTR(op);
@@ -251,7 +249,9 @@ static daf_ret_t daf_ror_restrict(daf_ref_t rop_ref, daf_ref_t op_ref)
 	return DAF_RET_SUCESS;
 }
 
-daf_ret_t daf_sra(daf_ref_t rop_ref, daf_ref_t op_ref, uint64_t n)
+daf_ret_t daf_ror(daf_ref_t rop_ref, daf_ref_t op_ref){SAFE_CALL(daf_ror, rop_ref, op_ref)}
+
+daf_ret_t daf_sra_restrict(daf_ref_t rop_ref, daf_ref_t op_ref, uint64_t n)
 {
 	if (n >= DAF_LIMB_SIZE)
 	{
@@ -274,6 +274,8 @@ daf_ret_t daf_sra(daf_ref_t rop_ref, daf_ref_t op_ref, uint64_t n)
 
 	return DAF_RET_SUCESS;
 }
+
+daf_ret_t daf_sra(daf_ref_t rop_ref, daf_ref_t op_ref, uint64_t n) { SAFE_CALL(daf_sra, rop_ref, op_ref, n) }
 
 // file stuff ------------------------------------------------------
 

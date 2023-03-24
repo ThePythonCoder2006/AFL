@@ -323,17 +323,4 @@ daf_ret_t daf_add_restrict(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_r
 	// #undef DAF_ADD_CLR_REM_BIT
 }
 
-daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref)
-{
-	if (rop_ref == op1_ref || rop_ref == op2_ref)
-	{
-		daf_ref_t rop2_ref = daf_init(DAF_GET(rop_ref, prec));
-		daf_ret_t ret = daf_add_restrict(rop2_ref, op1_ref, op2_ref);
-		daf_copy(rop_ref, rop2_ref);
-
-		daf_clear(rop2_ref);
-		return ret;
-	}
-
-	return daf_add_restrict(rop_ref, op1_ref, op2_ref);
-}
+daf_ret_t daf_add(daf_ref_t rop_ref, daf_ref_t op1_ref, daf_ref_t op2_ref) { SAFE_CALL(daf_add, rop_ref, op1_ref, op2_ref); }

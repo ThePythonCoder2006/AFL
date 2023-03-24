@@ -7,11 +7,6 @@
 
 #define PREC 51
 
-#ifdef _DEBUG
-#define PRINTF_RED
-#define PRINTF_RESET
-#endif
-
 int main(int argc, char **argv)
 {
 	// remove the first element of the call (the name of the program)
@@ -22,8 +17,7 @@ int main(int argc, char **argv)
 						rop = daf_init(PREC);
 
 	daf_set_ui(op2, TEN_9_MAX);
-
-	daf_sra(op2, op2, 2);
+	// daf_sra(op2, op2, 2);
 
 	for (uint8_t i = 0; i < 10; ++i)
 	{
